@@ -43,15 +43,15 @@ function adminAuthRegister( email, password, nameFirst, nameLast )
 
 function adminUserDetails(authUserId) 
 {
-  return {
+    return {
     user: {
-      userId: 1,
-      name: "Hayden Smith",
-      email: "hayden.smith@unsw.edu.au",
-      numSuccessfulLogins: 3,
-      numFailedPasswordsSinceLastLogin: 1,
+        userId: 1,
+        name: "Hayden Smith",
+        email: "hayden.smith@unsw.edu.au",
+        numSuccessfulLogins: 3,
+        numFailedPasswordsSinceLastLogin: 1,
     },
-  };
+    };
 }
 
 /**
