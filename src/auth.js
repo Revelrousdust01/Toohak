@@ -1,50 +1,15 @@
 /**
-  * Given a registered user's email and password returns their authUserId value.
-  * 
-  * @param {string} email - Email of user
-  * @param {string} password - Password of user
-  * 
-  * @returns {number} - Returns authUserId value when account is loged in
-*/
-
-function adminAuthLogin( email, password )
-{
-    return{
-        authUserId: 1
-    }
-}
-
-/**
-  * Register a user with an email, password, and names, then returns their authUserId value.
-  * 
-  * @param {string} email - Email of user
-  * @param {string} password - Password of user
-  * @param {string} nameFirst - First name of user 
-  * @param {string} nameLast - Last Name of user
-  * 
-  * @returns {number} - Returns authUserId value when account is registered
-*/
-
-function adminAuthRegister( email, password, nameFirst, nameLast )
-{
-    return {
-        authUserId: 1
-    }
-}
-
-/**
- * Given an admin user's authUserId and a set of properties, 
- * update the properties of this logged in admin user.
+ * Given details relating to a password change, 
+ * update the password of a logged in user.
  * 
- * @param {number} authUserId - user ID
- * @param {string} email - email of user
- * @param {string} nameFirst - first name of user
- * @param {string} nameLast - last name of user
+ * @param {number} authUserId - ID of user
+ * @param {string} oldPassword - Old password of user
+ * @param {string} newPassword - New password of user
  * 
- * @returns {} - Returns empty object when admin user details is updated
+ * @returns {} - Returns empty object when password is updated.
  */
 
-function adminUserDetailsUpdate( authUserId, email, nameFirst, nameLast ) {
+function adminUserPasswordUpdate( authUserId, oldPassword, newPassword ) {
     return {
 
     }
