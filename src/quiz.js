@@ -6,6 +6,7 @@
  * 
  * @returns {} - returns empty object when removing quiz
  */
+
 function adminQuizRemove( authUserId, quizId ) {
 	return {
 
