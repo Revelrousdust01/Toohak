@@ -5,7 +5,7 @@
   * @param {string} quizId - relevant quiz id
   * @param {string} name - new name for the relevant quiz
   * 
-  * @returns {} - no return
+  * @returns {} - returns empty object when quiz name is updated
 */
 
 function adminQuizNameUpdate( authUserId, quizId, name ) {
