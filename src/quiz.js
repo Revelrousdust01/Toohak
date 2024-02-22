@@ -1,4 +1,20 @@
 /**
+ * Given basic details about a new quiz, create one for the logged in user.
+ * 
+ * @param {number} authUserId - ID of user
+ * @param {string} name - Name of user
+ * @param {string} description - Basic details about new quiz.
+ * 
+ * @returns {number} - Returns the quizID of the user.
+ */
+
+function adminQuizCreate( authUserId, name, description ) {
+	return {
+		quizId: 2
+	}
+}
+
+/**
  * Provide a list of all quizzes that are owned by the currently logged in user.
  * 
  * @param {number} authUserId - ID of user
@@ -19,37 +35,6 @@ function adminQuizList( authUserId ) {
 }
 
 /**
- * Given basic details about a new quiz, create one for the logged in user.
- * 
- * @param {number} authUserId - ID of user
- * @param {string} name - Name of user
- * @param {string} description - Basic details about new quiz.
- * 
- * @returns {number} - Returns the quizID of the user.
- */
-
-function adminQuizCreate( authUserId, name, description ) {
-	return {
-		quizId: 2
-	}
-}
-      
-/**
- * Given a particular quiz, permanently remove the quiz.
- * 
- * @param {number} authUserId - User ID of admin
- * @param {number} quizId - relevant quizID
- * 
- * @returns {} - returns an empty object when a quiz is removed
- */
-
-function adminQuizRemove( authUserId, quizId ) {
-	return {
-
-	}
-}
-      
-/**
   * Update the name of the relevant quiz.
   * 
   * @param {number} authUserId - user id of admin
@@ -64,3 +49,20 @@ function adminQuizNameUpdate( authUserId, quizId, name ) {
         
     }
 }
+      
+/**
+ * Given a particular quiz, permanently remove the quiz.
+ * 
+ * @param {number} authUserId - User ID of admin
+ * @param {number} quizId - relevant quizID
+ * 
+ * @returns {} - returns an empty object when a quiz is removed
+ */
+
+function adminQuizRemove( authUserId, quizId ) {
+    return {
+
+    }
+}
+      
+
