@@ -1,19 +1,14 @@
 /**
- * Provide a list of all quizzes that are owned by the currently logged in user.
+ * Given basic details about a new quiz, create one for the logged in user.
  * 
- * @param {int} authUserId              - ID of user
+ * @param {int} authUserId 				- ID of user
+ * @param {string} name 				- Name of user
+ * @param {string} description 			- Basic details about new quiz.
  * 
- * @returns {array}                     - Returns array of all quizzes that are owned
- *                                        by the currently logged in user.
+ * @returns {int}						- Returns the quizID of the user.
  */
-
-function adminQuizList( authUserId ) {
-	return  { quizzes: 
-		[
-			{
-				quizId: 1,
-				name: 'My Quiz',
-			}
-		]
+function adminQuizCreate( authUserId, name, description ) {
+	return {
+		quizId: 2
 	}
 }
