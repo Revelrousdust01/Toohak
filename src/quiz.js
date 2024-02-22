@@ -14,7 +14,6 @@ function adminQuizCreate( authUserId, name, description ) {
 	}
 }
       
-
 /**
  * Given a particular quiz, permanently remove the quiz.
  * 
