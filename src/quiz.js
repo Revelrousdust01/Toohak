@@ -1,15 +1,14 @@
 /**
- * Given basic details about a new quiz, create one for the logged in user.
+ * Given a particular quiz, permanently remove the quiz.
  * 
- * @param {int} authUserId - ID of user
- * @param {string} name - Name of user
- * @param {string} description - Basic details about new quiz.
+ * @param {int} authUserId - User ID of admin
+ * @param {int} quizId - relevant quiz ID
  * 
- * @returns {int} - Returns the quizID of the user.
+ * @returns {} - no return
  */
-function adminQuizCreate( authUserId, name, description ) {
+function adminQuizRemove( authUserId, quizId ) {
 	return {
-		quizId: 2
+
 	}
 }
-
+      
