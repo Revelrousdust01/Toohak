@@ -40,7 +40,7 @@ function adminQuizCreate( authUserId, name, description ) {
  * @param {number} authUserId - User ID of admin
  * @param {number} quizId - relevant quizID
  * 
- * @returns {} - no return
+ * @returns {} - returns an empty object when a quiz is removed
  */
 
 function adminQuizRemove( authUserId, quizId ) {
