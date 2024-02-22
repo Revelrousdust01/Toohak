@@ -15,6 +15,22 @@ function adminQuizCreate( authUserId, name, description ) {
 }
 
 /**
+  * Update the description of the relevant quiz.
+  * 
+  * @param {number} authUserId - user id of admin
+  * @param {number} quizId - relevant quiz id
+  * @param {string} description - new description for the relevant quiz
+  * 
+  * @returns {} - returns empty array when quiz description is updated
+*/
+
+function adminQuizDescriptionUpdate( authUserId, quizId, description ) {
+    return {
+        
+    }
+}
+
+/**
  * Provide a list of all quizzes that are owned by the currently logged in user.
  * 
  * @param {number} authUserId - ID of user
