@@ -1,11 +1,31 @@
 /**
+ * Provide a list of all quizzes that are owned by the currently logged in user.
+ * 
+ * @param {number} authUserId - ID of user
+ * 
+ * @returns {array} - Returns array of all quizzes that are owned
+ *                    by the currently logged in user.
+ */
+
+function adminQuizList( authUserId ) {
+    return { 
+        quizzes: [
+            {
+            quizId: 1,
+            name: 'My Quiz',
+            }
+        ]
+    }
+}
+
+/**
  * Given basic details about a new quiz, create one for the logged in user.
  * 
- * @param {int} authUserId - ID of user
+ * @param {number} authUserId - ID of user
  * @param {string} name - Name of user
  * @param {string} description - Basic details about new quiz.
  * 
- * @returns {int} - Returns the quizID of the user.
+ * @returns {number} - Returns the quizID of the user.
  */
 
 function adminQuizCreate( authUserId, name, description ) {
@@ -17,8 +37,8 @@ function adminQuizCreate( authUserId, name, description ) {
 /**
  * Given a particular quiz, permanently remove the quiz.
  * 
- * @param {int} authUserId - User ID of admin
- * @param {int} quizId - relevant quiz ID
+ * @param {number} authUserId - User ID of admin
+ * @param {number} quizId - relevant quiz ID
  * 
  * @returns {} - no return
  */
