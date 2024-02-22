@@ -50,7 +50,7 @@ function adminUserDetails(authUserId)
         email: "hayden.smith@unsw.edu.au",
         numSuccessfulLogins: 3,
         numFailedPasswordsSinceLastLogin: 1,
-    },
+        },
     };
 }
 
