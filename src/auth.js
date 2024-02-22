@@ -9,6 +9,7 @@
  * 
  * @returns {} - Returns empty object when properties is updated.
  */
+
 function adminUserDetailsUpdate( authUserId, email, nameFirst, nameLast ) {
     return {
 
@@ -25,8 +26,9 @@ function adminUserDetailsUpdate( authUserId, email, nameFirst, nameLast ) {
  * 
  * @returns {} - Returns empty object when password is updated.
  */
+
 function adminUserPasswordUpdate( authUserId, oldPassword, newPassword ) {
     return {
-        
+
     }
 }
