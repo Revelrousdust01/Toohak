@@ -15,3 +15,21 @@ function adminAuthRegister( email, password, nameFirst, nameLast )
         authUserId: 1
     }
 }
+
+/**
+ * Given an admin user's authUserId and a set of properties, 
+ * update the properties of this logged in admin user.
+ * 
+ * @param {number} authUserId - user ID
+ * @param {string} email - email of user
+ * @param {string} nameFirst - first name of user
+ * @param {string} nameLast - last name of user
+ * 
+ * @returns {} - Returns empty object when admin user details is updated
+ */
+
+function adminUserDetailsUpdate( authUserId, email, nameFirst, nameLast ) {
+    return {
+
+    }
+}
