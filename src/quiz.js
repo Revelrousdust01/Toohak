@@ -1,6 +1,4 @@
 /**
-  * adminQuizNameUpdate:
-  *  
   * Update the name of the relevant quiz.
   * 
   * @param {string} authUserId - user id of admin
