@@ -38,7 +38,7 @@ function adminQuizCreate( authUserId, name, description ) {
  * Given a particular quiz, permanently remove the quiz.
  * 
  * @param {number} authUserId - User ID of admin
- * @param {number} quizId - relevant quiz ID
+ * @param {number} quizId - relevant quizID
  * 
  * @returns {} - no return
  */
