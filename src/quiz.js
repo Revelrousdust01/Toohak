@@ -7,7 +7,7 @@
   * @param {string} quizId - relevant quiz id
   * @param {string} description - new description for the relevant quiz
   * 
-  * @returns {} - no return
+  * @returns {} - returns empty array when quiz description is updated
 */
 
 function adminQuizDescriptionUpdate( authUserId, quizId, description ) {
