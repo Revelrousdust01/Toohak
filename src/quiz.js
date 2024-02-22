@@ -7,6 +7,7 @@
  * 
  * @returns {number} - Returns the quizID of the user.
  */
+
 function adminQuizCreate( authUserId, name, description ) {
 	return {
 		quizId: 2
