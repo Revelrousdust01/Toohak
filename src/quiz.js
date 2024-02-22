@@ -1,7 +1,7 @@
 /**
   * Update the description of the relevant quiz.
   * 
-  * @param {string} authUserId - user id of admin
+  * @param {number} authUserId - user id of admin
   * @param {number} quizId - relevant quiz id
   * @param {string} description - new description for the relevant quiz
   * 
