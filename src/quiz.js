@@ -31,6 +31,25 @@ function adminQuizDescriptionUpdate( authUserId, quizId, description ) {
 }
 
 /**
+ * Get all of the relevant information about the current quiz.
+ * 
+ * @param {number} authUserId - ID of user
+ * @param {number} quizId - quizID of current quiz
+ * 
+ * @returns {Object} - Returns an object when relavent information found.
+ */
+
+function adminQuizInfo( authUserId, quizId ) {
+    return {
+        quizId: 1,
+        name: 'My Quiz',
+        timeCreated: 1683125870,
+        timeLastEdited: 1683125871,
+        description: 'This is my quiz',
+    }
+}
+
+/**
  * Provide a list of all quizzes that are owned by the currently logged in user.
  * 
  * @param {number} authUserId - ID of user
