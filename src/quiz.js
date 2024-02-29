@@ -1,3 +1,7 @@
+import { clear } from './other';
+import { } from './';
+
+
 /**
  * Given basic details about a new quiz, create one for the logged in user.
  * 
@@ -78,12 +82,51 @@ function adminQuizList( authUserId ) {
   * 
   * @returns {} - returns empty object when quiz name is updated
 */
+export function adminQuizNameUpdate(authUserId, quizId, name) {
+    // Retrieve the current state of data
+    let currentState = getData();
 
-function adminQuizNameUpdate( authUserId, quizId, name ) {
-    return {
-        
+    // Check if authUserId is valid
+    const user = currentState.users.find(user => user.userId === authUserId);
+    if (!user) {
+        return { error: 'AuthUserId is not a valid user.' };
     }
+
+    // Check if quizId is valid and owned by the user
+    if (!user.ownedQuizzes.includes(quizId)) {
+        return { error: 'Quiz ID does not refer to a valid quiz owned by this user.' };
+    }
+
+    // Validate the new name (3 <= name.length <= 30 and valid characters (a-z,A-Z,0-9))
+    if (!/^[a-zA-Z0-9 ]{3,30}$/.test(name)) {
+        return { error: 'Name contains invalid characters or is out of the allowed length.' };
+    }
+
+    // Check if the name is already used by another quiz owned by the user
+    const isNameUsed = currentState.quizzes.some(
+        quiz => quiz.name === name &&
+        quiz.quizId !== quizId && 
+        user.ownedQuizzes.includes(quiz.quizId)
+    );
+    if (isNameUsed) {
+        return { error: 'Name is already used by another quiz owned by the user.' };
+    }
+
+    // Find the quiz and update its name
+    const quiz = currentState.quizzes.find(quiz => quiz.quizId === quizId);
+    if (quiz) {
+        quiz.name = name;
+    } else {
+        return { error: 'Quiz not found.' };
+    }
+
+    // Save the updated data back
+    setData(currentState);
+
+    // If there are no errors, return an empty object
+    return {};
 }
+
       
 /**
  * Given a particular quiz, permanently remove the quiz.
