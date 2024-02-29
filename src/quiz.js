@@ -1,6 +1,5 @@
 import { clear } from './other';
-import { } from './';
-
+import { getData, setData} from './dataStore';
 
 /**
  * Given basic details about a new quiz, create one for the logged in user.
