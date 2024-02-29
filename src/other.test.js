@@ -1,7 +1,8 @@
-import {
+import { clear } from './other';
+import { adminAuthRegister, adminUserDetails } from './auth';
+import { adminQuizCreate, adminQuizList } from './quiz';
 
-  } from './other';
-
+// Clear before each test
 beforeEach(() => {
     clear();
 });
