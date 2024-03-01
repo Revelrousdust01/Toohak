@@ -20,7 +20,7 @@ export function validName(name, isFirst) {
     else if (name.length < 2 || name.length > 20) 
         return { error: (isFirst ? 'First' : 'Last').concat(' name must not be less than 2 characters or more than 20 characters.') };
 
-    return {};
+    return { };
 }
 
 /**
