@@ -30,7 +30,6 @@ function adminAuthLogin( email, password )
 
 export function adminAuthRegister( email, password, nameFirst, nameLast )
 {   
-    
     const checkEmail = validEmail(email);
     if(checkEmail.error)
         return{
