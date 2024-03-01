@@ -8,7 +8,7 @@ beforeEach(() => {
 describe('adminAuthRegister', () => {
     let firstName = 'Christian'
     let lastName = 'Politis'
-    let email = 'cpolitis@student.com'
+    let email = 'cpolitis@student.unsw.edu.au'
     let password = 'a1b2c3d4e5f6'
 
     test('Valid Details', () =>
