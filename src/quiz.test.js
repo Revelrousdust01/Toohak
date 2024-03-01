@@ -10,6 +10,12 @@ beforeEach(() => {
 const ERROR = { error: expect.any(String) };
 
 describe('Test adminQuizNameUpdate', () => {
+    test('working input, 0 errors expected', () => {
+        const admin = adminAuthRegister('leonsun@gmail.com', 'leonsunspassword', 'Leon', 'Sun');
+        const quiz1 = adminQuizCreate(admin.authUserId, 'Quiz 1', 'This is the first test quiz');
+        expect(adminQuizNameUpdate(admin.authUserId, quiz1.quizId, 'New name')).toStrictEqual({});        
+    });
+
     test('authUserId is not valid', () => {
         const admin = adminAuthRegister('leonsun@gmail.com', 'leonsunspassword', 'Leon', 'Sun');
         const quiz1 = adminQuizCreate(admin.authUserId, 'Quiz 1', 'This is the first test quiz');
@@ -34,20 +40,20 @@ describe('Test adminQuizNameUpdate', () => {
         expect(adminQuizNameUpdate(admin.authUserId, quiz1.quizId, 'New name')).toStrictEqual(ERROR);
     });
 
-    test('Name contains invalid characters', () => {
+    test('name contains invalid characters', () => {
         const admin = adminAuthRegister('leonsun@gmail.com', 'leonsunspassword', 'Leon', 'Sun');
         const quiz1 = adminQuizCreate(admin.authUserId, 'Quiz 1', 'This is the first test quiz');
         expect(adminQuizNameUpdate(admin.authUserId, quiz1.quizId, 'Invalid#Name')).toStrictEqual(ERROR);
     });
 
-    test('Name is either too short or too long', () => {
+    test('name is either too short or too long', () => {
         const admin = adminAuthRegister('leonsun@gmail.com', 'leonsunspassword', 'Leon', 'Sun');
         const quiz1 = adminQuizCreate(admin.authUserId, 'Quiz 1', 'This is the first test quiz');
         expect(adminQuizNameUpdate(admin.authUserId, quiz1.quizId, 'AB')).toStrictEqual(ERROR);
         expect(adminQuizNameUpdate(admin.authUserId, quiz1.quizId, 'A'.repeat(31))).toStrictEqual(ERROR);
     });
 
-    test('Name is already used by the current logged in user for another quiz', () => {
+    test('name is already used by the current logged in user for another quiz', () => {
         const admin = adminAuthRegister('leonsun@gmail.com', 'leonsunspassword', 'Leon', 'Sun');
         const quiz1 = adminQuizCreate(admin.authUserId, 'Quiz 1', 'This is the first test quiz');
         const quiz2 = adminQuizCreate(admin.authUserId, 'Quiz 2', 'This is the second test quiz');
