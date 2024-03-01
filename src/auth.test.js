@@ -1,17 +1,25 @@
 import { adminAuthRegister } from './auth.js';
+import { clear } from './other.js';
 
-
+beforeEach(() => {
+    clear();
+  });
+  
 describe('adminAuthRegister', () => {
     let firstName = 'Christian'
     let lastName = 'Politis'
     let email = 'cpolitis@student.com'
-    let password = '1234'
-    beforeAll(() => {
-        //clear();
-      });
+    let password = 'a1b2c3d4e5f6'
+
+    test('Valid Details', () =>
+    {
+        expect(adminAuthRegister(email, password, firstName, lastName))
+            .toStrictEqual({ });
+    });
 
     test('Email address is used by another user', () =>
     {
+
         adminAuthRegister(email, password, firstName, lastName);
         expect(adminAuthRegister(email, password, firstName, lastName))
             .toStrictEqual({error: 'Email address is already used by another user.'});
@@ -20,7 +28,7 @@ describe('adminAuthRegister', () => {
     test.each([
         { badEmail: 'cpolitis@@student.unsw.edu.au' },
         { badEmail: 'cpolitis@student.unsw.edu..au' },
-        { badEmail: 'cpolitis@student.unsw.edu.au' },
+        { badEmail: 'cpolitis#student.unsw.edu.au' },
         { badEmail: 'cpolitis@student.unsw.edu.au.' },
         { badEmail: '@student.unsw.edu.au' },
         { badEmail: '[cpolitis@student.unsw.edu.au]' },
@@ -39,9 +47,8 @@ describe('adminAuthRegister', () => {
         { character: '*' },
         { character: '/' }
       ])("NameFirst contains unwanted Characters: '$character'", ({ character }) => {
-        firstName = firstName.concat(character);
-        expect(adminAuthRegister(email, password, firstName, lastName))
-            .toStrictEqual({ error: 'First Name contains characters other than lowercase letters, uppercase letters, spaces, hyphens, or apostrophes.'});
+        expect(adminAuthRegister(email, password, firstName.concat(character), lastName))
+            .toStrictEqual({ error: 'First name contains characters other than lowercase letters, uppercase letters, spaces, hyphens, or apostrophes.'});
       });
 
     test.each([
@@ -61,9 +68,8 @@ describe('adminAuthRegister', () => {
         { character: '*' },
         { character: '/' }
         ])("NameLast contains unwanted Characters: '$character'", ({ character }) => {
-        lastName = lastName.concat(character);
-        expect(adminAuthRegister(email, password, firstName, lastName))
-            .toStrictEqual({ error: 'Last Name contains characters other than lowercase letters, uppercase letters, spaces, hyphens, or apostrophes.'});
+        expect(adminAuthRegister(email, password, firstName, lastName.concat(character)))
+            .toStrictEqual({ error: 'Last name contains characters other than lowercase letters, uppercase letters, spaces, hyphens, or apostrophes.'});
         });
 
     test.each([
@@ -83,13 +89,13 @@ describe('adminAuthRegister', () => {
         { badPassword: 'A123456' }
         ])("Password is less than 8 characters: '$badPassword'", ({ badPassword }) => {
         expect(adminAuthRegister(email, badPassword, firstName, lastName))
-            .toStrictEqual({ error: 'Last Name contains characters other than lowercase letters, uppercase letters, spaces, hyphens, or apostrophes.'});
+            .toStrictEqual({ error: 'Password must contain at least 8 characters.'});
         });
 
     test.each([
         { badPassword: 'AAAAAAAAAAAAAAAAAAAA' },
         { badPassword: '11111111111111111111' },
-        ])("Password does not contain at least one number and at least one letter: '$character'", ({ badPassword }) => {
+        ])("Password does not contain at least one number and at least one letter: '$badPassword'", ({ badPassword }) => {
         expect(adminAuthRegister(email, badPassword, firstName, lastName))
             .toStrictEqual({ error: 'Password must contain at least letter and one number.'});
         });
