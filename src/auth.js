@@ -70,9 +70,7 @@ export function adminAuthRegister( email, password, nameFirst, nameLast )
 
     data.users.push(newUser);
 
-    return{
-
-    }
+    return{ }
 }
 
 /**
