@@ -49,7 +49,6 @@ export function adminAuthRegister( email, password, nameFirst, nameLast )
         }
     
     const checkNameLast = validName(nameLast, false);
-   
     if(checkNameLast.error)
         return{
             error: checkNameLast.error
