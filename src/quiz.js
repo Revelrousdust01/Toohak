@@ -27,11 +27,41 @@ function adminQuizCreate( authUserId, name, description ) {
   * @returns {} - returns empty array when quiz description is updated
 */
 
-function adminQuizDescriptionUpdate( authUserId, quizId, description ) {
-    return {
-        
+export function adminQuizDescriptionUpdate(authUserId, quizId, description) {
+    // Retrieve the current state of data
+    let currentState = getData();
+
+    // Check if authUserId is valid
+    const user = currentState.users.find(user => user.userId === authUserId);
+    if (!user) {
+        return { error: 'AuthUserId is not a valid user.' };
     }
+
+    // Check if quizId is valid and owned by the user
+    if (!user.ownedQuizzes.includes(quizId)) {
+        return { error: 'Quiz ID does not refer to a valid quiz owned by this user.' };
+    }
+
+    // Validate the new description's length
+    if (description.length > 100) {
+        return { error: 'Description is too long.' };
+    }
+
+    // Find the quiz and update its description
+    const quiz = currentState.quizzes.find(quiz => quiz.quizId === quizId);
+    if (quiz) {
+        quiz.description = description;
+    } else {
+        return { error: 'Quiz not found.' };
+    }
+
+    // Save the updated data back
+    setData(currentState);
+
+    // If there are no errors, return an empty object
+    return { };
 }
+
 
 /**
  * Get all of the relevant information about the current quiz.
@@ -123,7 +153,7 @@ export function adminQuizNameUpdate(authUserId, quizId, name) {
     setData(currentState);
 
     // If there are no errors, return an empty object
-    return {};
+    return { };
 }
 
       
