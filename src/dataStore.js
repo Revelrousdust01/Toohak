@@ -1,5 +1,16 @@
 // YOU SHOULD MODIFY THIS OBJECT BELOW ONLY
-let data = {};
+let data = {
+  /**
+   * We want data to store users and quizzes each within their own array.
+   * Each one should contain their own specific data as reflected in data.md.
+   */
+  users: [
+
+  ],
+  quizzes: [
+
+  ]
+};
 
 // YOU SHOULD MODIFY THIS OBJECT ABOVE ONLY
 
