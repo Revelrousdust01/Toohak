@@ -1,13 +1,13 @@
-import { auth } from './auth.js';
+import { adminAuthRegister } from './auth.js';
 
 
 describe('adminAuthRegister', () => {
+    let firstName = 'Christian'
+    let lastName = 'Politis'
+    let email = 'cpolitis@student.com'
+    let password = '1234'
     beforeAll(() => {
-        clear();
-        let firstName = 'Christian'
-        let lastName = 'Politis'
-        let email = 'cpolitis@student.unsw.edu.au'
-        let password = '1234'
+        //clear();
       });
 
     test('Email address is used by another user', () =>
