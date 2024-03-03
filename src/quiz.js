@@ -2,7 +2,6 @@ import { clear } from './other';
 import { getData, setData} from './dataStore';
 import { validQuizName } from './helper';
 
-let quizIdCount = 1;
 
 /**
  * Given basic details about a new quiz, create one for the logged in user.
