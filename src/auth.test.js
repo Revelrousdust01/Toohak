@@ -14,7 +14,7 @@ describe('adminAuthRegister', () => {
     test('Valid Details', () =>
     {
         expect(adminAuthRegister(email, password, firstName, lastName))
-            .toStrictEqual({ });
+            .toStrictEqual({ authUserId: expect.any(Number) });
     });
 
     test('Email address is used by another user', () =>
