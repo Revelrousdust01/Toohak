@@ -1,10 +1,40 @@
-import { adminAuthRegister } from './auth.js';
+import { adminAuthLogin, adminAuthRegister } from './auth.js';
 import { clear } from './other.js';
 
+//Clear before each test
 beforeEach(() => {
     clear();
   });
-  
+
+const ERROR = { error: expect.any(String) };
+
+//adminAuthLogin
+describe('adminAuthLogin', () =>{
+    let firstName = 'Christian'
+    let lastName = 'Politis'
+    let email = 'cpolitis@student.unsw.edu.au'
+    let password = 'a1b2c3d4e5f6'
+
+    test('Valid Details', () => {
+        adminAuthRegister(email, password, firstName, lastName)
+        expect(adminAuthLogin(email, password))
+        .toStrictEqual({ authUserId: expect.any(Number) });
+    });
+
+    test('Email does not exist', () => {
+        adminAuthRegister(email, password, firstName, lastName)
+        expect(adminAuthLogin(email.concat(".wrong"), password))
+        .toStrictEqual({ error: ERROR});
+    });
+
+    test('Invalid Password', () => {
+        adminAuthRegister(email, password, firstName, lastName)
+        expect(adminAuthLogin(email, password.concat(".wrong")))
+        .toStrictEqual({ error: ERROR});
+    });
+})
+
+//AdminAuthRegister
 describe('adminAuthRegister', () => {
     let firstName = 'Christian'
     let lastName = 'Politis'
@@ -22,7 +52,7 @@ describe('adminAuthRegister', () => {
 
         adminAuthRegister(email, password, firstName, lastName);
         expect(adminAuthRegister(email, password, firstName, lastName))
-            .toStrictEqual({error: 'Email address is already used by another user.'});
+            .toStrictEqual({error: ERROR});
     });
 
     test.each([
@@ -35,7 +65,7 @@ describe('adminAuthRegister', () => {
         { badEmail: 'cpolitis' }
         ])("Email does not satisfy validator: '$badEmail'", ({ badEmail }) => {
         expect(adminAuthRegister(badEmail, password, firstName, lastName))
-            .toStrictEqual({ error: 'Please enter a valid email.'});
+            .toStrictEqual({ error: ERROR});
         });
 
     test.each([
@@ -48,7 +78,7 @@ describe('adminAuthRegister', () => {
         { character: '/' }
       ])("NameFirst contains unwanted Characters: '$character'", ({ character }) => {
         expect(adminAuthRegister(email, password, firstName.concat(character), lastName))
-            .toStrictEqual({ error: 'First name contains characters other than lowercase letters, uppercase letters, spaces, hyphens, or apostrophes.'});
+            .toStrictEqual({ error: ERROR});
       });
 
     test.each([
@@ -56,7 +86,7 @@ describe('adminAuthRegister', () => {
         { badFirstName: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' }
         ])("NameFirst is less than 2 characters or more than 20 characers: '$badFirstName'", ({ badFirstName }) => {
         expect(adminAuthRegister(email, password, badFirstName, lastName))
-            .toStrictEqual({error:'First name must not be less than 2 characters or more than 20 characters.'});
+            .toStrictEqual({error: ERROR});
         });
 
     test.each([
@@ -69,7 +99,7 @@ describe('adminAuthRegister', () => {
         { character: '/' }
         ])("NameLast contains unwanted Characters: '$character'", ({ character }) => {
         expect(adminAuthRegister(email, password, firstName, lastName.concat(character)))
-            .toStrictEqual({ error: 'Last name contains characters other than lowercase letters, uppercase letters, spaces, hyphens, or apostrophes.'});
+            .toStrictEqual({ error: ERROR});
         });
 
     test.each([
@@ -77,7 +107,7 @@ describe('adminAuthRegister', () => {
         { badLastName: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' }
         ])("NameLast is less than 2 characters or more than 20 characers: '$badLastName'", ({ badLastName }) => {
         expect(adminAuthRegister(email, password, firstName, badLastName))
-            .toStrictEqual({ error: 'Last name must not be less than 2 characters or more than 20 characters.'});
+            .toStrictEqual({ error: ERROR});
         });
 
     test.each([
@@ -89,7 +119,7 @@ describe('adminAuthRegister', () => {
         { badPassword: 'A123456' }
         ])("Password is less than 8 characters: '$badPassword'", ({ badPassword }) => {
         expect(adminAuthRegister(email, badPassword, firstName, lastName))
-            .toStrictEqual({ error: 'Password must contain at least 8 characters.'});
+            .toStrictEqual({ error: ERROR});
         });
 
     test.each([
@@ -97,7 +127,7 @@ describe('adminAuthRegister', () => {
         { badPassword: '11111111111111111111' },
         ])("Password does not contain at least one number and at least one letter: '$badPassword'", ({ badPassword }) => {
         expect(adminAuthRegister(email, badPassword, firstName, lastName))
-            .toStrictEqual({ error: 'Password must contain at least letter and one number.'});
+            .toStrictEqual({ error: ERROR});
         });
 });
 
