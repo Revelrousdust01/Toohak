@@ -1,3 +1,9 @@
+import { clear } from './other';
+import { getData, setData} from './dataStore';
+import { validQuizName } from './helper';
+
+let quizIdCount = 1;
+
 /**
  * Given basic details about a new quiz, create one for the logged in user.
  * 
@@ -8,10 +14,34 @@
  * @returns {number} - Returns the quizID of the user.
  */
 
-function adminQuizCreate( authUserId, name, description ) {
-    return {
-        quizId: 2
+export function adminQuizCreate( authUserId, name, description ) {
+    let data = getData();
+    const user = data.users.find(user => user.userId === authUserId);
+
+    if (!user) 
+        return { error: 'AuthUserId is not a valid user.'}
+    
+    const checkQuizName = validQuizName(name);
+    if(checkQuizName.error)
+        return{
+            error: checkQuizName.error
+        }   
+
+    if (description.length > 100) 
+        return { error: 'Description must be less than 100 charactes.'}
+
+    if (data.quizzes.find(quiz => quiz.name === name)) 
+        return { error: 'Name is already used in another quiz.'}
+    
+    const newQuiz = {
+        quizId: data.quizzes.length + 1,
+        description: description,
+        name: name,
+        timeCreated: Date.now(),
+        timeLastEdited: Date.now(),
     }
+    data.quizzes.push(newQuiz);
+    return { quizId: newQuiz.quizId }
 }
 
 /**
