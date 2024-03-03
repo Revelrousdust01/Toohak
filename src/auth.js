@@ -1,3 +1,6 @@
+import {getData} from './dataStore';
+import {validEmail, validName, validPassword} from './helper';
+
 /**
   * Given a registered user's email and password returns their authUserId value.
   * 
@@ -25,11 +28,49 @@ function adminAuthLogin( email, password )
   * @returns {number} - Returns authUserId value when account is registered
 */
 
-function adminAuthRegister( email, password, nameFirst, nameLast )
-{
-    return {
-        authUserId: 1
+export function adminAuthRegister( email, password, nameFirst, nameLast )
+{   
+    const checkEmail = validEmail(email);
+    if(checkEmail.error)
+        return{
+            error: checkEmail.error
+        }
+
+    const checkPassword = validPassword(password);
+    if(checkPassword.error)
+        return{
+            error: checkPassword.error
+        }
+
+    const checkNameFirst = validName(nameFirst, true);
+    if(checkNameFirst.error)
+        return{
+            error: checkNameFirst.error
+        }
+    
+    const checkNameLast = validName(nameLast, false);
+    if(checkNameLast.error)
+        return{
+            error: checkNameLast.error
+        }     
+
+    let data = getData();
+
+    const newUser = {
+        userId: data.users.length + 1,
+        email: email,
+        name: nameFirst.concat(nameLast),
+        nameFirst: nameFirst,
+        nameLast: nameLast,
+        numFailedPasswordsSinceLastLogin: 0,
+        numSuccessfulLogins: 1,
+        ownedQuizzes: [],
+        password: password
     }
+
+    data.users.push(newUser);
+
+    return{ }
 }
 
 /**
