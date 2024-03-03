@@ -39,6 +39,7 @@ export function adminQuizCreate( authUserId, name, description ) {
         timeCreated: Date.now(),
         timeLastEdited: Date.now(),
     }
+
     data.quizzes.push(newQuiz);
     return { quizId: newQuiz.quizId }
 }
