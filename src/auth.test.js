@@ -21,13 +21,13 @@ describe('adminAuthLogin', () =>{
 
     test('Email does not exist', () => {
         adminAuthRegister(email, password, firstName, lastName)
-        expect(adminAuthLogin(email, password))
+        expect(adminAuthLogin(email.concat(".wrong"), password))
         .toStrictEqual({ error: "No account found with the provided email address."});
     });
 
     test('Invalid Password', () => {
         adminAuthRegister(email, password, firstName, lastName)
-        expect(adminAuthLogin(email, password))
+        expect(adminAuthLogin(email, password.concat(".wrong")))
         .toStrictEqual({ error: "Incorrect password."});
     });
 })
