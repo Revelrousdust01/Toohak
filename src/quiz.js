@@ -41,6 +41,7 @@ export function adminQuizCreate( authUserId, name, description ) {
     }
 
     data.quizzes.push(newQuiz);
+
     return { quizId: newQuiz.quizId }
 }
 
