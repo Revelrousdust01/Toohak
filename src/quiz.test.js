@@ -75,7 +75,7 @@ describe('Test adminQuizCreate', () => {
 });
 
     
-describe('Test adminQuizCreate', () => {
+describe('Test adminQuizRemove', () => {
     const firstName = 'Jeffery'
     const lastName = 'Zhang'
     const email = 'jeffery.zhang385@gmail.com'
