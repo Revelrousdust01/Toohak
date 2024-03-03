@@ -81,7 +81,7 @@ export function validQuizName(name) {
     if (!characterRegex.test(name))
         return { error: ' name contains characters other than lowercase letters, uppercase letters, spaces, hyphens, or apostrophes.' };
     else if (name.length < 3 || name.length > 30) 
-        return { error: ' name must not be less than 2 characters or more than 30 characters.' };
+        return { error: ' Name must not be less than 2 characters or more than 30 characters.' };
 
     return { };
 }
