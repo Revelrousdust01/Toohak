@@ -10,10 +10,18 @@ import {validEmail, validName, validPassword} from './helper';
   * @returns {number} - Returns authUserId value when account is loged in
 */
 
-function adminAuthLogin( email, password )
+export function adminAuthLogin( email, password )
 {
+    let data = getData();
+    const user = data.users.find(users => users.email == email)
+
+    if(!user)
+        return { error: "No account found with the provided email address." }
+    else if(user.password !== password)
+        return { error: "Incorrect password." }
+
     return{
-        authUserId: 1
+        authUserId: user.userId
     }
 }
 
