@@ -1,4 +1,4 @@
-import { adminQuizCreate } from './quiz.js';
+import { adminQuizCreate, adminQuizRemove } from './quiz.js';
 import { adminAuthRegister } from './auth.js';
 import { clear } from './other.js';
 
@@ -86,7 +86,7 @@ describe('Test adminQuizCreate', () => {
     test('Valid inputs', () => {
         const admin = adminAuthRegister(email, password, lastName, firstName);
         const quizId = adminQuizCreate(admin.authUserId, quizName, quizDescription);
-        expect(adminQuizRemove(admin.authUserId, quizId)).toStrictEqual({});
+        expect(adminQuizRemove(admin.authUserId, quizId.quizId)).toStrictEqual({});
     });
 
     test.each([
@@ -94,6 +94,7 @@ describe('Test adminQuizCreate', () => {
         { invalidId: 'a' },
         { invalidId: '/' },
     ])("AuthUserId is not a valid user: '$invalidId", ({ invalidId }) => {
+        const admin = adminAuthRegister(email, password, lastName, firstName);
         const quizId = adminQuizCreate(admin.authUserId, quizName, quizDescription);
         expect(adminQuizRemove(invalidId, quizId)).toStrictEqual(ERROR);
     });
