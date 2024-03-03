@@ -1,10 +1,38 @@
-import { adminAuthRegister } from './auth.js';
+import { adminAuthLogin, adminAuthRegister } from './auth.js';
 import { clear } from './other.js';
 
+//Clear before each test
 beforeEach(() => {
     clear();
   });
-  
+
+//adminAuthLogin
+describe('adminAuthLogin', () =>{
+    let firstName = 'Christian'
+    let lastName = 'Politis'
+    let email = 'cpolitis@student.unsw.edu.au'
+    let password = 'a1b2c3d4e5f6'
+
+    test('Valid Details', () => {
+        adminAuthRegister(email, password, firstName, lastName)
+        expect(adminAuthLogin(email, password))
+        .toStrictEqual({ authUserId: expect.any(Number) });
+    });
+
+    test('Email does not exist', () => {
+        adminAuthRegister(email, password, firstName, lastName)
+        expect(adminAuthLogin(email, password))
+        .toStrictEqual({ error: "No account found with the provided email address."});
+    });
+
+    test('Invalid Password', () => {
+        adminAuthRegister(email, password, firstName, lastName)
+        expect(adminAuthLogin(email, password))
+        .toStrictEqual({ error: "Incorrect password."});
+    });
+})
+
+//AdminAuthRegister
 describe('adminAuthRegister', () => {
     let firstName = 'Christian'
     let lastName = 'Politis'
