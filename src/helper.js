@@ -79,7 +79,7 @@ export function validQuizName(name) {
     const characterRegex = /^[A-Za-z\s'-]+$/;
 
     if (!characterRegex.test(name))
-        return { error: ' name contains characters other than lowercase letters, uppercase letters, spaces, hyphens, or apostrophes.' };
+        return { error: ' Name contains characters other than lowercase letters, uppercase letters, spaces, hyphens, or apostrophes.' };
     else if (name.length < 3 || name.length > 30) 
         return { error: ' Name must not be less than 2 characters or more than 30 characters.' };
 
