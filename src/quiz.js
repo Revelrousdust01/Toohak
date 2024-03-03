@@ -2,6 +2,7 @@ import { clear } from './other';
 import { getData, setData} from './dataStore';
 import { validQuizName } from './helper';
 
+let quizCounter = 1;
 
 /**
  * Given basic details about a new quiz, create one for the logged in user.
@@ -32,8 +33,10 @@ export function adminQuizCreate( authUserId, name, description ) {
     if (data.quizzes.find(quiz => quiz.name === name)) 
         return { error: 'Name is already used in another quiz.'}
     
+    const quizId = quizCounter++;
+
     const newQuiz = {
-        quizId: data.quizzes.length + 1,
+        quizId: quizId,
         description: description,
         name: name,
         timeCreated: Date.now(),
@@ -42,7 +45,7 @@ export function adminQuizCreate( authUserId, name, description ) {
 
     data.quizzes.push(newQuiz);
 
-    return { quizId: newQuiz.quizId }
+    return { quizId }
 }
 
 /**
