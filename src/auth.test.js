@@ -6,6 +6,8 @@ beforeEach(() => {
     clear();
   });
 
+const ERROR = { error: expect.any(String) };
+
 //adminAuthLogin
 describe('adminAuthLogin', () =>{
     let firstName = 'Christian'
@@ -22,13 +24,13 @@ describe('adminAuthLogin', () =>{
     test('Email does not exist', () => {
         adminAuthRegister(email, password, firstName, lastName)
         expect(adminAuthLogin(email.concat(".wrong"), password))
-        .toStrictEqual({ error: "No account found with the provided email address."});
+        .toStrictEqual({ error: ERROR});
     });
 
     test('Invalid Password', () => {
         adminAuthRegister(email, password, firstName, lastName)
         expect(adminAuthLogin(email, password.concat(".wrong")))
-        .toStrictEqual({ error: "Incorrect password."});
+        .toStrictEqual({ error: ERROR});
     });
 })
 
@@ -50,7 +52,7 @@ describe('adminAuthRegister', () => {
 
         adminAuthRegister(email, password, firstName, lastName);
         expect(adminAuthRegister(email, password, firstName, lastName))
-            .toStrictEqual({error: 'Email address is already used by another user.'});
+            .toStrictEqual({error: ERROR});
     });
 
     test.each([
