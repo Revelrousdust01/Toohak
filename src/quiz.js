@@ -42,10 +42,8 @@ export function adminQuizCreate( authUserId, name, description ) {
         timeCreated: Date.now(),
         timeLastEdited: Date.now(),
     }
-    const userIndex = data.users.findIndex(users => users.userId === authUserId);
-
-    data.users[userIndex].ownedQuizzes.push(quizId);
-
+    data.users.find(user => user.userId === authUserId).ownedQuizzes.push(quizId);
+    
     data.quizzes.push(newQuiz);
 
     return { quizId: newQuiz.quizId }
