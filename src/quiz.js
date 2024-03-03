@@ -2,6 +2,7 @@ import { clear } from './other';
 import { getData, setData} from './dataStore';
 import { validQuizName } from './helper';
 
+let quizCounter = 1;
 
 /**
  * Given basic details about a new quiz, create one for the logged in user.
@@ -32,18 +33,24 @@ export function adminQuizCreate( authUserId, name, description ) {
     if (data.quizzes.find(quiz => quiz.name === name)) 
         return { error: 'Name is already used in another quiz.'}
     
+    const quizId = quizCounter++;
+
     const newQuiz = {
-        quizId: data.quizzes.length + 1,
+        quizId: quizId,
         description: description,
         name: name,
         timeCreated: Date.now(),
         timeLastEdited: Date.now(),
     }
+    const userIndex = data.users.findIndex(users => users.userId === authUserId);
+
+    data.users[userIndex].ownedQuizzes.push(quizId);
 
     data.quizzes.push(newQuiz);
 
     return { quizId: newQuiz.quizId }
 }
+
 
 /**
   * Update the description of the relevant quiz.
@@ -125,8 +132,28 @@ function adminQuizNameUpdate( authUserId, quizId, name ) {
  * @returns {} - returns an empty object when a quiz is removed
  */
 
-function adminQuizRemove( authUserId, quizId ) {
-    return {
+export function adminQuizRemove( authUserId, quizId ) {
+    let data = getData();
+    const user = data.users.find(user => user.userId === authUserId);
+    const quizIndex = data.quizzes.findIndex(quizzes => quizzes.quizId === quizId);
+    
+    if (!user) 
+        return { error: 'AuthUserId is not a valid user.'}
 
-    }
+    if (quizIndex === -1)
+        return { error: 'Quiz ID does not refer to a valid quiz.'}
+
+    if (!user.ownedQuizzes.includes(quizId)) 
+        return { error: 'Quiz ID does not refer to a quiz that this user owns.'}
+
+    data.quizzes.splice(quizIndex, 1);
+
+    const ownedQuizIndex = user.ownedQuizzes.indexOf(quizId);
+
+    if (ownedQuizIndex !== -1) 
+        user.ownedQuizzes.splice(ownedQuizIndex, 1);
+
+    setData(data);
+
+    return { };
 }
