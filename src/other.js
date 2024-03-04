@@ -5,9 +5,7 @@
   * 
   * @returns {} - returns an empty object when resetting the application to the start
 */
-
 function clear() {
     return {
-
     }
 }
