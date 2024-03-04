@@ -51,6 +51,7 @@ export function adminQuizCreate( authUserId, name, description ) {
     return { quizId: newQuiz.quizId }
 }
 
+
 /**
   * Update the description of the relevant quiz.
   * 
@@ -131,8 +132,28 @@ function adminQuizNameUpdate( authUserId, quizId, name ) {
  * @returns {} - returns an empty object when a quiz is removed
  */
 
-function adminQuizRemove( authUserId, quizId ) {
-    return {
+export function adminQuizRemove( authUserId, quizId ) {
+    let data = getData();
+    const user = data.users.find(user => user.userId === authUserId);
+    const quizIndex = data.quizzes.findIndex(quizzes => quizzes.quizId === quizId);
+    
+    if (!user) 
+        return { error: 'AuthUserId is not a valid user.'}
 
-    }
+    if (quizIndex === -1)
+        return { error: 'Quiz ID does not refer to a valid quiz.'}
+
+    if (!user.ownedQuizzes.includes(quizId)) 
+        return { error: 'Quiz ID does not refer to a quiz that this user owns.'}
+
+    data.quizzes.splice(quizIndex, 1);
+
+    const ownedQuizIndex = user.ownedQuizzes.indexOf(quizId);
+
+    if (ownedQuizIndex !== -1) 
+        user.ownedQuizzes.splice(ownedQuizIndex, 1);
+
+    setData(data);
+
+    return { };
 }
