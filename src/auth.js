@@ -1,5 +1,5 @@
 import {getData} from './dataStore';
-import {validEmail, validName, validPassword} from './helper';
+import {validEmail, validName, validPassword, validAuthUserId} from './helper';
 
 /**
   * Given a registered user's email and password returns their authUserId value.
@@ -90,16 +90,22 @@ export function adminAuthRegister( email, password, nameFirst, nameLast )
   * @returns {Object} - Returns an object containing details about the user when the account is logged in.
 */
 
-function adminUserDetails(authUserId) 
+export function adminUserDetails(authUserId) 
 {
+    const checkAuthUserID = validAuthUserId(authUserId);
+    if(checkAuthUserID.error)
+        return{
+            error: checkAuthUserID.error
+        }     
+
     return {
-    user: {
-        userId: 1,
-        name: "Hayden Smith",
-        email: "hayden.smith@unsw.edu.au",
-        numSuccessfulLogins: 3,
-        numFailedPasswordsSinceLastLogin: 1,
-        },
+        user: {
+            userId: checkAuthUserID.user.userId,
+            name: checkAuthUserID.user.nameFirst.concat(' ', checkAuthUserID.user.nameLast),
+            email: checkAuthUserID.user.email,
+            numSuccessfulLogins: checkAuthUserID.user.numSuccessfulLogins,
+            numFailedPasswordsSinceLastLogin: checkAuthUserID.user.numFailedPasswordsSinceLastLogin,
+            },
     };
 }
 

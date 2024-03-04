@@ -8,7 +8,8 @@ import validator from 'validator';
   * 
   * @param {string} name - First or last name of user
   * @param {boolean} isFirst - First Name bool check
-  * 
+  *
+  * @returns { { error: }  } - Returns object with error when name is invalid
   * @returns { } - Returns empty object when name is valid
 */
 
@@ -30,6 +31,7 @@ export function validName(name, isFirst) {
   * 
   * @param {string} email - Email of user
   * 
+  * @returns { { error: }  } - Returns object with error when email is invalid
   * @returns { } - Returns empty object when name is valid
 */
 
@@ -51,6 +53,7 @@ export function validEmail(email){
   * 
   * @param {string} password - Password of user
   * 
+  * @returns { { error: }  } - Returns object with error when password is invalid
   * @returns { } - Returns empty object when name is valid
 */
 
@@ -63,4 +66,25 @@ export function validPassword(password){
         return { error: 'Password must contain at least letter and one number.' };
 
     return { }
+}
+
+/**
+  * Checks for existence of a user
+  * 
+  * @param {number} authUserId - Password of user
+  * 
+  * @returns { { error: }  } - Returns object with error when authUserId is invalid
+  * @returns { { user: } } - Returns object containing the user when authUserId is valid
+
+*/
+export function validAuthUserId(authUserId){
+
+    let data = getData();
+    const user = data.users.find(user => user.userId === authUserId);
+
+    if (!user) 
+        return { error: 'AuthUserId is not a valid user.'}
+    
+    return { user: user }
+
 }
