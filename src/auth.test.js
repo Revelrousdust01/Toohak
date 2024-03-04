@@ -131,7 +131,7 @@ describe('adminAuthRegister', () => {
         });
 });
 
-//adminUserDetails
+//AdminUserDetails
 describe('adminUserDetails', () =>{
     let firstName = 'Christian'
     let lastName = 'Politis'

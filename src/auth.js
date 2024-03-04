@@ -1,5 +1,5 @@
 import {getData} from './dataStore';
-import {validEmail, validName, validPassword, validAuthUserId} from './helper';
+import {validAuthUserId, validEmail, validName, validPassword} from './helper';
 
 /**
   * Given a registered user's email and password returns their authUserId value.
