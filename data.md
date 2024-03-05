@@ -4,12 +4,11 @@ let data = {
         {
          userId: 1,
          email: 'hayden.smith@unsw.edu.au',
-         name: 'Hayden Smith',
          nameFirst: 'Hayden',
-         nameLast: 'Smith'
+         nameLast: 'Smith',
          numFailedPasswordsSinceLastLogin: 1,
          numSuccessfulLogins: 3,
-         ownedQuizzes: [1,2,3]
+         ownedQuizzes: [1,2,3],
          password: 'hayden1!'
         }
     ]
@@ -20,9 +19,10 @@ let data = {
          name: 'My Quiz',
          timeCreated: 1683125870,
          timeLastEdited: 1683125871,
+         question: ['Q1: how big is Billy','Q2: how smart is Willy','Q3: how tall is Tilly'],
+         answer: ['A', 'B', 'D']
         }   
     ]
 }
 ```
-
 [Optional] short description: 
