@@ -1,4 +1,4 @@
-import { adminAuthLogin, adminAuthRegister } from './auth.js';
+import { adminAuthLogin, adminAuthRegister, adminUserDetails } from './auth.js';
 import { clear } from './other.js';
 
 //Clear before each test
@@ -34,7 +34,7 @@ describe('adminAuthLogin', () =>{
     });
 })
 
-//AdminAuthRegister
+//adminAuthRegister
 describe('adminAuthRegister', () => {
     let firstName = 'Christian'
     let lastName = 'Politis'
@@ -129,5 +129,34 @@ describe('adminAuthRegister', () => {
         expect(adminAuthRegister(email, badPassword, firstName, lastName))
             .toStrictEqual({ error: ERROR});
         });
+});
+
+//AdminUserDetails
+describe('adminUserDetails', () =>{
+    let firstName = 'Christian'
+    let lastName = 'Politis'
+    let email = 'cpolitis@student.unsw.edu.au'
+    let password = 'a1b2c3d4e5f6'
+
+    test('Valid Details', () => {
+        const user = adminAuthRegister(email, password, firstName, lastName);
+        expect(adminUserDetails(user.authUserId))
+        .toStrictEqual({ 
+                        user:{
+                            userId: expect.any(Number),
+                            name: expect.any(String),
+                            email: expect.any(String),
+                            numSuccessfulLogins: expect.any(Number),
+                            numFailedPasswordsSinceLastLogin: expect.any(Number),
+                        }});
+    });
+
+    test.each([
+        { invalidId: '-1' },
+        { invalidId: 'a' },
+        { invalidId: '/' },
+    ])("AuthUserId is not a valid user: '$invalidId", ({ invalidId }) => {
+        expect(adminUserDetails(invalidId)).toStrictEqual(ERROR);
+    });
 });
 

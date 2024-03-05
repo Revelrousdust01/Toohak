@@ -29,7 +29,8 @@ export function validEmail(email){
   * 
   * @param {string} name - First or last name of user
   * @param {boolean} isFirst - First Name bool check
-  * 
+  *
+  * @returns { { error: }  } - Returns object with error when name is invalid
   * @returns { } - Returns empty object when name is valid
 */
 
@@ -45,12 +46,35 @@ export function validName(name, isFirst) {
 }
 
 /**
+  * Validates email of certain conditions:
+  * - Email address is used by another user.
+  * - Email does not satisfy this validator
+  * 
+  * @param {string} email - Email of user
+  * 
+  * @returns { { error: }  } - Returns object with error when email is invalid
+  * @returns { } - Returns empty object when name is valid
+*/
+
+export function validEmail(email){
+    let data = getData();
+
+    if(data.users.find(user => user.email === email))
+        return { error: 'Email address is already used by another user.'};
+    else if(!validator.isEmail(email))
+        return { error: 'Please enter a valid email.' };
+
+    return { }
+}
+
+/**
   * Validates password of certain conditions:
   * - Password is less than 8 characters.
   * - Password does not contain at least one number and at least one letter.
   * 
   * @param {string} password - Password of user
   * 
+  * @returns { { error: }  } - Returns object with error when password is invalid
   * @returns { } - Returns empty object when name is valid
 */
 
@@ -66,12 +90,34 @@ export function validPassword(password){
 }
 
 /**
+  * Checks for existence of a user
+  * 
+  * @param {number} authUserId - Password of user
+  * 
+  * @returns { { error: }  } - Returns object with error when authUserId is invalid
+  * @returns { { user: } } - Returns object containing the user when authUserId is valid
+
+*/
+export function validAuthUserId(authUserId){
+
+    let data = getData();
+    const user = data.users.find(user => user.userId === authUserId);
+
+    if (!user) 
+        return { error: 'AuthUserId is not a valid user.'}
+    
+    return { user: user }
+
+}
+
+/**
   * Validates Quiz name of certain Conditions
   * - Name contains characters other than lowercase letters, uppercase letters, spaces, hyphens, or apostrophes.
   * - Name is less than 3 characters or more than 30 characters.
   * 
   * @param {string} name - Name of quiz
   * 
+  * @returns { { error: }  } - Returns object with error when quiz name is invalid
   * @returns { } - Returns empty object when name is valid
 */
 
