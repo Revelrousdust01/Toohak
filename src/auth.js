@@ -184,13 +184,11 @@ export function adminUserPasswordUpdate( authUserId, oldPassword, newPassword )
             error: 'Old Password is not the correct old password'
         }
     
-
     if (oldPassword === newPassword) 
         return {
             error: 'Old Password and New Password match exactly'
         }
     
-
     const oldPasswordArray = user.oldPasswords
     for (const oldPasswordUsed of oldPasswordArray) 
         if (oldPasswordUsed === newPassword) 
@@ -198,8 +196,6 @@ export function adminUserPasswordUpdate( authUserId, oldPassword, newPassword )
                 error: 'New Password has already been used before by this user'
             }
         
-    
-
     const checkPassword = validPassword(newPassword);
     if(checkPassword.error)
         return{
