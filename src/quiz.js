@@ -92,13 +92,26 @@ export function adminQuizDescriptionUpdate(authUserId, quizId, description) {
  * @returns {Object} - Returns an object when relavent information found.
  */
 
-function adminQuizInfo( authUserId, quizId ) {
+export function adminQuizInfo( authUserId, quizId ) {
+    let data = getData();
+    const user = data.users.find(user => user.userId === authUserId);
+    const quiz = data.quizzes.find(quiz => quiz.quizId === quizId);
+ 
+    if (!user) 
+        return { error: 'AuthUserId is not a valid user.'}
+
+    if (!quiz)
+        return { error: 'Quiz ID does not refer to a valid quiz.'}
+
+    if (!user.ownedQuizzes.includes(quizId)) 
+        return { error: 'Quiz ID does not refer to a quiz that this user owns.'}
+
     return {
-        quizId: 1,
-        name: 'My Quiz',
-        timeCreated: 1683125870,
-        timeLastEdited: 1683125871,
-        description: 'This is my quiz',
+        quizId: quizId,
+        name: quiz.name,
+        timeCreated: quiz.timeCreated,
+        timeLastEdited: quiz.timeLastEdited,
+        description: quiz.description,
     }
 }
 
