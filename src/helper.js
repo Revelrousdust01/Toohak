@@ -67,7 +67,7 @@ export function validPassword(password){
 
 /**
   * Validates Quiz name of certain Conditions
-  * - Name contains characters other than lowercase letters, uppercase letters, spaces, hyphens, or apostrophes.
+  * - Name contains characters other than lowercase letters, uppercase letters, numbers or spaces.
   * - Name is less than 3 characters or more than 30 characters.
   * 
   * @param {string} name - Name of quiz
@@ -76,10 +76,10 @@ export function validPassword(password){
 */
 
 export function validQuizName(name) {
-    const characterRegex = /^[A-Za-z\s'-]+$/;
+    const characterRegex = /^[a-zA-Z0-9 ]+$/;
 
     if (!characterRegex.test(name))
-        return { error: ' Name contains characters other than lowercase letters, uppercase letters, spaces, hyphens, or apostrophes.' };
+        return { error: ' Name contains characters other than lowercase letters, uppercase letters, numbers or spaces.' };
     else if (name.length < 3 || name.length > 30) 
         return { error: ' Name must not be less than 2 characters or more than 30 characters.' };
 
