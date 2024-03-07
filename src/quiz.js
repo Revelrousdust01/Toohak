@@ -140,7 +140,8 @@ export function adminQuizNameUpdate(authUserId, quizId, name) {
         return { error: 'Name is already used by another quiz owned by the user.' };
 
     const quiz = currentState.quizzes.find(quiz => quiz.quizId === quizId);
-    if (quiz) quiz.name = name;
+    if (quiz) 
+        quiz.name = name;
     else 
         return { error: 'Quiz not found.' };
 
