@@ -60,11 +60,34 @@ export function adminQuizCreate( authUserId, name, description ) {
   * @returns {} - returns empty array when quiz description is updated
 */
 
-function adminQuizDescriptionUpdate( authUserId, quizId, description ) {
-    return {
-        
+export function adminQuizDescriptionUpdate(authUserId, quizId, description) {
+    let currentState = getData();
+
+    const user = currentState.users.find(user => user.userId === authUserId);
+    if (!user) {
+        return { error: 'AuthUserId is not a valid user.' };
     }
+
+    if (!user.ownedQuizzes.includes(quizId)) {
+        return { error: 'Quiz ID does not refer to a valid quiz owned by this user.' };
+    }
+
+    if (description.length > 100) {
+        return { error: 'Description is too long.' };
+    }
+
+    const quiz = currentState.quizzes.find(quiz => quiz.quizId === quizId);
+    if (quiz) {
+        quiz.description = description;
+    } else {
+        return { error: 'Quiz not found.' };
+    }
+
+    setData(currentState);
+
+    return { };
 }
+
 
 /**
  * Get all of the relevant information about the current quiz.
@@ -114,12 +137,13 @@ function adminQuizList( authUserId ) {
   * 
   * @returns {} - returns empty object when quiz name is updated
 */
-
 function adminQuizNameUpdate( authUserId, quizId, name ) {
     return {
         
     }
 }
+
+
       
 /**
  * Given a particular quiz, permanently remove the quiz.

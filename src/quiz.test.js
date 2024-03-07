@@ -1,14 +1,14 @@
-import { adminQuizCreate, adminQuizRemove } from './quiz.js';
-import { adminAuthRegister } from './auth.js';
+import { adminQuizCreate, adminQuizRemove, adminQuizList, adminQuizNameUpdate } from './quiz.js';
+import { adminAuthRegister, adminUserDetails } from './auth.js';
 import { clear } from './other.js';
 
-// Clear before each test
 beforeEach(() => {
     clear();
 });
 
 const ERROR = { error: expect.any(String) };
 
+// adminQuizCreate
 describe('Test adminQuizCreate', () => {
     const firstName = 'Jeffery'
     const lastName = 'Zhang'
@@ -74,7 +74,43 @@ describe('Test adminQuizCreate', () => {
     });
 });
 
-    
+// adminQuizDescriptionUpdate
+describe('Test adminQuizDescriptionUpdate', () => {
+    test('working input, 0 errors expected', () => {
+        const admin = adminAuthRegister('leonsun@gmail.com', 'leonsunspassword', 'Leon', 'Sun');
+        const quiz1 = adminQuizCreate(admin.authUserId, 'Quiz 1', 'This is the first test quiz');
+        expect(adminQuizDescriptionUpdate(admin.authUserId, quiz1.quizId, 
+            'This is the new description for the first test quiz')).toStrictEqual({});        
+    });
+
+    test('authUserId is not valid', () => {
+        const admin = adminAuthRegister('leonsun@gmail.com', 'leonsunspassword', 'Leon', 'Sun');
+        const quiz1 = adminQuizCreate(admin.authUserId, 'Quiz 1', 'This is the first test quiz');
+        expect(adminQuizDescriptionUpdate(-1, quiz1.quizId,  
+            'This is the new description for the first test quiz')).toStrictEqual(ERROR);
+    });
+
+    test('quizId does not refer to a valid quiz', () => {
+        const admin = adminAuthRegister('leonsun@gmail.com', 'leonsunspassword', 'Leon', 'Sun');
+        expect(adminQuizDescriptionUpdate(admin.authUserId, -1,  
+            'This is the new description for the first test quiz')).toStrictEqual(ERROR);
+    });
+
+    test('quizId does not refer to a quiz that this user owns', () => {
+        const admin = adminAuthRegister('leonsun@gmail.com', 'leonsunspassword', 'Leon', 'Sun');
+        const otherAdmin = adminAuthRegister('johndoe@gmail.com', 'johndoespassword', 'John', 'Doe');
+        const quiz1 = adminQuizCreate(otherAdmin.authUserId, 'Quiz 1', 'This is a quiz by another user');
+        expect(adminQuizDescriptionUpdate(admin.authUserId, quiz1.quizId, 'New name')).toStrictEqual(ERROR);
+    });
+
+    test('description is too long', () => {
+        const admin = adminAuthRegister('leonsun@gmail.com', 'leonsunspassword', 'Leon', 'Sun');
+        const quiz1 = adminQuizCreate(admin.authUserId, 'Quiz 1', 'This is the first test quiz');
+        expect(adminQuizDescriptionUpdate(admin.authUserId, quiz1.quizId, 'A'.repeat(999))).toStrictEqual(ERROR);
+    });
+});
+
+// adminQuizRemove
 describe('Test adminQuizRemove', () => {
     const firstName = 'Jeffery'
     const lastName = 'Zhang'
@@ -115,3 +151,4 @@ describe('Test adminQuizRemove', () => {
         expect(adminQuizRemove(admin.authUserId, quizId)).toStrictEqual(ERROR);
     });
 });
+
