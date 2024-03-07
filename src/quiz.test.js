@@ -250,3 +250,52 @@ describe('Test adminQuizRemove', () => {
         expect(adminQuizRemove(admin.authUserId, quizId)).toStrictEqual(ERROR);
     });
 });
+
+// adminQuizInfo
+describe('Test adminQuizInfo', () => {
+    const firstName = 'Jeffery'
+    const lastName = 'Zhang'
+    const email = 'jeffery.zhang385@gmail.com'
+    const password = 'str0ngpassword'
+    const quizName = 'New Quiz'
+    const quizDescription = 'This is a new quiz'
+    
+    test('Valid inputs', () => {
+        const admin = adminAuthRegister(email, password, lastName, firstName);
+        const quizCreate = adminQuizCreate(admin.authUserId, quizName, quizDescription);
+        expect(adminQuizInfo(admin.authUserId, quizId.quizId)).toStrictEqual(
+        {
+            quizId: quizCreate.quizId,
+            name: quizName,
+            timeCreated: expect.any(Number),
+            timeLastEdited: expect.any(Number),
+            description: quizDescription,
+        });
+    });
+
+    test.each([
+        { invalidId: '-1' },
+        { invalidId: 'a' },
+        { invalidId: '/' },
+    ])("AuthUserId is not a valid user: '$invalidId", ({ invalidId }) => {
+        const admin = adminAuthRegister(email, password, lastName, firstName);
+        const quizId = adminQuizCreate(admin.authUserId, quizName, quizDescription);
+        expect(adminQuizInfo(invalidId, quizId)).toStrictEqual(ERROR);
+    });
+
+    test.each([
+        { invalidQuizId: '-1' },
+        { invalidQuizId: 'a' },
+        { invalidQuizId: '/' },
+    ])("QuizId does not refer to valid quiz: '$invalidQuizId", ({ invalidQuizId }) => {
+        const admin = adminAuthRegister(email, password, lastName, firstName);
+        expect(adminQuizInfo(admin.authUserId, invalidQuizId)).toStrictEqual(ERROR);
+    });
+
+    test('QuizId does not refer to a quiz that this user owns', () => {
+        const admin = adminAuthRegister(email, password, lastName, firstName);
+        const admin1 = adminAuthRegister('bob.smith@gmail.com', '1234', 'Smith', 'Bob');
+        const quizId = adminQuizCreate(admin1.authUserId, quizName, quizDescription);
+        expect(adminQuizInfo(admin.authUserId, quizId)).toStrictEqual(ERROR);
+    });
+});
