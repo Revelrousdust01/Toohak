@@ -120,10 +120,40 @@ export function adminUserDetails(authUserId)
  * @returns {} - Returns empty object when admin user details is updated
  */
 
-function adminUserDetailsUpdate( authUserId, email, nameFirst, nameLast ) {
-    return {
+export function adminUserDetailsUpdate( authUserId, email, nameFirst, nameLast ) 
+{
+    const checkAuthUserId = validAuthUserId(authUserId);
+    if(checkAuthUserId.error) 
+        return {
+            error: checkAuthUserId.error
+        }
+    
+    const checkEmail = validEmail(email);
+    if(checkEmail.error)
+        return{
+            error: checkEmail.error
+        }
 
-    }
+    const checkNameFirst = validName(nameFirst, true);
+    if(checkNameFirst.error) 
+        return{
+            error: checkNameFirst.error
+        }
+    
+    const checkNameLast = validName(nameLast, false);
+    if(checkNameLast.error) 
+        return{
+            error: checkNameLast.error
+        } 
+
+    let data = getData();
+    
+    let user = data.users.find(user => user.userId === authUserId);
+    user.email = email;
+    user.nameFirst = nameFirst;
+    user.nameLast = nameLast;
+
+    return { }
 }
 
 /**

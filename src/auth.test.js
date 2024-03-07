@@ -1,4 +1,4 @@
-import { adminAuthLogin, adminAuthRegister, adminUserDetails } from './auth.js';
+import { adminAuthLogin, adminAuthRegister, adminUserDetails, adminUserDetailsUpdate } from './auth.js';
 import { clear } from './other.js';
 
 // Clear before each test
@@ -161,34 +161,37 @@ describe('adminUserDetails', () =>{
 });
 
 // adminUserDetailsUpdate
-describe('adminUserDetailsUpdate', () => {
+describe.only('adminUserDetailsUpdate', () => {
     let firstName = 'Samuel'
     let lastName = 'Huang'
     let email = 'shuang@student.unsw.edu.au'
     let password = 'a1b2c3d4e5f6'
-    const UserId = adminAuthRegister(email, password, firstName, lastName)
 
     test('Valid Details', () => {
+        const UserId = adminAuthRegister(email, password, firstName, lastName)
         expect(adminUserDetailsUpdate(
-            UserId, 
+            UserId.authUserId, 
             'shuangupdated@student.unsw.edu.au', 
             'UpdateSamuel', 
             'UpdateHuang'
         )).toStrictEqual({})
         
-        expect(adminUserDetails(UserId)).toStrictEqual({
+        expect(adminUserDetails(UserId.authUserId)).toStrictEqual({
             user: {
-                userId: UserId,
+                userId: UserId.authUserId,
                 name: 'UpdateSamuel UpdateHuang',
-                email: 'shuangupdated@student.unsw.edu.au'
+                email: 'shuangupdated@student.unsw.edu.au',
+                numSuccessfulLogins: expect.any(Number),
+                numFailedPasswordsSinceLastLogin: expect.any(Number)
             }
         });
     });
 
     test('AuthUserId is not a valid User', () => {
+        const UserId = adminAuthRegister(email, password, firstName, lastName)
         const invalidUserId = UserId + 1
         expect(adminUserDetailsUpdate(
-            invalidUserId,
+            invalidUserId.authUserId,
             'shuangupdated@student.unsw.edu.au',
             'UpdateSamuel',
             'UpdateSamuel'
@@ -196,9 +199,10 @@ describe('adminUserDetailsUpdate', () => {
     });
 
     test('Email is currently used by another user', () => {
+        const UserId = adminAuthRegister(email, password, firstName, lastName)
         adminAuthRegister('cpolitis@student.unsw.edu.au', 'a1b2c3d4e5f6', 'Christian', 'Politis')
         expect(adminUserDetailsUpdate(
-            UserId,
+            UserId.authUserId,
             'cpolitis@student.unsw.edu.au',
             'UpdateSamuel',
             'UpdateSamuel'
@@ -214,8 +218,9 @@ describe('adminUserDetailsUpdate', () => {
         { badEmail: '[shuang@student.unsw.edu.au]' },
         { badEmail: 'shuang' }
         ])("Email does not satisfy validator: '$badEmail'", ({ badEmail }) => {
-        expect(adminUserDetailsUpdate(UserId, badEmail, firstName, lastName))
-            .toStrictEqual({ error: ERROR})
+        const UserId = adminAuthRegister(email, password, firstName, lastName)    
+        expect(adminUserDetailsUpdate(UserId.authUserId, badEmail, firstName, lastName))
+            .toStrictEqual(ERROR)
         });
 
     test.each([
@@ -227,8 +232,9 @@ describe('adminUserDetailsUpdate', () => {
         { character: '*' },
         { character: '/' }
         ])("NameFirst contains unwanted Characters: '$character'", ({ character }) => {
-        expect(adminAuthRegister(UserId, email, firstName.concat(character), lastName))
-            .toStrictEqual({ error: ERROR})
+        const UserId = adminAuthRegister(email, password, firstName, lastName)
+        expect(adminUserDetailsUpdate(UserId.authUserId, email, firstName.concat(character), lastName))
+            .toStrictEqual(ERROR)
         });
 
     test.each([
@@ -240,7 +246,8 @@ describe('adminUserDetailsUpdate', () => {
         { character: '*' },
         { character: '/' }
         ])("NameLast contains unwanted Characters: '$character'", ({ character }) => {
-        expect(adminUserDetailsUpdate(UserId, email, firstName, lastName.concat(character)))
-            .toStrictEqual({ error: ERROR})
+        const UserId = adminAuthRegister(email, password, firstName, lastName)
+        expect(adminUserDetailsUpdate(UserId.authUserId, email, firstName, lastName.concat(character)))
+            .toStrictEqual(ERROR)
         });
 });
