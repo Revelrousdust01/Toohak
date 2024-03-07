@@ -1,3 +1,4 @@
+import { getData, setData } from './dataStore.js';
 /**
   * Reset the state of the application back to the start.
   * 
@@ -5,9 +6,13 @@
   * 
   * @returns {} - returns an empty object when resetting the application to the start
 */
+export function clear() {
+  let currentState = getData();
 
-function clear() {
-    return {
+  currentState.users = [];
+  currentState.quizzes = [];
 
-    }
+  setData(currentState);
+
+  return {};
 }

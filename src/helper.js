@@ -29,7 +29,8 @@ export function validEmail(email){
   * 
   * @param {string} name - First or last name of user
   * @param {boolean} isFirst - First Name bool check
-  * 
+  *
+  * @returns { { error: }  } - Returns object with error when name is invalid
   * @returns { } - Returns empty object when name is valid
 */
 
@@ -51,6 +52,7 @@ export function validName(name, isFirst) {
   * 
   * @param {string} password - Password of user
   * 
+  * @returns { { error: }  } - Returns object with error when password is invalid
   * @returns { } - Returns empty object when name is valid
 */
 
@@ -64,3 +66,47 @@ export function validPassword(password){
 
     return { }
 }
+
+/**
+  * Checks for existence of a user
+  * 
+  * @param {number} authUserId - Password of user
+  * 
+  * @returns { { error: }  } - Returns object with error when authUserId is invalid
+  * @returns { { user: } } - Returns object containing the user when authUserId is valid
+
+*/
+export function validAuthUserId(authUserId){
+
+    let data = getData();
+    const user = data.users.find(user => user.userId === authUserId);
+
+    if (!user) 
+        return { error: 'AuthUserId is not a valid user.'}
+    
+    return { user: user }
+
+}
+
+/**
+  * Validates Quiz name of certain Conditions
+  * - Name contains characters other than lowercase letters, uppercase letters, numbers or spaces.
+  * - Name is less than 3 characters or more than 30 characters.
+  * 
+  * @param {string} name - Name of quiz
+  * 
+  * @returns { { error: }  } - Returns object with error when quiz name is invalid
+  * @returns { } - Returns empty object when name is valid
+*/
+
+export function validQuizName(name) {
+    const characterRegex = /^[a-zA-Z0-9 ]+$/;
+
+    if (!characterRegex.test(name))
+        return { error: ' Name contains characters other than lowercase letters, uppercase letters, numbers or spaces.' };
+    else if (name.length < 3 || name.length > 30) 
+        return { error: ' Name must not be less than 3 characters or more than 30 characters.' };
+
+    return { };
+}
+
