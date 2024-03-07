@@ -253,7 +253,7 @@ describe('adminUserDetailsUpdate', () => {
 });
 
 // adminUserPasswordUpdate
-describe('adminUserPasswordUpdate', () => {
+describe.only('adminUserPasswordUpdate', () => {
     let firstName = 'Samuel'
     let lastName = 'Huang'
     let email = 'shuang@student.unsw.edu.au'
@@ -261,7 +261,7 @@ describe('adminUserPasswordUpdate', () => {
     let newPassword = 'newa1b2c3d4qwerty'
 
     test('Valid Details', () => {
-        const UserId = adminAuthRegister(email, password, firstName, lastName)
+        const UserId = adminAuthRegister(email, oldPassword, firstName, lastName)
         expect(adminUserPasswordUpdate(UserId.authUserId, oldPassword, newPassword))
             .toStrictEqual({ })
     });
@@ -271,7 +271,8 @@ describe('adminUserPasswordUpdate', () => {
         { invalidId: 'a' },
         { invalidId: '/' },
     ])("AuthUserId is not a valid user: '$invalidId", ({ invalidId }) => {
-        expect(adminUserPasswordUpdate(UserId.authUserId, oldPassword, newPassword))
+        const UserId = adminAuthRegister(email, oldPassword, firstName, lastName)
+        expect(adminUserPasswordUpdate(invalidId, oldPassword, newPassword))
             .toStrictEqual(ERROR)
     });
 
