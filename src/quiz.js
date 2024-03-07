@@ -50,7 +50,6 @@ export function adminQuizCreate( authUserId, name, description ) {
 }
 
 
-
 /**
   * Update the description of the relevant quiz.
   * 
