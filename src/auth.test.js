@@ -174,7 +174,7 @@ describe('adminUserDetailsUpdate', () => {
             'shuangupdated@student.unsw.edu.au', 
             'UpdateSamuel', 
             'UpdateHuang'
-        )).toStrictEqual({})
+        )).toStrictEqual({ })
         
         expect(adminUserDetails(UserId.authUserId)).toStrictEqual({
             user: {
