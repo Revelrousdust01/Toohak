@@ -179,26 +179,26 @@ export function adminUserPasswordUpdate( authUserId, oldPassword, newPassword )
     
     let user = data.users.find(user => user.userId === authUserId)
 
-    if (!(user.password === oldPassword)) {
+    if (!(user.password === oldPassword)) 
         return {
             error: 'Old Password is not the correct old password'
         }
-    }
+    
 
-    if (oldPassword === newPassword) {
+    if (oldPassword === newPassword) 
         return {
             error: 'Old Password and New Password match exactly'
         }
-    }
+    
 
     const oldPasswordArray = user.oldPasswords
-    for (const oldPasswordUsed of oldPasswordArray) {
-        if (oldPasswordUsed === newPassword) {
+    for (const oldPasswordUsed of oldPasswordArray) 
+        if (oldPasswordUsed === newPassword) 
             return {
                 error: 'New Password has already been used before by this user'
             }
-        }
-    }
+        
+    
 
     const checkPassword = validPassword(newPassword);
     if(checkPassword.error)
