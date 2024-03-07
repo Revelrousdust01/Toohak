@@ -49,7 +49,6 @@ export function adminQuizCreate( authUserId, name, description ) {
     return { quizId: newQuiz.quizId }
 }
 
-
 /**
   * Update the description of the relevant quiz.
   * 
@@ -83,7 +82,6 @@ export function adminQuizDescriptionUpdate(authUserId, quizId, description) {
 
     return { };
 }
-
 
 /**
  * Get all of the relevant information about the current quiz.
@@ -133,14 +131,13 @@ function adminQuizList( authUserId ) {
   * 
   * @returns {} - returns empty object when quiz name is updated
 */
+
 function adminQuizNameUpdate( authUserId, quizId, name ) {
     return {
         
     }
 }
 
-
-      
 /**
  * Given a particular quiz, permanently remove the quiz.
  * 
@@ -154,7 +151,7 @@ export function adminQuizRemove( authUserId, quizId ) {
     let data = getData();
     const user = data.users.find(user => user.userId === authUserId);
     const quizIndex = data.quizzes.findIndex(quizzes => quizzes.quizId === quizId);
-    
+ 
     if (!user) 
         return { error: 'AuthUserId is not a valid user.'}
 
