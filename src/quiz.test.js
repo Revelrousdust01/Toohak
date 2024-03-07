@@ -176,9 +176,7 @@ describe('adminQuizList', () => {
     test('No quiz in quizlist', () => {
         const UserId = adminAuthRegister(email, password, firstName, lastName)
         expect(adminQuizList(UserId.authUserId)).toStrictEqual({
-            quizzes: [
-
-            ]
+            quizzes: [ ]
         });
     });
 
