@@ -19,9 +19,20 @@ let data = {
          name: 'My Quiz',
          timeCreated: 1683125870,
          timeLastEdited: 1683125871,
-         question: ['Q1: how big is Billy','Q2: how smart is Willy','Q3: how tall is Tilly'],
-         answer: ['A', 'B', 'D']
-        }   
+         question: [
+            {
+                questionId: 1,
+                name: 'On the scale from 1 through to 10 how silly is Willy?'
+                answers: ['0/10', '4/10', '7/10', '10/10'],
+                correctAnswer: '0/10'
+            },
+            {
+                questionId: 2,
+                name: 'Is Willy silly?'
+                answers: ['Yes', 'No'],
+                correctAnswer: 'Yes'
+            }
+        ]}   
     ]
 }
 ```
