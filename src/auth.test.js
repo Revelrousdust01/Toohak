@@ -1,14 +1,14 @@
-import { adminAuthLogin, adminAuthRegister, adminUserDetails } from './auth.js';
+import { adminAuthLogin, adminAuthRegister, adminUserDetails, adminUserDetailsUpdate } from './auth.js';
 import { clear } from './other.js';
 
-//Clear before each test
+// Clear before each test
 beforeEach(() => {
     clear();
   });
 
 const ERROR = { error: expect.any(String) };
 
-//adminAuthLogin
+// adminAuthLogin
 describe('adminAuthLogin', () =>{
     let firstName = 'Christian'
     let lastName = 'Politis'
@@ -34,7 +34,7 @@ describe('adminAuthLogin', () =>{
     });
 })
 
-//adminAuthRegister
+// adminAuthRegister
 describe('adminAuthRegister', () => {
     let firstName = 'Christian'
     let lastName = 'Politis'
@@ -131,7 +131,7 @@ describe('adminAuthRegister', () => {
         });
 });
 
-//AdminUserDetails
+// adminUserDetails
 describe('adminUserDetails', () =>{
     let firstName = 'Christian'
     let lastName = 'Politis'
@@ -160,3 +160,94 @@ describe('adminUserDetails', () =>{
     });
 });
 
+// adminUserDetailsUpdate
+describe('adminUserDetailsUpdate', () => {
+    let firstName = 'Samuel'
+    let lastName = 'Huang'
+    let email = 'shuang@student.unsw.edu.au'
+    let password = 'a1b2c3d4e5f6'
+
+    test('Valid Details', () => {
+        const UserId = adminAuthRegister(email, password, firstName, lastName)
+        expect(adminUserDetailsUpdate(
+            UserId.authUserId, 
+            'shuangupdated@student.unsw.edu.au', 
+            'UpdateSamuel', 
+            'UpdateHuang'
+        )).toStrictEqual({ })
+        
+        expect(adminUserDetails(UserId.authUserId)).toStrictEqual({
+            user: {
+                userId: UserId.authUserId,
+                name: 'UpdateSamuel UpdateHuang',
+                email: 'shuangupdated@student.unsw.edu.au',
+                numSuccessfulLogins: expect.any(Number),
+                numFailedPasswordsSinceLastLogin: expect.any(Number)
+            }
+        });
+    });
+
+    test('AuthUserId is not a valid User', () => {
+        const UserId = adminAuthRegister(email, password, firstName, lastName)
+        const invalidUserId = UserId + 1
+        expect(adminUserDetailsUpdate(
+            invalidUserId.authUserId,
+            'shuangupdated@student.unsw.edu.au',
+            'UpdateSamuel',
+            'UpdateSamuel'
+        )).toStrictEqual(ERROR)
+    });
+
+    test('Email is currently used by another user', () => {
+        const UserId = adminAuthRegister(email, password, firstName, lastName)
+        adminAuthRegister('cpolitis@student.unsw.edu.au', 'a1b2c3d4e5f6', 'Christian', 'Politis')
+        expect(adminUserDetailsUpdate(
+            UserId.authUserId,
+            'cpolitis@student.unsw.edu.au',
+            'UpdateSamuel',
+            'UpdateSamuel'
+        )).toStrictEqual(ERROR)
+    });
+
+    test.each([
+        { badEmail: 'shuang@@student.unsw.edu.au' },
+        { badEmail: 'shuang@student.unsw.edu..au' },
+        { badEmail: 'shuang#student.unsw.edu.au' },
+        { badEmail: 'shuang@student.unsw.edu.au.' },
+        { badEmail: '@student.unsw.edu.au' },
+        { badEmail: '[shuang@student.unsw.edu.au]' },
+        { badEmail: 'shuang' }
+        ])("Email does not satisfy validator: '$badEmail'", ({ badEmail }) => {
+        const UserId = adminAuthRegister(email, password, firstName, lastName)    
+        expect(adminUserDetailsUpdate(UserId.authUserId, badEmail, firstName, lastName))
+            .toStrictEqual(ERROR)
+        });
+
+    test.each([
+        { character: '`' },
+        { character: '~' },
+        { character: '+' },
+        { character: '_' },
+        { character: '=' },
+        { character: '*' },
+        { character: '/' }
+        ])("NameFirst contains unwanted Characters: '$character'", ({ character }) => {
+        const UserId = adminAuthRegister(email, password, firstName, lastName)
+        expect(adminUserDetailsUpdate(UserId.authUserId, email, firstName.concat(character), lastName))
+            .toStrictEqual(ERROR)
+        });
+
+    test.each([
+        { character: '`' },
+        { character: '~' },
+        { character: '+' },
+        { character: '_' },
+        { character: '=' },
+        { character: '*' },
+        { character: '/' }
+        ])("NameLast contains unwanted Characters: '$character'", ({ character }) => {
+        const UserId = adminAuthRegister(email, password, firstName, lastName)
+        expect(adminUserDetailsUpdate(UserId.authUserId, email, firstName, lastName.concat(character)))
+            .toStrictEqual(ERROR)
+        });
+});
