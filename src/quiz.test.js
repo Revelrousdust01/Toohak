@@ -185,7 +185,7 @@ describe('Test adminQuizNameUpdate', () => {
         expect(adminQuizNameUpdate(admin.authUserId, quizId, 'A'.repeat(31))).toStrictEqual(ERROR);    
     });
 
-    test('name is already used by the current logged in user for another quiz', () => {
+    test('Name is already used by the current logged in user for another quiz', () => {
         const admin = adminAuthRegister(email, password, nameLast, nameFirst);
         const quiz1 = adminQuizCreate(admin.authUserId, quizName, quizDescription);
         const quiz2 = adminQuizCreate(admin.authUserId, 'Quiz 2', 'This is the second test quiz');
