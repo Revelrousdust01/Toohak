@@ -47,12 +47,7 @@ describe('Test adminQuizCreate', () => {
     test.each([
         { shortQuizName: '1' },
         { shortQuizName: '12' },
-        { shortQuizName: '123' },
-        { shortQuizName: '1234' },
-        { shortQuizName: '12345' },
-        { shortQuizName: '123456' },
-        { shortQuizName: '1234567' }
-        ])("Quiz name is less than 8 characters: '$shortQuizName'", ({ shortQuizName }) => {
+        ])("Quiz name is less than 3 characters: '$shortQuizName'", ({ shortQuizName }) => {
             const admin = adminAuthRegister(email, password, lastName, firstName);
             expect(adminQuizCreate(admin.authUserId, shortQuizName, quizDescription)).toStrictEqual(ERROR);
     });
