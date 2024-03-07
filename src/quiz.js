@@ -1,11 +1,8 @@
 import { clear } from './other';
 import { getData, setData} from './dataStore';
-<<<<<<< HEAD
 import { validQuizName } from './helper';
 
 let quizCounter = 1;
-=======
->>>>>>> 91e44962374b229b46c606c1de16d55535cd2110
 
 /**
  * Given basic details about a new quiz, create one for the logged in user.
@@ -45,8 +42,8 @@ export function adminQuizCreate( authUserId, name, description ) {
         timeCreated: Date.now(),
         timeLastEdited: Date.now(),
     }
-    data.users.find(user => user.userId === authUserId).ownedQuizzes.push(quizId);
 
+    data.users.find(user => user.userId === authUserId).ownedQuizzes.push(quizId);
     data.quizzes.push(newQuiz);
 
     return { quizId: newQuiz.quizId }
@@ -63,40 +60,12 @@ export function adminQuizCreate( authUserId, name, description ) {
   * @returns {} - returns empty array when quiz description is updated
 */
 
-export function adminQuizDescriptionUpdate(authUserId, quizId, description) {
-    // Retrieve the current state of data
-    let currentState = getData();
-
-    // Check if authUserId is valid
-    const user = currentState.users.find(user => user.userId === authUserId);
-    if (!user) {
-        return { error: 'AuthUserId is not a valid user.' };
+function adminQuizDescriptionUpdate( authUserId, quizId, description ) {
+    return {
+        
     }
-
-    // Check if quizId is valid and owned by the user
-    if (!user.ownedQuizzes.includes(quizId)) {
-        return { error: 'Quiz ID does not refer to a valid quiz owned by this user.' };
-    }
-
-    // Validate the new description's length
-    if (description.length > 100) {
-        return { error: 'Description is too long.' };
-    }
-
-    // Find the quiz and update its description
-    const quiz = currentState.quizzes.find(quiz => quiz.quizId === quizId);
-    if (quiz) {
-        quiz.description = description;
-    } else {
-        return { error: 'Quiz not found.' };
-    }
-
-    // Save the updated data back
-    setData(currentState);
-
-    // If there are no errors, return an empty object
-    return { };
 }
+
 
 
 /**
@@ -148,26 +117,21 @@ function adminQuizList( authUserId ) {
   * @returns {} - returns empty object when quiz name is updated
 */
 export function adminQuizNameUpdate(authUserId, quizId, name) {
-    // Retrieve the current state of data
     let currentState = getData();
 
-    // Check if authUserId is valid
     const user = currentState.users.find(user => user.userId === authUserId);
     if (!user) {
         return { error: 'AuthUserId is not a valid user.' };
     }
 
-    // Check if quizId is valid and owned by the user
     if (!user.ownedQuizzes.includes(quizId)) {
         return { error: 'Quiz ID does not refer to a valid quiz owned by this user.' };
     }
 
-    // Validate the new name (3 <= name.length <= 30 and valid characters (a-z,A-Z,0-9))
     if (!/^[a-zA-Z0-9 ]{3,30}$/.test(name)) {
         return { error: 'Name contains invalid characters or is out of the allowed length.' };
     }
 
-    // Check if the name is already used by another quiz owned by the user
     const isNameUsed = currentState.quizzes.some(
         quiz => quiz.name === name &&
         quiz.quizId !== quizId && 
@@ -177,7 +141,6 @@ export function adminQuizNameUpdate(authUserId, quizId, name) {
         return { error: 'Name is already used by another quiz owned by the user.' };
     }
 
-    // Find the quiz and update its name
     const quiz = currentState.quizzes.find(quiz => quiz.quizId === quizId);
     if (quiz) {
         quiz.name = name;
@@ -185,11 +148,9 @@ export function adminQuizNameUpdate(authUserId, quizId, name) {
         return { error: 'Quiz not found.' };
     }
 
-    // Save the updated data back
     setData(currentState);
 
-    // If there are no errors, return an empty object
-    return {};
+    return { };
 }
 
       
