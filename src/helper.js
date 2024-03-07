@@ -46,28 +46,6 @@ export function validName(name, isFirst) {
 }
 
 /**
-  * Validates email of certain conditions:
-  * - Email address is used by another user.
-  * - Email does not satisfy this validator
-  * 
-  * @param {string} email - Email of user
-  * 
-  * @returns { { error: }  } - Returns object with error when email is invalid
-  * @returns { } - Returns empty object when name is valid
-*/
-
-export function validEmail(email){
-    let data = getData();
-
-    if(data.users.find(user => user.email === email))
-        return { error: 'Email address is already used by another user.'};
-    else if(!validator.isEmail(email))
-        return { error: 'Please enter a valid email.' };
-
-    return { }
-}
-
-/**
   * Validates password of certain conditions:
   * - Password is less than 8 characters.
   * - Password does not contain at least one number and at least one letter.

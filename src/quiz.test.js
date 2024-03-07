@@ -1,4 +1,4 @@
-import { adminQuizCreate, adminQuizRemove, adminQuizList, adminQuizNameUpdate } from './quiz.js';
+import { adminQuizCreate, adminQuizRemove, adminQuizList, adminQuizNameUpdate, adminQuizDescriptionUpdate } from './quiz.js';
 import { adminAuthRegister, adminUserDetails } from './auth.js';
 import { clear } from './other.js';
 
@@ -70,7 +70,7 @@ describe('Test adminQuizCreate', () => {
 });
 
 // adminQuizDescriptionUpdate
-describe('Test adminQuizDescriptionUpdate', () => {
+describe.only('Test adminQuizDescriptionUpdate', () => {
     let nameFirst = 'Leon'
     let nameLast = 'Sun'
     let email = 'leonsun@gmail.com'
@@ -107,7 +107,7 @@ describe('Test adminQuizDescriptionUpdate', () => {
         { invalidQuizId: 'a' },
         { invalidQuizId: '/' },
     ])("QuizId does not refer to valid quiz: '$invalidQuizId", ({ invalidQuizId }) => {
-        const admin = adminAuthRegister(email, password, lastName, firstName);
+        const admin = adminAuthRegister(email, password, nameFirst, nameLast);
         const newQuiz = adminQuizCreate(admin.authUserId, quizName, quizDescription);
         expect(adminQuizDescriptionUpdate(admin.authUserId, invalidQuizId, newQuizDescription)).toStrictEqual(ERROR);
     });
@@ -120,7 +120,7 @@ describe('Test adminQuizDescriptionUpdate', () => {
     });
 
     test('Description length is greater than 100 characters', () => {
-        const admin = adminAuthRegister('leonsun@gmail.com', 'leonsunspassword', 'Leon', 'Sun');
+        const admin = adminAuthRegister(email, password, nameFirst, nameLast);
         const quiz1 = adminQuizCreate(admin.authUserId, 'Quiz 1', 'This is the first test quiz');
         expect(adminQuizDescriptionUpdate(admin.authUserId, quiz1.quizId, 'A'.repeat(999))).toStrictEqual(ERROR);
     });
