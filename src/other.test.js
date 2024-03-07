@@ -45,8 +45,12 @@ describe('Iteration 1: Test "clear" function ', () => {
                             numFailedPasswordsSinceLastLogin: expect.any(Number),
                         }});
         expect(adminQuizList(admin2.authUserId)).toStrictEqual({
-            quizId: expect.any(String),
-            name: expect.any(String),
+            quizzes: [
+                {
+                quizId: expect.any(Number),
+                name: expect.any(String),              
+                }
+            ]
         });
     });
 });
