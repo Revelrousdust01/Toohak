@@ -121,8 +121,6 @@ export function adminQuizNameUpdate(authUserId, quizId, name) {
     if (!user) 
         return { error: 'AuthUserId is not a valid user.' };
 
-    
-    console.log(currentState);
     if (!user.ownedQuizzes.includes(quizId)) 
         return { error: 'Quiz ID does not refer to a valid quiz owned by this user.' };
 

@@ -112,7 +112,7 @@ describe('Test adminQuizRemove', () => {
 });
 
 // adminQuizNameUpdate
-describe.only('Test adminQuizNameUpdate', () => {
+describe('Test adminQuizNameUpdate', () => {
     let nameFirst = 'Leon'
     let nameLast = 'Sun'
     let email = 'leonsun@gmail.com'
