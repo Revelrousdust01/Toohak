@@ -1,6 +1,6 @@
 import { clear } from './other';
 import { getData, setData} from './dataStore';
-import { validQuizName } from './helper';
+import { validQuizName, validAuthUserId } from './helper';
 
 let quizCounter = 1;
 
@@ -124,14 +124,30 @@ export function adminQuizInfo( authUserId, quizId ) {
  *                    by the currently logged in user.
  */
 
-function adminQuizList( authUserId ) {
+export function adminQuizList( authUserId ) {
+    
+    const checkAuthUserId = validAuthUserId(authUserId);
+    if(checkAuthUserId.error) 
+        return {
+            error: checkAuthUserId.error
+        }
+    
+    const data = getData()
+    
+    const user = data.users.find(user => user.userId === authUserId)
+    const ownedQuizzes = user.ownedQuizzes
+    const quizzes = []
+
+    for (const ownedQuiz of ownedQuizzes) {
+        const quiz = {
+            name: data.quizzes.find(quiz => quiz.quizId === ownedQuiz).name,
+            quizId: ownedQuiz
+        }
+        quizzes.push(quiz)
+    }
+
     return { 
-        quizzes: [
-            {
-            quizId: 1,
-            name: 'My Quiz',
-            }
-        ]
+       quizzes: quizzes
     }
 }
 
