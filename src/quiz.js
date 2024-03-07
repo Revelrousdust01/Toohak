@@ -42,12 +42,14 @@ export function adminQuizCreate( authUserId, name, description ) {
         timeCreated: Date.now(),
         timeLastEdited: Date.now(),
     }
-
     data.users.find(user => user.userId === authUserId).ownedQuizzes.push(quizId);
+
     data.quizzes.push(newQuiz);
 
     return { quizId: newQuiz.quizId }
 }
+
+
 
 /**
   * Update the description of the relevant quiz.
