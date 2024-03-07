@@ -70,7 +70,7 @@ describe('Test adminQuizCreate', () => {
 });
 
 // adminQuizDescriptionUpdate
-describe.only('Test adminQuizDescriptionUpdate', () => {
+describe('Test adminQuizDescriptionUpdate', () => {
     let nameFirst = 'Leon'
     let nameLast = 'Sun'
     let email = 'leonsun@gmail.com'
@@ -126,6 +126,70 @@ describe.only('Test adminQuizDescriptionUpdate', () => {
     });
 });
 
+// adminQuizList
+describe('adminQuizList', () => {
+    let firstName = 'Samuel'
+    let lastName = 'Huang'
+    let email = 'shuang@student.unsw.edu.au'
+    let password = 'a1b2c3d4e5f6'
+
+    test('One quiz in quizlist', () => {
+        const UserId = adminAuthRegister(email, password, firstName, lastName)
+        const quizId1 = adminQuizCreate(UserId.authUserId, 'How to train your dragon', 
+                        'Quiz about the movie trivia of How to Train your dragon')
+        expect(adminQuizList(UserId.authUserId)).toStrictEqual({
+            quizzes: [
+                {
+                    quizId: quizId1.quizId,
+                    name: 'How to train your dragon'
+                }
+            ]
+        });
+    });
+
+    test('Multiple quiz in quizlist', () => {
+        const UserId = adminAuthRegister(email, password, firstName, lastName)
+        const quizId1 = adminQuizCreate(UserId.authUserId, 'How to train your dragon', 
+                        'Quiz about the movie trivia of How to Train your dragon')
+        const quizId2 = adminQuizCreate(UserId.authUserId, 'Age of Adeline', 
+                        'Quiz about the movie trivia of Age of Adeline')
+        const quizId3 = adminQuizCreate(UserId.authUserId, 'Kung Fu Panda', 
+                        'Quiz about the movie trivia of Kung Fu Panda')
+        expect(adminQuizList(UserId.authUserId)).toStrictEqual({
+            quizzes: [
+                {
+                    quizId: quizId1.quizId,
+                    name: 'How to train your dragon'
+                },
+                {
+                    quizId: quizId2.quizId,
+                    name: 'Age of Adeline'
+                },
+                {
+                    quizId: quizId3.quizId,
+                    name: 'Kung Fu Panda'
+                }
+            ]
+        });
+    });
+
+    test('No quiz in quizlist', () => {
+        const UserId = adminAuthRegister(email, password, firstName, lastName)
+        expect(adminQuizList(UserId.authUserId)).toStrictEqual({
+            quizzes: [ ]
+        });
+    });
+
+    test.each([
+        { invalidId: '-1' },
+        { invalidId: 'a' },
+        { invalidId: '/' },
+    ])("AuthUserId is not a valid user: '$invalidId", ({ invalidId }) => {
+        const admin = adminAuthRegister(email, password, lastName, firstName);
+        const quizId = adminQuizCreate(admin.authUserId, 'QuizName', 'QuizDescription');
+	expect(adminQuizList(invalidId)).toStrictEqual(ERROR);
+    });
+});
 
 // adminQuizNameUpdate
 describe('Test adminQuizNameUpdate', () => {
