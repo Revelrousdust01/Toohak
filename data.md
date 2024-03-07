@@ -6,6 +6,7 @@ let data = {
          email: 'hayden.smith@unsw.edu.au',
          nameFirst: 'Hayden',
          nameLast: 'Smith',
+         oldPasswords: ['firstPassword1', 'secondPassword2', 'thirdPassword3'],
          numFailedPasswordsSinceLastLogin: 1,
          numSuccessfulLogins: 3,
          ownedQuizzes: [1,2,3],
