@@ -114,12 +114,41 @@ function adminQuizList( authUserId ) {
   * 
   * @returns {} - returns empty object when quiz name is updated
 */
+export function adminQuizNameUpdate(authUserId, quizId, name) {
+    let currentState = getData();
 
-function adminQuizNameUpdate( authUserId, quizId, name ) {
-    return {
-        
-    }
+    const user = currentState.users.find(user => user.userId === authUserId);
+
+    if (!user) 
+        return { error: 'AuthUserId is not a valid user.' };
+
+    if (!user.ownedQuizzes.includes(quizId)) 
+        return { error: 'Quiz ID does not refer to a valid quiz owned by this user.' };
+
+    const checkQuizName = validQuizName(name);
+    if (checkQuizName.error) 
+        return{ error: checkQuizName.error }   
+    
+    const isNameUsed = currentState.quizzes.some(
+        quiz => quiz.name === name &&
+        quiz.quizId !== quizId && 
+        user.ownedQuizzes.includes(quiz.quizId)
+    );
+
+    if (isNameUsed) 
+        return { error: 'Name is already used by another quiz owned by the user.' };
+
+    const quiz = currentState.quizzes.find(quiz => quiz.quizId === quizId);
+    if (quiz) 
+        quiz.name = name;
+    else 
+        return { error: 'Quiz not found.' };
+
+    setData(currentState);
+
+    return { };
 }
+
       
 /**
  * Given a particular quiz, permanently remove the quiz.
