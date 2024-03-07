@@ -1,4 +1,4 @@
-import { adminQuizCreate, adminQuizDescriptionUpdate, adminQuizList, adminQuizNameUpdate, adminQuizRemove } from './quiz.js';
+import { adminQuizCreate, adminQuizDescriptionUpdate, adminQuizInfo, adminQuizList, adminQuizNameUpdate, adminQuizRemove } from './quiz.js';
 import { adminAuthRegister, adminUserDetails } from './auth.js';
 import { clear } from './other.js';
 
@@ -70,7 +70,7 @@ describe('Test adminQuizCreate', () => {
 });
 
 // adminQuizDescriptionUpdate
-describe.only('Test adminQuizDescriptionUpdate', () => {
+describe('Test adminQuizDescriptionUpdate', () => {
     let nameFirst = 'Leon'
     let nameLast = 'Sun'
     let email = 'leonsun@gmail.com'
@@ -263,7 +263,7 @@ describe('Test adminQuizInfo', () => {
     test('Valid inputs', () => {
         const admin = adminAuthRegister(email, password, lastName, firstName);
         const quizCreate = adminQuizCreate(admin.authUserId, quizName, quizDescription);
-        expect(adminQuizInfo(admin.authUserId, quizId.quizId)).toStrictEqual(
+        expect(adminQuizInfo(admin.authUserId, quizCreate.quizId)).toStrictEqual(
         {
             quizId: quizCreate.quizId,
             name: quizName,
