@@ -7,6 +7,7 @@ import { getData, setData } from './dataStore.js';
   * @returns {} - returns an empty object when resetting the application to the start
 */
 function clear() {
-  return {
-  }
+    return {
+          
+    }
 }
