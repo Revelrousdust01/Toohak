@@ -1,4 +1,4 @@
-import { adminQuizCreate, adminQuizRemove } from './quiz.js';
+import { adminQuizCreate, adminQuizRemove, adminQuizList } from './quiz.js';
 import { adminAuthRegister } from './auth.js';
 import { clear } from './other.js';
 
@@ -116,15 +116,15 @@ describe('adminQuizList', () => {
     let lastName = 'Huang'
     let email = 'shuang@student.unsw.edu.au'
     let password = 'a1b2c3d4e5f6'
-    const UserId = adminAuthRegister(email, password, firstName, lastName)
 
     test('One quiz in quizlist', () => {
-        const quizId1 = adminQuizCreate(UserId, 'How to train your dragon', 
+        const UserId = adminAuthRegister(email, password, firstName, lastName)
+        const quizId1 = adminQuizCreate(UserId.authUserId, 'How to train your dragon', 
                         'Quiz about the movie trivia of How to Train your dragon')
-        expect(adminQuizList(UserId)).toStrictEqual({
+        expect(adminQuizList(UserId.authUserId)).toStrictEqual({
             quizzes: [
                 {
-                    quizId: quizId1,
+                    quizId: quizId1.quizId,
                     name: 'How to train your dragon'
                 }
             ]
@@ -132,24 +132,25 @@ describe('adminQuizList', () => {
     });
 
     test('Multiple quiz in quizlist', () => {
-        const quizId1 = adminQuizCreate(UserId, 'How to train your dragon', 
+        const UserId = adminAuthRegister(email, password, firstName, lastName)
+        const quizId1 = adminQuizCreate(UserId.authUserId, 'How to train your dragon', 
                         'Quiz about the movie trivia of How to Train your dragon')
-        const quizId2 = adminQuizCreate(UserId, 'Age of Adeline', 
+        const quizId2 = adminQuizCreate(UserId.authUserId, 'Age of Adeline', 
                         'Quiz about the movie trivia of Age of Adeline')
-        const quizId3 = adminQuizCreate(UserId, 'Kung Fu Panda', 
+        const quizId3 = adminQuizCreate(UserId.authUserId, 'Kung Fu Panda', 
                         'Quiz about the movie trivia of Kung Fu Panda')
-        expect(adminQuizList(UserId)).toStrictEqual({
+        expect(adminQuizList(UserId.authUserId)).toStrictEqual({
             quizzes: [
                 {
-                    quizId: quizId1,
+                    quizId: quizId1.quizId,
                     name: 'How to train your dragon'
                 },
                 {
-                    quizId: quizId2,
+                    quizId: quizId2.quizId,
                     name: 'Age of Adeline'
                 },
                 {
-                    quizId: quizId3,
+                    quizId: quizId3.quizId,
                     name: 'Kung Fu Panda'
                 }
             ]
@@ -157,7 +158,8 @@ describe('adminQuizList', () => {
     });
 
     test('No quiz in quizlist', () => {
-        expect(adminQuizList(UserId)).toStrictEqual({
+        const UserId = adminAuthRegister(email, password, firstName, lastName)
+        expect(adminQuizList(UserId.authUserId)).toStrictEqual({
             quizzes: [
 
             ]
@@ -170,7 +172,7 @@ describe('adminQuizList', () => {
         { invalidId: '/' },
     ])("AuthUserId is not a valid user: '$invalidId", ({ invalidId }) => {
         const admin = adminAuthRegister(email, password, lastName, firstName);
-        const quizId = adminQuizCreate(admin.authUserId, quizName, quizDescription);
+        const quizId = adminQuizCreate(admin.authUserId, 'QuizName', 'QuizDescription');
 	expect(adminQuizList(invalidId)).toStrictEqual(ERROR);
     });
 });

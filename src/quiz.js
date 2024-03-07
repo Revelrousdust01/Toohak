@@ -1,6 +1,6 @@
 import { clear } from './other';
 import { getData, setData} from './dataStore';
-import { validQuizName } from './helper';
+import { validQuizName, validAuthUserId } from './helper';
 
 let quizCounter = 1;
 
