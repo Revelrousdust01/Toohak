@@ -148,6 +148,7 @@ describe('Test adminQuizNameUpdate', () => {
         { invalidQuizId: '/' },
     ])("QuizId does not refer to valid quiz: '$invalidQuizId", ({ invalidQuizId }) => {
         const admin = adminAuthRegister(email, password, lastName, firstName);
+        const newQuiz = adminQuizCreate(admin.authUserId, quizName, quizDescription);
         expect(adminQuizNameUpdate(admin.authUserId, invalidQuizId, newQuizName)).toStrictEqual(ERROR);
     });
 
