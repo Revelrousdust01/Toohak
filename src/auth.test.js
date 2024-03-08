@@ -1,4 +1,4 @@
-import { adminAuthLogin, adminAuthRegister, adminUserDetails, adminUserDetailsUpdate } from './auth.js';
+import { adminAuthLogin, adminAuthRegister, adminUserDetails, adminUserDetailsUpdate, adminUserPasswordUpdate } from './auth.js';
 import { clear } from './other.js';
 
 // Clear before each test
@@ -250,4 +250,70 @@ describe('adminUserDetailsUpdate', () => {
         expect(adminUserDetailsUpdate(UserId.authUserId, email, firstName, lastName.concat(character)))
             .toStrictEqual(ERROR)
         });
+});
+
+// adminUserPasswordUpdate
+describe.only('adminUserPasswordUpdate', () => {
+    let firstName = 'Samuel'
+    let lastName = 'Huang'
+    let email = 'shuang@student.unsw.edu.au'
+    let oldPassword = 'a1b2c3d4qwerty'
+    let newPassword = 'newa1b2c3d4qwerty'
+
+    test('Valid Details', () => {
+        const UserId = adminAuthRegister(email, oldPassword, firstName, lastName)
+        expect(adminUserPasswordUpdate(UserId.authUserId, oldPassword, newPassword))
+            .toStrictEqual({ })
+    });
+
+    test.each([
+        { invalidId: '-1' },
+        { invalidId: 'a' },
+        { invalidId: '/' },
+    ])("AuthUserId is not a valid user: '$invalidId", ({ invalidId }) => {
+        const UserId = adminAuthRegister(email, oldPassword, firstName, lastName)
+        expect(adminUserPasswordUpdate(invalidId, oldPassword, newPassword))
+            .toStrictEqual(ERROR)
+    });
+
+    test('Old Password is not the correct old password', () => {
+        const UserId = adminAuthRegister(email, oldPassword, firstName, lastName)
+        expect(adminUserPasswordUpdate(UserId.authUserId, 'thisisthewrongpassword', newPassword))
+            .toStrictEqual(ERROR)
+    });
+
+    test('Old Password and New Password match exactly', () => {
+        const UserId = adminAuthRegister(email, oldPassword, firstName, lastName)
+        expect(adminUserPasswordUpdate(UserId.authUserId, oldPassword, oldPassword))
+            .toStrictEqual(ERROR)
+    });
+
+    test('New Password has already been used by this user', () => {
+        const UserId = adminAuthRegister(email, oldPassword, firstName, lastName)
+        adminUserPasswordUpdate(UserId.authUserId, oldPassword, newPassword)
+        expect(adminUserPasswordUpdate(UserId.authUserId, newPassword, oldPassword))
+            .toStrictEqual(ERROR)
+    });
+
+    test.each([
+        { badPassword: 'A1' },
+        { badPassword: 'A12' },
+        { badPassword: 'A123' },
+        { badPassword: 'A1234' },
+        { badPassword: 'A12345' },
+        { badPassword: 'A123456' }
+    ])("Password is less than 8 characters: '$badPassword'", ({ badPassword }) => {
+        const UserId = adminAuthRegister(email, oldPassword, firstName, lastName)
+        expect(adminUserPasswordUpdate(UserId.authUserId, newPassword, badPassword))
+            .toStrictEqual(ERROR)
+    });
+
+    test.each([
+        { badPassword: 'AAAAAAAAAAAAAAAAAAAA' },
+        { badPassword: '11111111111111111111' },
+    ])("Password does not contain at least one number and at least one letter: '$badPassword'", ({ badPassword }) => {
+        const UserId = adminAuthRegister(email, oldPassword, firstName, lastName)
+        expect(adminUserPasswordUpdate(UserId.authUserId, newPassword, badPassword))
+            .toStrictEqual(ERROR)
+    });
 });

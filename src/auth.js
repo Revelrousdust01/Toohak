@@ -168,8 +168,43 @@ export function adminUserDetailsUpdate( authUserId, email, nameFirst, nameLast )
  * @returns {} - Returns empty object when password is updated.
  */
 
-function adminUserPasswordUpdate( authUserId, oldPassword, newPassword ) {
-    return {
+export function adminUserPasswordUpdate( authUserId, oldPassword, newPassword ) 
+{
+    let data = getData()
 
-    }
+    const checkAuthUserId = validAuthUserId(authUserId);
+    if(checkAuthUserId.error) 
+        return {
+            error: checkAuthUserId.error
+        }
+    
+    let user = data.users.find(user => user.userId === authUserId)
+
+    if (!(user.password === oldPassword)) 
+        return {
+            error: 'Old Password is not the correct old password'
+        }
+    
+    if (oldPassword === newPassword) 
+        return {
+            error: 'Old Password and New Password match exactly'
+        }
+    
+    const oldPasswordArray = user.oldPasswords
+    for (const oldPasswordUsed of oldPasswordArray) 
+        if (oldPasswordUsed === newPassword) 
+            return {
+                error: 'New Password has already been used before by this user'
+            }
+        
+    const checkPassword = validPassword(newPassword);
+    if(checkPassword.error)
+        return{
+            error: checkPassword.error
+        }
+
+    user.oldPasswords.push(oldPassword)
+    user.password = newPassword
+
+    return { }
 }
