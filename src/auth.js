@@ -19,7 +19,6 @@ export function adminAuthLogin( email, password )
         return { error: "No account found with the provided email address." }
     else if(user.password !== password)
         return { error: "Incorrect password." }
-    
 
     return{
         authUserId: user.userId
