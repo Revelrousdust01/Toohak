@@ -253,7 +253,7 @@ describe('adminUserDetailsUpdate', () => {
 });
 
 // adminUserPasswordUpdate
-describe.only('adminUserPasswordUpdate', () => {
+describe('adminUserPasswordUpdate', () => {
     let firstName = 'Samuel'
     let lastName = 'Huang'
     let email = 'shuang@student.unsw.edu.au'
