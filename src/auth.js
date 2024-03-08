@@ -1,4 +1,4 @@
-import {getData} from './dataStore';
+import {getData, setData} from './dataStore';
 import {validAuthUserId, validEmail, validName, validPassword} from './helper';
 
 /**
@@ -79,6 +79,8 @@ export function adminAuthRegister( email, password, nameFirst, nameLast )
 
     data.users.push(newUser);
 
+    setData(data);
+
     return{ authUserId: newUser.userId }
 }
 
@@ -154,6 +156,8 @@ export function adminUserDetailsUpdate( authUserId, email, nameFirst, nameLast )
     user.nameFirst = nameFirst;
     user.nameLast = nameLast;
 
+    setData(data);
+
     return { }
 }
 
@@ -205,6 +209,8 @@ export function adminUserPasswordUpdate( authUserId, oldPassword, newPassword )
 
     user.oldPasswords.push(oldPassword)
     user.password = newPassword
+
+    setData(data);
 
     return { }
 }

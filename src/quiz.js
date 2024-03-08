@@ -46,6 +46,8 @@ export function adminQuizCreate( authUserId, name, description ) {
 
     data.quizzes.push(newQuiz);
 
+    setData(data);
+
     return { quizId: newQuiz.quizId }
 }
 
@@ -106,6 +108,8 @@ export function adminQuizInfo( authUserId, quizId ) {
     if (!user.ownedQuizzes.includes(quizId)) 
         return { error: 'Quiz ID does not refer to a quiz that this user owns.'}
 
+    setData(data);
+
     return {
         quizId: quizId,
         name: quiz.name,
@@ -145,6 +149,8 @@ export function adminQuizList( authUserId ) {
         }
         quizzes.push(quiz)
     }
+    
+    setData(data);
 
     return { 
        quizzes: quizzes
