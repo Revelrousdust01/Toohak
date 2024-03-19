@@ -9,6 +9,9 @@ let data: DataStore = {
   users: [
 
   ],
+  userSessions: [
+
+  ],
   quizzes: [
 
   ]

@@ -18,6 +18,11 @@ export interface Quiz {
     question: Question[]
 }
 
+export interface UserSessions {
+    userId: string
+    sessionId: string
+}
+
 export interface User{
     userId: number,
     email: string,
@@ -28,11 +33,11 @@ export interface User{
     numSuccessfulLogins: number,
     ownedQuizzes: number[],
     password: string
-    sessions: { sessionId: string }[];
 }
 
 export interface DataStore {
     users: User[],
+    userSessions: UserSessions[]
     quizzes: Quiz[]
 }
 
