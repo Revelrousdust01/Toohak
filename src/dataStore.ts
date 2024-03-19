@@ -38,7 +38,7 @@ function getData() {
 }
 
 // Use set(newData) to pass in the entire data object, with modifications made
-function setData(newData : DataStore) {
+function setData(newData: DataStore) {
   data = newData;
 }
 
