@@ -35,6 +35,16 @@ let data = {
             }
         ]}   
     ]
+    userSessions:[
+        {
+            userId: 1
+            sessionId: 1
+        },
+                {
+            userId: 1
+            sessionId: 2
+        }
+    ]
 }
 ```
 [Optional] short description: 

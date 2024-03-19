@@ -1,10 +1,15 @@
 // YOU SHOULD MODIFY THIS OBJECT BELOW ONLY
-let data = {
+import type { DataStore } from './interfaces';
+
+let data: DataStore = {
   /**
    * We want data to store users and quizzes each within their own array.
    * Each one should contain their own specific data as reflected in data.md.
    */
   users: [
+
+  ],
+  userSessions: [
 
   ],
   quizzes: [
@@ -36,7 +41,7 @@ function getData() {
 }
 
 // Use set(newData) to pass in the entire data object, with modifications made
-function setData(newData) {
+function setData(newData: DataStore) {
   data = newData;
 }
 
