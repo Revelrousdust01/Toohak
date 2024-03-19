@@ -44,14 +44,14 @@ describe('adminAuthRegister', () => {
   const password = 'a1b2c3d4e5f6';
 
   test('Valid Details', () => {
-    const response = requestAdminAuthRegister(email, password, firstName, lastName)
+    const response = requestAdminAuthRegister(email, password, firstName, lastName);
     expect(response.jsonBody).toStrictEqual({ token: expect.any(Number) });
     expect(response.statusCode).toStrictEqual(200);
   });
 
   test('Email address is used by another user', () => {
     requestAdminAuthRegister(email, password, firstName, lastName);
-    const response = requestAdminAuthRegister(email, password, firstName, lastName)
+    const response = requestAdminAuthRegister(email, password, firstName, lastName);
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(400);
   });
@@ -65,7 +65,7 @@ describe('adminAuthRegister', () => {
     { badEmail: '[cpolitis@student.unsw.edu.au]' },
     { badEmail: 'cpolitis' }
   ])("Email does not satisfy validator: '$badEmail'", ({ badEmail }) => {
-    const response = requestAdminAuthRegister(badEmail, password, firstName, lastName)
+    const response = requestAdminAuthRegister(badEmail, password, firstName, lastName);
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(400);
   });
@@ -79,7 +79,7 @@ describe('adminAuthRegister', () => {
     { character: '*' },
     { character: '/' }
   ])("NameFirst contains unwanted Characters: '$character'", ({ character }) => {
-    const response = requestAdminAuthRegister(email, password, firstName.concat(character), lastName)
+    const response = requestAdminAuthRegister(email, password, firstName.concat(character), lastName);
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(400);
   });
@@ -88,7 +88,7 @@ describe('adminAuthRegister', () => {
     { badFirstName: 'a' },
     { badFirstName: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' }
   ])("NameFirst is less than 2 characters or more than 20 characers: '$badFirstName'", ({ badFirstName }) => {
-    const response = requestAdminAuthRegister(email, password, badFirstName, lastName)
+    const response = requestAdminAuthRegister(email, password, badFirstName, lastName);
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(400);
   });
@@ -102,7 +102,7 @@ describe('adminAuthRegister', () => {
     { character: '*' },
     { character: '/' }
   ])("NameLast contains unwanted Characters: '$character'", ({ character }) => {
-    const response = requestAdminAuthRegister(email, password, firstName, lastName.concat(character))
+    const response = requestAdminAuthRegister(email, password, firstName, lastName.concat(character));
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(400);
   });
@@ -111,7 +111,7 @@ describe('adminAuthRegister', () => {
     { badLastName: 'a' },
     { badLastName: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' }
   ])("NameLast is less than 2 characters or more than 20 characers: '$badLastName'", ({ badLastName }) => {
-    const response = requestAdminAuthRegister(email, password, firstName, badLastName)
+    const response = requestAdminAuthRegister(email, password, firstName, badLastName);
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(400);
   });
@@ -124,7 +124,7 @@ describe('adminAuthRegister', () => {
     { badPassword: 'A12345' },
     { badPassword: 'A123456' }
   ])("Password is less than 8 characters: '$badPassword'", ({ badPassword }) => {
-    const response = requestAdminAuthRegister(email, badPassword, firstName, lastName)
+    const response = requestAdminAuthRegister(email, badPassword, firstName, lastName);
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(400);
   });
@@ -133,7 +133,7 @@ describe('adminAuthRegister', () => {
     { badPassword: 'AAAAAAAAAAAAAAAAAAAA' },
     { badPassword: '11111111111111111111' },
   ])("Password does not contain at least one number and at least one letter: '$badPassword'", ({ badPassword }) => {
-    const response = requestAdminAuthRegister(email, badPassword, firstName, lastName)
+    const response = requestAdminAuthRegister(email, badPassword, firstName, lastName);
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(400);
   });

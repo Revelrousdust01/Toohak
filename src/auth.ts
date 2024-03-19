@@ -31,7 +31,7 @@ export function adminAuthLogin(email: string, password: string) {
   * @param {string} nameLast - Last Name of user
   *
   * @returns {ErrorObject} when criteria is not met:
-  * 
+  *
   * Email address is used by another user.
   * Email does not satisfy this: https://www.npmjs.com/package/validator (validator.isEmail function).
   * NameFirst contains characters other than lowercase letters, uppercase letters, spaces, hyphens, or apostrophes.
@@ -40,7 +40,7 @@ export function adminAuthLogin(email: string, password: string) {
   * NameLast is less than 2 characters or more than 20 characters.
   * Password is less than 8 characters.
   * Password does not contain at least one number and at least one letter.
-  * 
+  *
   * @returns {adminAuthRegisterReturn} - Returns token value when account is registered
 */
 

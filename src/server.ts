@@ -1,3 +1,4 @@
+import { adminAuthRegister } from './auth';
 import express, { json, Request, Response } from 'express';
 import { echo } from './newecho';
 import morgan from 'morgan';
@@ -23,7 +24,7 @@ app.get('/', (req: Request, res: Response) => res.redirect('/docs'));
 app.use('/docs', sui.serve, sui.setup(YAML.parse(file), { swaggerOptions: { docExpansion: config.expandDocs ? 'full' : 'list' } }));
 
 const PORT: number = parseInt(process.env.PORT || config.port);
-const HOST: string = process.env.IP || 'localhost';
+const HOST: string = process.env.IP || '127.0.0.1';
 
 // ====================================================================
 //  ================= WORK IS DONE BELOW THIS LINE ===================
@@ -33,6 +34,16 @@ const HOST: string = process.env.IP || 'localhost';
 app.get('/echo', (req: Request, res: Response) => {
   const data = req.query.echo as string;
   return res.json(echo(data));
+});
+
+app.post('/v1/admin/auth/register', (req: Request, res: Response) => {
+  const { email, password, nameFirst, nameLast } = req.body;
+  const response = adminAuthRegister(email, password, nameFirst, nameLast);
+
+  if ('error' in response) {
+    return res.status(400).json(response);
+  }
+  res.json(response);
 });
 
 // ====================================================================
