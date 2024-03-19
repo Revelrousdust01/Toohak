@@ -11,7 +11,6 @@ let data = {
          numSuccessfulLogins: 3,
          ownedQuizzes: [1,2,3],
          password: 'hayden1!'
-         sessions: [{sessionId: '1'}, {sessionId: '2'}]
         }
     ]
     quizzes: [
