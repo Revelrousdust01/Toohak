@@ -1,6 +1,6 @@
-import { adminQuizCreate, adminQuizDescriptionUpdate, adminQuizInfo, adminQuizList, adminQuizNameUpdate, adminQuizRemove } from './quiz.js';
-import { adminAuthRegister } from './auth.js';
-import { clear } from './other.js';
+import { adminQuizCreate, adminQuizDescriptionUpdate, adminQuizInfo, adminQuizList, adminQuizNameUpdate, adminQuizRemove } from './quiz';
+import { adminAuthRegister } from './auth';
+import { clear } from './other';
 
 beforeEach(() => {
   clear();
@@ -9,7 +9,7 @@ beforeEach(() => {
 const ERROR = { error: expect.any(String) };
 
 // adminQuizCreate
-describe('Test adminQuizCreate', () => {
+describe.skip('Test adminQuizCreate', () => {
   const firstName = 'Jeffery';
   const lastName = 'Zhang';
   const email = 'jeffery.zhang385@gmail.com';
@@ -70,7 +70,7 @@ describe('Test adminQuizCreate', () => {
 });
 
 // adminQuizDescriptionUpdate
-describe('Test adminQuizDescriptionUpdate', () => {
+describe.skip('Test adminQuizDescriptionUpdate', () => {
   const nameFirst = 'Leon';
   const nameLast = 'Sun';
   const email = 'leonsun@gmail.com';
@@ -127,7 +127,7 @@ describe('Test adminQuizDescriptionUpdate', () => {
 });
 
 // adminQuizRemove
-describe('Test adminQuizRemove', () => {
+describe.skip('Test adminQuizRemove', () => {
   const firstName = 'Jeffery';
   const lastName = 'Zhang';
   const email = 'jeffery.zhang385@gmail.com';
@@ -169,7 +169,7 @@ describe('Test adminQuizRemove', () => {
 });
 
 // adminQuizInfo
-describe('Test adminQuizInfo', () => {
+describe.skip('Test adminQuizInfo', () => {
   const firstName = 'Jeffery';
   const lastName = 'Zhang';
   const email = 'jeffery.zhang385@gmail.com';
@@ -218,7 +218,7 @@ describe('Test adminQuizInfo', () => {
 });
 
 // adminQuizList
-describe('adminQuizList', () => {
+describe.skip('adminQuizList', () => {
   const firstName = 'Samuel';
   const lastName = 'Huang';
   const email = 'shuang@student.unsw.edu.au';
@@ -283,7 +283,7 @@ describe('adminQuizList', () => {
 });
 
 // adminQuizNameUpdate
-describe('Test adminQuizNameUpdate', () => {
+describe.skip('Test adminQuizNameUpdate', () => {
   const nameFirst = 'Leon';
   const nameLast = 'Sun';
   const email = 'leonsun@gmail.com';

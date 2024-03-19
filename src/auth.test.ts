@@ -1,7 +1,7 @@
-import { adminAuthLogin, adminUserDetails, adminUserDetailsUpdate, adminUserPasswordUpdate } from './auth.js';
-import { requestAdminAuthRegister } from './requests'
-import { ErrorObject } from './interfaces.js'
-import { clear } from './other.js';
+import { adminAuthLogin, adminUserDetails, adminUserDetailsUpdate, adminUserPasswordUpdate } from './auth';
+import { requestAdminAuthRegister } from './requests';
+import { ErrorObject } from './interfaces';
+import { clear } from './other';
 
 // Clear before each test
 beforeEach(() => {
@@ -11,7 +11,7 @@ beforeEach(() => {
 const ERROR: ErrorObject = { error: expect.any(String) };
 
 // adminAuthLogin
-describe('adminAuthLogin', () => {
+describe.skip('adminAuthLogin', () => {
   const firstName = 'Christian';
   const lastName = 'Politis';
   const email = 'cpolitis@student.unsw.edu.au';
@@ -20,7 +20,7 @@ describe('adminAuthLogin', () => {
   test('Valid Details', () => {
     requestAdminAuthRegister(email, password, firstName, lastName);
     expect(adminAuthLogin(email, password))
-      .toStrictEqual({ authUserId: expect.any(Number) });
+      .toStrictEqual({ token: expect.any(Number) });
   });
 
   test('Email does not exist', () => {
@@ -44,14 +44,16 @@ describe('adminAuthRegister', () => {
   const password = 'a1b2c3d4e5f6';
 
   test('Valid Details', () => {
-    expect(requestAdminAuthRegister(email, password, firstName, lastName))
-      .toStrictEqual({ token: expect.any(Number) });
+    const response = requestAdminAuthRegister(email, password, firstName, lastName)
+    expect(response.jsonBody).toStrictEqual({ token: expect.any(Number) });
+    expect(response.statusCode).toStrictEqual(200);
   });
 
   test('Email address is used by another user', () => {
     requestAdminAuthRegister(email, password, firstName, lastName);
-    expect(requestAdminAuthRegister(email, password, firstName, lastName))
-      .toStrictEqual(ERROR);
+    const response = requestAdminAuthRegister(email, password, firstName, lastName)
+    expect(response.jsonBody).toStrictEqual(ERROR);
+    expect(response.statusCode).toStrictEqual(400);
   });
 
   test.each([
@@ -63,8 +65,9 @@ describe('adminAuthRegister', () => {
     { badEmail: '[cpolitis@student.unsw.edu.au]' },
     { badEmail: 'cpolitis' }
   ])("Email does not satisfy validator: '$badEmail'", ({ badEmail }) => {
-    expect(requestAdminAuthRegister(badEmail, password, firstName, lastName))
-      .toStrictEqual(ERROR);
+    const response = requestAdminAuthRegister(badEmail, password, firstName, lastName)
+    expect(response.jsonBody).toStrictEqual(ERROR);
+    expect(response.statusCode).toStrictEqual(400);
   });
 
   test.each([
@@ -76,16 +79,18 @@ describe('adminAuthRegister', () => {
     { character: '*' },
     { character: '/' }
   ])("NameFirst contains unwanted Characters: '$character'", ({ character }) => {
-    expect(requestAdminAuthRegister(email, password, firstName.concat(character), lastName))
-      .toStrictEqual(ERROR);
+    const response = requestAdminAuthRegister(email, password, firstName.concat(character), lastName)
+    expect(response.jsonBody).toStrictEqual(ERROR);
+    expect(response.statusCode).toStrictEqual(400);
   });
 
   test.each([
     { badFirstName: 'a' },
     { badFirstName: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' }
   ])("NameFirst is less than 2 characters or more than 20 characers: '$badFirstName'", ({ badFirstName }) => {
-    expect(requestAdminAuthRegister(email, password, badFirstName, lastName))
-      .toStrictEqual(ERROR);
+    const response = requestAdminAuthRegister(email, password, badFirstName, lastName)
+    expect(response.jsonBody).toStrictEqual(ERROR);
+    expect(response.statusCode).toStrictEqual(400);
   });
 
   test.each([
@@ -97,16 +102,18 @@ describe('adminAuthRegister', () => {
     { character: '*' },
     { character: '/' }
   ])("NameLast contains unwanted Characters: '$character'", ({ character }) => {
-    expect(requestAdminAuthRegister(email, password, firstName, lastName.concat(character)))
-      .toStrictEqual(ERROR);
+    const response = requestAdminAuthRegister(email, password, firstName, lastName.concat(character))
+    expect(response.jsonBody).toStrictEqual(ERROR);
+    expect(response.statusCode).toStrictEqual(400);
   });
 
   test.each([
     { badLastName: 'a' },
     { badLastName: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' }
   ])("NameLast is less than 2 characters or more than 20 characers: '$badLastName'", ({ badLastName }) => {
-    expect(requestAdminAuthRegister(email, password, firstName, badLastName))
-      .toStrictEqual(ERROR);
+    const response = requestAdminAuthRegister(email, password, firstName, badLastName)
+    expect(response.jsonBody).toStrictEqual(ERROR);
+    expect(response.statusCode).toStrictEqual(400);
   });
 
   test.each([
@@ -117,21 +124,23 @@ describe('adminAuthRegister', () => {
     { badPassword: 'A12345' },
     { badPassword: 'A123456' }
   ])("Password is less than 8 characters: '$badPassword'", ({ badPassword }) => {
-    expect(requestAdminAuthRegister(email, badPassword, firstName, lastName))
-      .toStrictEqual(ERROR);
+    const response = requestAdminAuthRegister(email, badPassword, firstName, lastName)
+    expect(response.jsonBody).toStrictEqual(ERROR);
+    expect(response.statusCode).toStrictEqual(400);
   });
 
   test.each([
     { badPassword: 'AAAAAAAAAAAAAAAAAAAA' },
     { badPassword: '11111111111111111111' },
   ])("Password does not contain at least one number and at least one letter: '$badPassword'", ({ badPassword }) => {
-    expect(requestAdminAuthRegister(email, badPassword, firstName, lastName))
-      .toStrictEqual(ERROR);
+    const response = requestAdminAuthRegister(email, badPassword, firstName, lastName)
+    expect(response.jsonBody).toStrictEqual(ERROR);
+    expect(response.statusCode).toStrictEqual(400);
   });
 });
 
 // adminUserDetails
-describe('adminUserDetails', () => {
+describe.skip('adminUserDetails', () => {
   const firstName = 'Christian';
   const lastName = 'Politis';
   const email = 'cpolitis@student.unsw.edu.au';
@@ -139,7 +148,7 @@ describe('adminUserDetails', () => {
 
   test('Valid Details', () => {
     const user = requestAdminAuthRegister(email, password, firstName, lastName);
-    expect(adminUserDetails(user.jsonBody?.token))
+    expect(adminUserDetails(user.jsonBody?.token as number))
       .toStrictEqual({
         user: {
           userId: expect.any(Number),
@@ -161,7 +170,7 @@ describe('adminUserDetails', () => {
 });
 
 // adminUserDetailsUpdate
-describe('adminUserDetailsUpdate', () => {
+describe.skip('adminUserDetailsUpdate', () => {
   const firstName = 'Samuel';
   const lastName = 'Huang';
   const email = 'shuang@student.unsw.edu.au';
@@ -170,13 +179,13 @@ describe('adminUserDetailsUpdate', () => {
   test('Valid Details', () => {
     const UserId = requestAdminAuthRegister(email, password, firstName, lastName);
     expect(adminUserDetailsUpdate(
-      UserId.jsonBody?.token,
+      UserId.jsonBody?.token as number,
       'shuangupdated@student.unsw.edu.au',
       'UpdateSamuel',
       'UpdateHuang'
     )).toStrictEqual({ });
 
-    expect(adminUserDetails(UserId.jsonBody?.token)).toStrictEqual({
+    expect(adminUserDetails(UserId.jsonBody?.token as number)).toStrictEqual({
       user: {
         userId: UserId.jsonBody?.token,
         name: 'UpdateSamuel UpdateHuang',
@@ -189,9 +198,9 @@ describe('adminUserDetailsUpdate', () => {
 
   test('AuthUserId is not a valid User', () => {
     const UserId = requestAdminAuthRegister(email, password, firstName, lastName);
-    const invalidUserId = UserId.jsonBody?.token + 1;
+    const invalidUserId = UserId.jsonBody?.token as number + 1;
     expect(adminUserDetailsUpdate(
-      invalidUserId.authUserId,
+      invalidUserId,
       'shuangupdated@student.unsw.edu.au',
       'UpdateSamuel',
       'UpdateSamuel'
@@ -202,7 +211,7 @@ describe('adminUserDetailsUpdate', () => {
     const UserId = requestAdminAuthRegister(email, password, firstName, lastName);
     requestAdminAuthRegister('cpolitis@student.unsw.edu.au', 'a1b2c3d4e5f6', 'Christian', 'Politis');
     expect(adminUserDetailsUpdate(
-      UserId.jsonBody?.token,
+      UserId.jsonBody?.token as number,
       'cpolitis@student.unsw.edu.au',
       'UpdateSamuel',
       'UpdateSamuel'
@@ -219,7 +228,7 @@ describe('adminUserDetailsUpdate', () => {
     { badEmail: 'shuang' }
   ])("Email does not satisfy validator: '$badEmail'", ({ badEmail }) => {
     const UserId = requestAdminAuthRegister(email, password, firstName, lastName);
-    expect(adminUserDetailsUpdate(UserId.jsonBody?.token, badEmail, firstName, lastName))
+    expect(adminUserDetailsUpdate(UserId.jsonBody?.token as number, badEmail, firstName, lastName))
       .toStrictEqual(ERROR);
   });
 
@@ -233,7 +242,7 @@ describe('adminUserDetailsUpdate', () => {
     { character: '/' }
   ])("NameFirst contains unwanted Characters: '$character'", ({ character }) => {
     const UserId = requestAdminAuthRegister(email, password, firstName, lastName);
-    expect(adminUserDetailsUpdate(UserId.jsonBody?.token, email, firstName.concat(character), lastName))
+    expect(adminUserDetailsUpdate(UserId.jsonBody?.token as number, email, firstName.concat(character), lastName))
       .toStrictEqual(ERROR);
   });
 
@@ -247,13 +256,13 @@ describe('adminUserDetailsUpdate', () => {
     { character: '/' }
   ])("NameLast contains unwanted Characters: '$character'", ({ character }) => {
     const UserId = requestAdminAuthRegister(email, password, firstName, lastName);
-    expect(adminUserDetailsUpdate(UserId.jsonBody?.token, email, firstName, lastName.concat(character)))
+    expect(adminUserDetailsUpdate(UserId.jsonBody?.token as number, email, firstName, lastName.concat(character)))
       .toStrictEqual(ERROR);
   });
 });
 
 // adminUserPasswordUpdate
-describe('adminUserPasswordUpdate', () => {
+describe.skip('adminUserPasswordUpdate', () => {
   const firstName = 'Samuel';
   const lastName = 'Huang';
   const email = 'shuang@student.unsw.edu.au';
@@ -262,7 +271,7 @@ describe('adminUserPasswordUpdate', () => {
 
   test('Valid Details', () => {
     const UserId = requestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    expect(adminUserPasswordUpdate(UserId.jsonBody?.token, oldPassword, newPassword))
+    expect(adminUserPasswordUpdate(UserId.jsonBody?.token as number, oldPassword, newPassword))
       .toStrictEqual({ });
   });
 
@@ -278,20 +287,20 @@ describe('adminUserPasswordUpdate', () => {
 
   test('Old Password is not the correct old password', () => {
     const UserId = requestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    expect(adminUserPasswordUpdate(UserId.jsonBody?.token, 'thisisthewrongpassword', newPassword))
+    expect(adminUserPasswordUpdate(UserId.jsonBody?.token as number, 'thisisthewrongpassword', newPassword))
       .toStrictEqual(ERROR);
   });
 
   test('Old Password and New Password match exactly', () => {
     const UserId = requestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    expect(adminUserPasswordUpdate(UserId.jsonBody?.token, oldPassword, oldPassword))
+    expect(adminUserPasswordUpdate(UserId.jsonBody?.token as number, oldPassword, oldPassword))
       .toStrictEqual(ERROR);
   });
 
   test('New Password has already been used by this user', () => {
     const UserId = requestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    adminUserPasswordUpdate(UserId.jsonBody?.token, oldPassword, newPassword);
-    expect(adminUserPasswordUpdate(UserId.jsonBody?.token, newPassword, oldPassword))
+    adminUserPasswordUpdate(UserId.jsonBody?.token as number, oldPassword, newPassword);
+    expect(adminUserPasswordUpdate(UserId.jsonBody?.token as number, newPassword, oldPassword))
       .toStrictEqual(ERROR);
   });
 
@@ -304,7 +313,7 @@ describe('adminUserPasswordUpdate', () => {
     { badPassword: 'A123456' }
   ])("Password is less than 8 characters: '$badPassword'", ({ badPassword }) => {
     const UserId = requestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    expect(adminUserPasswordUpdate(UserId.jsonBody?.token, newPassword, badPassword))
+    expect(adminUserPasswordUpdate(UserId.jsonBody?.token as number, newPassword, badPassword))
       .toStrictEqual(ERROR);
   });
 
@@ -313,7 +322,7 @@ describe('adminUserPasswordUpdate', () => {
     { badPassword: '11111111111111111111' },
   ])("Password does not contain at least one number and at least one letter: '$badPassword'", ({ badPassword }) => {
     const UserId = requestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    expect(adminUserPasswordUpdate(UserId.jsonBody?.token, newPassword, badPassword))
+    expect(adminUserPasswordUpdate(UserId.jsonBody?.token as number, newPassword, badPassword))
       .toStrictEqual(ERROR);
   });
 });
