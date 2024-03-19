@@ -11,6 +11,7 @@ let data = {
          numSuccessfulLogins: 3,
          ownedQuizzes: [1,2,3],
          password: 'hayden1!'
+         sessions: [{token: '1'}, {token: '2'}]
         }
     ]
     quizzes: [
