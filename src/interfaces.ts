@@ -28,7 +28,7 @@ export interface User{
     numSuccessfulLogins: number,
     ownedQuizzes: number[],
     password: string
-    sessions: { token: string }[];
+    sessions: { sessionId: string }[];
 }
 
 export interface DataStore {
