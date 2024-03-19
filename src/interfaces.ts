@@ -2,7 +2,11 @@
  * Stores all unique interfaces that maybe used throughout the project
  */
 
-export interface Question{
+export interface adminAuthRegisterReturn {
+    token: number
+}
+
+export interface Question {
     questionId: number,
     name: string,
     answers: string[],
@@ -23,7 +27,7 @@ export interface UserSessions {
     sessionId: string
 }
 
-export interface User{
+export interface User {
     userId: number,
     email: string,
     nameFirst: string,

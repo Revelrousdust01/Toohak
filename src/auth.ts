@@ -1,4 +1,5 @@
 import { getData, setData } from './dataStore';
+import type { adminAuthRegisterReturn, ErrorObject, User } from './interfaces';
 import { validAuthUserId, validEmail, validName, validPassword } from './helper';
 
 /**
@@ -10,7 +11,7 @@ import { validAuthUserId, validEmail, validName, validPassword } from './helper'
   * @returns {number} - Returns authUserId value when account is loged in
 */
 
-export function adminAuthLogin(email, password) {
+export function adminAuthLogin(email: string, password: string) {
   const data = getData();
   const user = data.users.find(users => users.email === email);
 
@@ -29,10 +30,21 @@ export function adminAuthLogin(email, password) {
   * @param {string} nameFirst - First name of user
   * @param {string} nameLast - Last Name of user
   *
-  * @returns {number} - Returns authUserId value when account is registered
+  * @returns {ErrorObject} when criteria is not met:
+  * 
+  * Email address is used by another user.
+  * Email does not satisfy this: https://www.npmjs.com/package/validator (validator.isEmail function).
+  * NameFirst contains characters other than lowercase letters, uppercase letters, spaces, hyphens, or apostrophes.
+  * NameFirst is less than 2 characters or more than 20 characters.
+  * NameLast contains characters other than lowercase letters, uppercase letters, spaces, hyphens, or apostrophes.
+  * NameLast is less than 2 characters or more than 20 characters.
+  * Password is less than 8 characters.
+  * Password does not contain at least one number and at least one letter.
+  * 
+  * @returns {adminAuthRegisterReturn} - Returns token value when account is registered
 */
 
-export function adminAuthRegister(email, password, nameFirst, nameLast) {
+export function adminAuthRegister(email: string, password: string, nameFirst: string, nameLast: string): adminAuthRegisterReturn | ErrorObject {
   const checkEmail = validEmail(email);
   if (checkEmail.error) {
     return {
@@ -63,24 +75,23 @@ export function adminAuthRegister(email, password, nameFirst, nameLast) {
 
   const data = getData();
 
-  const newUser = {
+  const newUser: User = {
     userId: data.users.length + 1,
     email: email,
-    name: nameFirst.concat(nameLast),
     nameFirst: nameFirst,
     nameLast: nameLast,
     numFailedPasswordsSinceLastLogin: 0,
     numSuccessfulLogins: 1,
     oldPasswords: [],
     ownedQuizzes: [],
-    password: password
+    password: password,
   };
 
   data.users.push(newUser);
 
   setData(data);
 
-  return { authUserId: newUser.userId };
+  return { token: newUser.userId };
 }
 
 /**
@@ -92,7 +103,7 @@ export function adminAuthRegister(email, password, nameFirst, nameLast) {
   * @returns {Object} - Returns an object containing details about the user when the account is logged in.
 */
 
-export function adminUserDetails(authUserId) {
+export function adminUserDetails(authUserId: number) {
   const checkAuthUserID = validAuthUserId(authUserId);
   if (checkAuthUserID.error) {
     return {
@@ -122,7 +133,7 @@ export function adminUserDetails(authUserId) {
  * @returns {} - Returns empty object when admin user details is updated
  */
 
-export function adminUserDetailsUpdate(authUserId, email, nameFirst, nameLast) {
+export function adminUserDetailsUpdate(authUserId: number, email: string, nameFirst: string, nameLast: string) {
   const checkAuthUserId = validAuthUserId(authUserId);
   if (checkAuthUserId.error) {
     return {
@@ -174,7 +185,7 @@ export function adminUserDetailsUpdate(authUserId, email, nameFirst, nameLast) {
  * @returns {} - Returns empty object when password is updated.
  */
 
-export function adminUserPasswordUpdate(authUserId, oldPassword, newPassword) {
+export function adminUserPasswordUpdate(authUserId: number, oldPassword: string, newPassword: string) {
   const data = getData();
 
   const checkAuthUserId = validAuthUserId(authUserId);

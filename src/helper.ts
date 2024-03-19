@@ -11,7 +11,7 @@ import validator from 'validator';
   * @returns { } - Returns empty object when name is valid
 */
 
-export function validEmail(email) {
+export function validEmail(email: string) {
   const data = getData();
 
   if (data.users.find(user => user.email === email)) { return { error: 'Email address is already used by another user.' }; } else if (!validator.isEmail(email)) { return { error: 'Please enter a valid email.' }; }
@@ -31,7 +31,7 @@ export function validEmail(email) {
   * @returns { } - Returns empty object when name is valid
 */
 
-export function validName(name, isFirst) {
+export function validName(name: string, isFirst: boolean) {
   const characterRegex = /^[A-Za-z\s'-]+$/;
 
   if (!characterRegex.test(name)) { return { error: (isFirst ? 'First' : 'Last').concat(' name contains characters other than lowercase letters, uppercase letters, spaces, hyphens, or apostrophes.') }; } else if (name.length < 2 || name.length > 20) { return { error: (isFirst ? 'First' : 'Last').concat(' name must not be less than 2 characters or more than 20 characters.') }; }
@@ -50,7 +50,7 @@ export function validName(name, isFirst) {
   * @returns { } - Returns empty object when name is valid
 */
 
-export function validPassword(password) {
+export function validPassword(password: string) {
   const digitsAndLetters = /^(?=.*[0-9])(?=.*[a-zA-Z]).+$/;
 
   if (password.length < 8) { return { error: 'Password must contain at least 8 characters.' }; } else if (!digitsAndLetters.test(password)) { return { error: 'Password must contain at least letter and one number.' }; }
@@ -67,7 +67,7 @@ export function validPassword(password) {
   * @returns { { user: } } - Returns object containing the user when authUserId is valid
 
 */
-export function validAuthUserId(authUserId) {
+export function validAuthUserId(authUserId: number) {
   const data = getData();
   const user = data.users.find(user => user.userId === authUserId);
 
@@ -87,7 +87,7 @@ export function validAuthUserId(authUserId) {
   * @returns { } - Returns empty object when name is valid
 */
 
-export function validQuizName(name) {
+export function validQuizName(name: string) {
   const characterRegex = /^[a-zA-Z0-9 ]+$/;
 
   if (!characterRegex.test(name)) { return { error: ' Name contains characters other than lowercase letters, uppercase letters, numbers or spaces.' }; } else if (name.length < 3 || name.length > 30) { return { error: ' Name must not be less than 3 characters or more than 30 characters.' }; }
