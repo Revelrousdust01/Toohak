@@ -2,23 +2,23 @@
  * Stores all unique interfaces that maybe used throughout the project
  */
 
-export interface question{
+export interface Question{
     questionId: number,
     name: string,
     answers: string[],
     correctAnswer: string
 }
 
-export interface quiz {
+export interface Quiz {
     quizId: number,
     description: string,
     name: string,
     timeCreated: number,
     timeLastEdited: number,
-    question: question[]
+    question: Question[]
 }
 
-export interface user{
+export interface User{
     userId: number,
     email: string,
     nameFirst: string,
@@ -32,8 +32,8 @@ export interface user{
 }
 
 export interface DataStore {
-    users: user[],
-    quizzes: quiz[]
+    users: User[],
+    quizzes: Quiz[]
 }
 
 export interface ErrorObject {
