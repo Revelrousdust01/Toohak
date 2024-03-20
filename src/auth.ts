@@ -90,14 +90,13 @@ export function adminAuthRegister(email: string, password: string, nameFirst: st
 
   data.users.push(newUser);
 
-  setData(data);
-
   const userSession: UserSessions = {
     userId: newUser.userId,
     sessionId: Guid.create().toString()
   };
-
   data.userSessions.push(userSession);
+  
+  setData(data);
 
   return { token: userSession.sessionId };
 }
