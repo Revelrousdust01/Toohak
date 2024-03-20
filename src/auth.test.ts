@@ -2,7 +2,6 @@ import { adminUserDetails, adminUserDetailsUpdate, adminUserPasswordUpdate } fro
 import { requestAdminAuthLogin, requestAdminAuthRegister } from './requests';
 import { ErrorObject } from './interfaces';
 import { clear } from './other';
-import { response } from 'express';
 
 // Clear before each test
 beforeEach(() => {

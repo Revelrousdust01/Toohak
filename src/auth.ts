@@ -1,6 +1,6 @@
 import { Guid } from 'guid-typescript';
 import { getData, setData } from './dataStore';
-import type { adminAuthRegisterReturn, ErrorObject, User, UserSessions } from './interfaces';
+import type { createTokenReturn, ErrorObject, User, UserSessions } from './interfaces';
 import { validAuthUserId, validEmail, validName, validPassword } from './helper';
 
 /**
@@ -9,17 +9,37 @@ import { validAuthUserId, validEmail, validName, validPassword } from './helper'
   * @param {string} email - Email of user
   * @param {string} password - Password of user
   *
-  * @returns {number} - Returns authUserId value when account is loged in
+  * @returns {ErrorObject} - when criteria is not met:
+  *
+  * Email address does not exist
+  * Password is not correct for the given email
+  *
+  * @returns {createTokenReturn} - Returns authUserId value when account is loged in
 */
 
-export function adminAuthLogin(email: string, password: string) {
+export function adminAuthLogin(email: string, password: string): createTokenReturn | ErrorObject {
   const data = getData();
   const user = data.users.find(users => users.email === email);
+  if (!user) {
+    return { error: 'No account found with the provided email address.' };
+  } else if (user.password !== password) {
+    user.numFailedPasswordsSinceLastLogin++;
+    setData(data);
+    return { error: 'Incorrect password.' };
+  } else {
+    user.numSuccessfulLogins++;
+    setData(data);
+  }
 
-  if (!user) { return { error: 'No account found with the provided email address.' }; } else if (user.password !== password) { return { error: 'Incorrect password.' }; }
+  const userSession: UserSessions = {
+    userId: user.userId,
+    sessionId: Guid.create().toString()
+  };
+
+  data.userSessions.push(userSession);
 
   return {
-    authUserId: user.userId
+    token: userSession.sessionId
   };
 }
 
@@ -45,7 +65,7 @@ export function adminAuthLogin(email: string, password: string) {
   * @returns {adminAuthRegisterReturn} - Returns token value when account is registered
 */
 
-export function adminAuthRegister(email: string, password: string, nameFirst: string, nameLast: string): adminAuthRegisterReturn | ErrorObject {
+export function adminAuthRegister(email: string, password: string, nameFirst: string, nameLast: string): createTokenReturn | ErrorObject {
   const checkEmail = validEmail(email);
   if (checkEmail.error) {
     return {

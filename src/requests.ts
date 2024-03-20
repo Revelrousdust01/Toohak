@@ -69,7 +69,7 @@ const requestHelper = (
 
 export const requestAdminAuthLogin = (email: string, password: string) => {
   return requestHelper('POST',
-    '/v1/admin/auth/register',
+    '/v1/admin/auth/login',
     { email: email, password: password });
 };
 
