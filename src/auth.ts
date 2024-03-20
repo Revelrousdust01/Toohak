@@ -1,6 +1,6 @@
 import { Guid } from 'guid-typescript';
 import { getData, setData } from './dataStore';
-import type { adminAuthRegisterReturn, ErrorObject, User } from './interfaces';
+import type { adminAuthRegisterReturn, ErrorObject, User, UserSessions } from './interfaces';
 import { validAuthUserId, validEmail, validName, validPassword } from './helper';
 
 /**
@@ -92,7 +92,14 @@ export function adminAuthRegister(email: string, password: string, nameFirst: st
 
   setData(data);
 
-  return { token: Guid.create().toString() };
+  const userSession: UserSessions = {
+    userId: newUser.userId,
+    sessionId: Guid.create().toString()
+  };
+
+  data.userSessions.push(userSession);
+
+  return { token: userSession.sessionId };
 }
 
 /**

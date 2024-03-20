@@ -23,7 +23,7 @@ export interface Quiz {
 }
 
 export interface UserSessions {
-    userId: string
+    userId: number
     sessionId: string
 }
 
