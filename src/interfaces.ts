@@ -3,7 +3,7 @@
  */
 
 export interface adminAuthRegisterReturn {
-    token: number
+    token: string
 }
 
 export interface Question {

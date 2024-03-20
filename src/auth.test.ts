@@ -45,7 +45,7 @@ describe('adminAuthRegister', () => {
 
   test('Valid Details', () => {
     const response = requestAdminAuthRegister(email, password, firstName, lastName);
-    expect(response.jsonBody).toStrictEqual({ token: expect.any(Number) });
+    expect(response.jsonBody).toStrictEqual({ token: expect.any(String) });
     expect(response.statusCode).toStrictEqual(200);
   });
 
