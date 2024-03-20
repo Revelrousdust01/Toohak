@@ -95,7 +95,7 @@ export function adminAuthRegister(email: string, password: string, nameFirst: st
     sessionId: Guid.create().toString()
   };
   data.userSessions.push(userSession);
-  
+
   setData(data);
 
   return { token: userSession.sessionId };
