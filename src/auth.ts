@@ -28,6 +28,7 @@ export function adminAuthLogin(email: string, password: string): createTokenRetu
     return { error: 'Incorrect password.' };
   } else {
     user.numSuccessfulLogins++;
+    user.numFailedPasswordsSinceLastLogin = 0;
     setData(data);
   }
 
