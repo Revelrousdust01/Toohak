@@ -48,3 +48,9 @@ export interface DataStore {
 export interface ErrorObject {
     error: string;
 }
+
+export interface RequestHelperReturnType {
+    statusCode: number;
+    jsonBody?: Record<string, string | number>;
+    error?: string;
+  }
