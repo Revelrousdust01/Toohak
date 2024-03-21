@@ -77,5 +77,5 @@ export const requestAdminAuthRegister = (email: string, password: string, firstN
 export const requestAdminUserDetails = (token: string): RequestHelperReturnType => {
   return requestHelper('GET',
     '/v1/admin/user/details',
-    { token: token, });
+    { token: token });
 };

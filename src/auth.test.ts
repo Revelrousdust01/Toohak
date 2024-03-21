@@ -151,8 +151,8 @@ describe('adminUserDetails', () => {
 
   test('Valid Details', () => {
     const user = requestAdminAuthRegister(email, password, firstName, lastName);
-    expect(requestAdminUserDetails(user.jsonBody?.token as string))
-      .toStrictEqual({
+    const response = requestAdminUserDetails(user.jsonBody?.token as string)
+    expect(response.jsonBody).toMatchObject({ 
         user: {
           userId: expect.any(Number),
           name: expect.any(String),
@@ -161,6 +161,7 @@ describe('adminUserDetails', () => {
           numFailedPasswordsSinceLastLogin: expect.any(Number),
         }
       });
+    expect(user.statusCode).toStrictEqual(200);
   });
 
   test.each([
