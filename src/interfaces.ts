@@ -2,7 +2,7 @@
  * Stores all unique interfaces that maybe used throughout the project
  */
 
-export interface adminAuthRegisterReturn {
+export interface createTokenReturn {
     token: string
 }
 

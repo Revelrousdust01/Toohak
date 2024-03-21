@@ -1,4 +1,4 @@
-import { adminAuthRegister } from './auth';
+import { adminAuthLogin, adminAuthRegister } from './auth';
 import express, { json, Request, Response } from 'express';
 import { echo } from './newecho';
 import morgan from 'morgan';
@@ -34,6 +34,16 @@ const HOST: string = process.env.IP || '127.0.0.1';
 app.get('/echo', (req: Request, res: Response) => {
   const data = req.query.echo as string;
   return res.json(echo(data));
+});
+
+app.post('/v1/admin/auth/login', (req: Request, res: Response) => {
+  const { email, password } = req.body;
+  const response = adminAuthLogin(email, password);
+
+  if ('error' in response) {
+    return res.status(400).json(response);
+  }
+  res.json(response);
 });
 
 app.post('/v1/admin/auth/register', (req: Request, res: Response) => {

@@ -67,6 +67,12 @@ const requestHelper = (
   return bodyObject;
 };
 
+export const requestAdminAuthLogin = (email: string, password: string) => {
+  return requestHelper('POST',
+    '/v1/admin/auth/login',
+    { email: email, password: password });
+};
+
 export const requestAdminAuthRegister = (email: string, password: string, firstName: string, lastName: string) => {
   return requestHelper('POST',
     '/v1/admin/auth/register',

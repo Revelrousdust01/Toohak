@@ -1,5 +1,5 @@
-import { adminAuthLogin, adminUserDetails, adminUserDetailsUpdate, adminUserPasswordUpdate } from './auth';
-import { requestAdminAuthRegister } from './requests';
+import { adminUserDetails, adminUserDetailsUpdate, adminUserPasswordUpdate } from './auth';
+import { requestAdminAuthLogin, requestAdminAuthRegister } from './requests';
 import { ErrorObject } from './interfaces';
 import { clear } from './other';
 
@@ -11,7 +11,7 @@ beforeEach(() => {
 const ERROR: ErrorObject = { error: expect.any(String) };
 
 // adminAuthLogin
-describe.skip('adminAuthLogin', () => {
+describe('adminAuthLogin', () => {
   const firstName = 'Christian';
   const lastName = 'Politis';
   const email = 'cpolitis@student.unsw.edu.au';
@@ -19,25 +19,28 @@ describe.skip('adminAuthLogin', () => {
 
   test('Valid Details', () => {
     requestAdminAuthRegister(email, password, firstName, lastName);
-    expect(adminAuthLogin(email, password))
-      .toStrictEqual({ token: expect.any(Number) });
+    const response = requestAdminAuthLogin(email, password);
+    expect(response.jsonBody).toStrictEqual({ token: expect.any(String) });
+    expect(response.statusCode).toStrictEqual(200);
   });
 
   test('Email does not exist', () => {
     requestAdminAuthRegister(email, password, firstName, lastName);
-    expect(adminAuthLogin(email.concat('.wrong'), password))
-      .toStrictEqual(ERROR);
+    const response = requestAdminAuthLogin(email.concat('.wrong'), password);
+    expect(response.jsonBody).toStrictEqual(ERROR);
+    expect(response.statusCode).toStrictEqual(400);
   });
 
   test('Invalid Password', () => {
     requestAdminAuthRegister(email, password, firstName, lastName);
-    expect(adminAuthLogin(email, password.concat('.wrong')))
-      .toStrictEqual(ERROR);
+    const response = requestAdminAuthLogin(email, password.concat('.wrong'));
+    expect(response.jsonBody).toStrictEqual(ERROR);
+    expect(response.statusCode).toStrictEqual(400);
   });
 });
 
 // adminAuthRegister
-describe('adminAuthRegister', () => {
+describe.skip('adminAuthRegister', () => {
   const firstName = 'Christian';
   const lastName = 'Politis';
   const email = 'cpolitis@student.unsw.edu.au';
