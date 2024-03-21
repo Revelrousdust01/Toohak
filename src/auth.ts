@@ -1,7 +1,7 @@
 import { Guid } from 'guid-typescript';
 import { getData, setData } from './dataStore';
-import type { createTokenReturn, ErrorObject, User, UserSessions } from './interfaces';
-import { validAuthUserId, validEmail, validName, validPassword } from './helper';
+import type { createTokenReturn, ErrorObject, ReturnUser, User, UserSessions } from './interfaces';
+import { isError, validAuthUserId, validEmail, validName, validPassword, validToken } from './helper';
 
 /**
   * Given a registered user's email and password returns their authUserId value.
@@ -68,28 +68,28 @@ export function adminAuthLogin(email: string, password: string): createTokenRetu
 
 export function adminAuthRegister(email: string, password: string, nameFirst: string, nameLast: string): createTokenReturn | ErrorObject {
   const checkEmail = validEmail(email);
-  if (checkEmail.error) {
+  if (isError(checkEmail)) {
     return {
       error: checkEmail.error
     };
   }
 
   const checkPassword = validPassword(password);
-  if (checkPassword.error) {
+  if (isError(checkPassword)) {
     return {
       error: checkPassword.error
     };
   }
 
   const checkNameFirst = validName(nameFirst, true);
-  if (checkNameFirst.error) {
+  if (isError(checkNameFirst)) {
     return {
       error: checkNameFirst.error
     };
   }
 
   const checkNameLast = validName(nameLast, false);
-  if (checkNameLast.error) {
+  if (isError(checkNameLast)) {
     return {
       error: checkNameLast.error
     };
@@ -131,22 +131,22 @@ export function adminAuthRegister(email: string, password: string, nameFirst: st
   * @returns {Object} - Returns an object containing details about the user when the account is logged in.
 */
 
-export function adminUserDetails(authUserId: number) {
-  const checkAuthUserID = validAuthUserId(authUserId);
-  if (checkAuthUserID.error) {
+export function adminUserDetails(token: string): ReturnUser | ErrorObject {
+  const checkToken = validToken(token);
+  if (isError(checkToken)) {
     return {
-      error: checkAuthUserID.error
+      error: checkToken.error
     };
   }
 
   return {
     user: {
-      userId: checkAuthUserID.user.userId,
-      name: checkAuthUserID.user.nameFirst.concat(' ', checkAuthUserID.user.nameLast),
-      email: checkAuthUserID.user.email,
-      numSuccessfulLogins: checkAuthUserID.user.numSuccessfulLogins,
-      numFailedPasswordsSinceLastLogin: checkAuthUserID.user.numFailedPasswordsSinceLastLogin,
-    },
+      userId: checkToken.userId,
+      name: checkToken.nameFirst.concat(' ', checkToken.nameLast),
+      email: checkToken.email,
+      numSuccessfulLogins: checkToken.numSuccessfulLogins,
+      numFailedPasswordsSinceLastLogin: checkToken.numFailedPasswordsSinceLastLogin,
+    }
   };
 }
 
@@ -170,21 +170,21 @@ export function adminUserDetailsUpdate(authUserId: number, email: string, nameFi
   }
 
   const checkEmail = validEmail(email);
-  if (checkEmail.error) {
+  if (isError(checkEmail)) {
     return {
       error: checkEmail.error
     };
   }
 
   const checkNameFirst = validName(nameFirst, true);
-  if (checkNameFirst.error) {
+  if (isError(checkNameFirst)) {
     return {
       error: checkNameFirst.error
     };
   }
 
   const checkNameLast = validName(nameLast, false);
-  if (checkNameLast.error) {
+  if (isError(checkNameLast)) {
     return {
       error: checkNameLast.error
     };
@@ -247,7 +247,7 @@ export function adminUserPasswordUpdate(authUserId: number, oldPassword: string,
   }
 
   const checkPassword = validPassword(newPassword);
-  if (checkPassword.error) {
+  if (isError(checkPassword)) {
     return {
       error: checkPassword.error
     };

@@ -151,16 +151,16 @@ describe('adminUserDetails', () => {
 
   test('Valid Details', () => {
     const user = requestAdminAuthRegister(email, password, firstName, lastName);
-    const response = requestAdminUserDetails(user.jsonBody?.token as string)
-    expect(response.jsonBody).toMatchObject({ 
-        user: {
-          userId: expect.any(Number),
-          name: expect.any(String),
-          email: expect.any(String),
-          numSuccessfulLogins: expect.any(Number),
-          numFailedPasswordsSinceLastLogin: expect.any(Number),
-        }
-      });
+    const response = requestAdminUserDetails(user.jsonBody?.token as string);
+    expect(response.jsonBody).toMatchObject({
+      user: {
+        userId: expect.any(Number),
+        name: expect.any(String),
+        email: expect.any(String),
+        numSuccessfulLogins: expect.any(Number),
+        numFailedPasswordsSinceLastLogin: expect.any(Number),
+      }
+    });
     expect(user.statusCode).toStrictEqual(200);
   });
 
