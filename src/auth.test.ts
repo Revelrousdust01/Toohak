@@ -169,8 +169,11 @@ describe('adminUserDetails', () => {
     { invalidToken: '123' },
     { invalidToken: 'b77d409a-10cd-4a47-8e94-b0cd0ab50aa1' },
     { invalidToken: 'abc' },
-  ])("AuthUserId is not a valid user: '$invalidToken", ({ invalidToken }) => {
-    expect(adminUserDetails(invalidToken)).toStrictEqual(ERROR);
+  ])("Invalid or Empty Token: '$invalidToken", ({ invalidToken }) => {
+    requestAdminAuthRegister(email, password, firstName, lastName);
+    const response = requestAdminUserDetails(invalidToken);
+    expect(response.jsonBody).toStrictEqual(ERROR);
+    expect(response.statusCode).toStrictEqual(401);
   });
 });
 
