@@ -26,15 +26,16 @@ describe('Test adminQuizCreate', () => {
   });
 
   test.each([
-    { invalidId: '-1' },
-    { invalidId: 'a' },
-    { invalidId: '/' },
-  ])("AuthUserId is not a valid user: '$invalidId", ({ invalidId }) => {
+    { invalidToken: '' },
+    { invalidToken: '123' },
+    { invalidToken: 'b77d409a-10cd-4a47-8e94-b0cd0ab50aa1' },
+    { invalidToken: 'abc' },
+  ])("Invalid Token: '$invalidToken", ({ invalidToken }) => {
     requestAdminAuthRegister(email, password, lastName, firstName);
     requestAdminAuthLogin(email, password);
-    const newQuiz = requestAdminQuizCreate(invalidId, quizName, quizDescription);
+    const newQuiz = requestAdminQuizCreate(invalidToken, quizName, quizDescription);
     expect(newQuiz).toStrictEqual(ERROR);
-    expect(newQuiz.statusCode).toStrictEqual(400);
+    expect(newQuiz.statusCode).toStrictEqual(401);
   });
 
   test.each([
