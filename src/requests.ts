@@ -1,13 +1,8 @@
 import { port, url } from './config.json';
 import request, { HttpVerb } from 'sync-request-curl';
+import type { RequestHelperReturnType } from './interfaces';
 
 const SERVER_URL = `${url}:${port}`;
-
-interface RequestHelperReturnType {
-    statusCode: number;
-    jsonBody?: Record<string, string | number>;
-    error?: string;
-  }
 
 /**
    * Sends a request to the given route and return its results
@@ -83,4 +78,10 @@ export const requestAdminAuthRegister = (email: string, password: string, firstN
   return requestHelper('POST',
     '/v1/admin/auth/register',
     { email: email, password: password, nameFirst: firstName, nameLast: lastName });
+};
+
+export const requestAdminUserDetails = (token: string): RequestHelperReturnType => {
+  return requestHelper('GET',
+    '/v1/admin/user/details',
+    { token: token });
 };

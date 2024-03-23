@@ -1,5 +1,17 @@
 import { getData } from './dataStore';
+import type { ErrorObject, User } from './interfaces';
 import validator from 'validator';
+
+/**
+  * Check whether object is of type ErrorObject or not:
+  *
+  * @param {unknown} object - Unknown Object
+  *
+  * @returns { } - Returns the error if it is of the same type.
+*/
+export function isError(object: unknown): object is ErrorObject {
+  return 'error' in (object as ErrorObject);
+}
 
 /**
   * Validates email of certain conditions:
@@ -11,7 +23,7 @@ import validator from 'validator';
   * @returns { } - Returns empty object when name is valid
 */
 
-export function validEmail(email: string) {
+export function validEmail(email: string): object | ErrorObject {
   const data = getData();
 
   if (data.users.find(user => user.email === email)) { return { error: 'Email address is already used by another user.' }; } else if (!validator.isEmail(email)) { return { error: 'Please enter a valid email.' }; }
@@ -31,7 +43,7 @@ export function validEmail(email: string) {
   * @returns { } - Returns empty object when name is valid
 */
 
-export function validName(name: string, isFirst: boolean) {
+export function validName(name: string, isFirst: boolean): object | ErrorObject {
   const characterRegex = /^[A-Za-z\s'-]+$/;
 
   if (!characterRegex.test(name)) { return { error: (isFirst ? 'First' : 'Last').concat(' name contains characters other than lowercase letters, uppercase letters, spaces, hyphens, or apostrophes.') }; } else if (name.length < 2 || name.length > 20) { return { error: (isFirst ? 'First' : 'Last').concat(' name must not be less than 2 characters or more than 20 characters.') }; }
@@ -50,7 +62,7 @@ export function validName(name: string, isFirst: boolean) {
   * @returns { } - Returns empty object when name is valid
 */
 
-export function validPassword(password: string) {
+export function validPassword(password: string): object | ErrorObject {
   const digitsAndLetters = /^(?=.*[0-9])(?=.*[a-zA-Z]).+$/;
 
   if (password.length < 8) { return { error: 'Password must contain at least 8 characters.' }; } else if (!digitsAndLetters.test(password)) { return { error: 'Password must contain at least letter and one number.' }; }
@@ -77,6 +89,23 @@ export function validAuthUserId(authUserId: number) {
 }
 
 /**
+  * Checks for validToken
+  *
+  * @param {string} token - Password of user
+  *
+  * @returns { { error: }  } - Returns object with error when token is invalid
+  * @returns { User } - Returns the user within the correct session when the token is valid
+
+*/
+export function validToken(token: string): User | ErrorObject {
+  const data = getData();
+  const session = data.userSessions.find(session => session.sessionId === token);
+  if (!session) { return { error: 'Token is empty or invalid.' }; }
+
+  return data.users.find(user => user.userId === session.userId);
+}
+
+/**
   * Validates Quiz name of certain Conditions
   * - Name contains characters other than lowercase letters, uppercase letters, numbers or spaces.
   * - Name is less than 3 characters or more than 30 characters.
@@ -87,7 +116,7 @@ export function validAuthUserId(authUserId: number) {
   * @returns { } - Returns empty object when name is valid
 */
 
-export function validQuizName(name: string) {
+export function validQuizName(name: string): object | ErrorObject {
   const characterRegex = /^[a-zA-Z0-9 ]+$/;
 
   if (!characterRegex.test(name)) { return { error: ' Name contains characters other than lowercase letters, uppercase letters, numbers or spaces.' }; } else if (name.length < 3 || name.length > 30) { return { error: ' Name must not be less than 3 characters or more than 30 characters.' }; }
