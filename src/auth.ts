@@ -124,11 +124,10 @@ export function adminAuthRegister(email: string, password: string, nameFirst: st
 
 /**
   * Given an admin user's authUserId, return details about the user.
-  * "name" is the first and last name concatenated with a single space between them.
   *
-  * @param {number} authUserId - ID of user
+  * @param {string} token - token of session
   *
-  * @returns {Object} - Returns an object containing details about the user when the account is logged in.
+  * @returns {ReturnUser} - Returns an object containing details about the user when the account is logged in.
 */
 
 export function adminUserDetails(token: string): ReturnUser | ErrorObject {
