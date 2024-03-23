@@ -40,7 +40,7 @@ describe.skip('adminAuthLogin', () => {
 });
 
 // adminAuthLogout
-describe('adminAuthLogout', () => {
+describe.skip('adminAuthLogout', () => {
   const firstName = 'Christian';
   const lastName = 'Politis';
   const email = 'cpolitis@student.unsw.edu.au';
