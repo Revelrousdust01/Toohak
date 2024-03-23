@@ -131,22 +131,22 @@ export function adminAuthRegister(email: string, password: string, nameFirst: st
   * @returns {Object} - Returns an object containing details about the user when the account is logged in.
 */
 
-export function adminUserDetails(authUserId: number) {
-  const checkAuthUserID = validAuthUserId(authUserId);
-  if (checkAuthUserID.error) {
+export function adminUserDetails(token: string): ReturnUser | ErrorObject {
+  const checkToken = validToken(token);
+  if (isError(checkToken)) {
     return {
-      error: checkAuthUserID.error
+      error: checkToken.error
     };
   }
 
   return {
     user: {
-      userId: checkAuthUserID.user.userId,
-      name: checkAuthUserID.user.nameFirst.concat(' ', checkAuthUserID.user.nameLast),
-      email: checkAuthUserID.user.email,
-      numSuccessfulLogins: checkAuthUserID.user.numSuccessfulLogins,
-      numFailedPasswordsSinceLastLogin: checkAuthUserID.user.numFailedPasswordsSinceLastLogin,
-    },
+      userId: checkToken.userId,
+      name: checkToken.nameFirst.concat(' ', checkToken.nameLast),
+      email: checkToken.email,
+      numSuccessfulLogins: checkToken.numSuccessfulLogins,
+      numFailedPasswordsSinceLastLogin: checkToken.numFailedPasswordsSinceLastLogin,
+    }
   };
 }
 
