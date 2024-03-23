@@ -29,7 +29,6 @@ export function adminAuthLogin(email: string, password: string): createTokenRetu
   } else {
     user.numSuccessfulLogins++;
     user.numFailedPasswordsSinceLastLogin = 0;
-    setData(data);
   }
 
   const userSession: UserSessions = {
@@ -39,9 +38,37 @@ export function adminAuthLogin(email: string, password: string): createTokenRetu
 
   data.userSessions.push(userSession);
 
+  setData(data);
+
   return {
     token: userSession.sessionId
   };
+}
+
+/**
+  * Given a valid token returns logs out the assosciated user.
+  *
+  * @param {string} token - Token of session
+  *
+  * @returns {ErrorObject} - when criteria is not met:
+  *
+  * Invalid or blank email
+  *
+  * @returns {object} - Returns Blank object upon valid token
+*/
+
+export function adminAuthLogout(token: string): object | ErrorObject {
+  const data = getData();
+  const index = data.userSessions.findIndex(session => session.sessionId === token);
+  if (index > -1) {
+    data.userSessions.splice(index, 1);
+  } else {
+    return { error: 'Token is empty or invalid.' };
+  }
+
+  setData(data);
+
+  return { };
 }
 
 /**

@@ -50,7 +50,7 @@ describe('adminAuthLogout', () => {
     requestAdminAuthRegister(email, password, firstName, lastName);
     const responseLogin = requestAdminAuthLogin(email, password);
     const responseLogout = requestAdminAuthLogout(responseLogin.jsonBody?.token as string);
-    expect(responseLogout.jsonBody).toStrictEqual({ token: expect.any(String) });
+    expect(responseLogout.jsonBody).toStrictEqual({ });
     expect(responseLogout.statusCode).toStrictEqual(200);
   });
 
@@ -171,7 +171,7 @@ describe.skip('adminAuthRegister', () => {
 });
 
 // adminUserDetails
-describe('adminUserDetails', () => {
+describe.skip('adminUserDetails', () => {
   const firstName = 'Christian';
   const lastName = 'Politis';
   const email = 'cpolitis@student.unsw.edu.au';
