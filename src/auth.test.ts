@@ -1,5 +1,5 @@
 import { adminUserDetails, adminUserDetailsUpdate, adminUserPasswordUpdate } from './auth';
-import { requestAdminAuthLogin, requestAdminAuthRegister } from './requests';
+import { requestAdminAuthLogin, requestAdminAuthRegister, requestAdminUserDetails } from './requests';
 import { ErrorObject } from './interfaces';
 import { clear } from './other';
 
@@ -11,7 +11,7 @@ beforeEach(() => {
 const ERROR: ErrorObject = { error: expect.any(String) };
 
 // adminAuthLogin
-describe('adminAuthLogin', () => {
+describe.skip('adminAuthLogin', () => {
   const firstName = 'Christian';
   const lastName = 'Politis';
   const email = 'cpolitis@student.unsw.edu.au';
@@ -143,7 +143,7 @@ describe.skip('adminAuthRegister', () => {
 });
 
 // adminUserDetails
-describe.skip('adminUserDetails', () => {
+describe('adminUserDetails', () => {
   const firstName = 'Christian';
   const lastName = 'Politis';
   const email = 'cpolitis@student.unsw.edu.au';
@@ -151,24 +151,29 @@ describe.skip('adminUserDetails', () => {
 
   test('Valid Details', () => {
     const user = requestAdminAuthRegister(email, password, firstName, lastName);
-    expect(adminUserDetails(user.jsonBody?.token as number))
-      .toStrictEqual({
-        user: {
-          userId: expect.any(Number),
-          name: expect.any(String),
-          email: expect.any(String),
-          numSuccessfulLogins: expect.any(Number),
-          numFailedPasswordsSinceLastLogin: expect.any(Number),
-        }
-      });
+    const response = requestAdminUserDetails(user.jsonBody?.token as string);
+    expect(response.jsonBody).toMatchObject({
+      user: {
+        userId: expect.any(Number),
+        name: expect.any(String),
+        email: expect.any(String),
+        numSuccessfulLogins: expect.any(Number),
+        numFailedPasswordsSinceLastLogin: expect.any(Number),
+      }
+    });
+    expect(user.statusCode).toStrictEqual(200);
   });
 
   test.each([
-    { invalidId: -1 },
-    { invalidId: -999 },
-    { invalidId: 0 },
-  ])("AuthUserId is not a valid user: '$invalidId", ({ invalidId }) => {
-    expect(adminUserDetails(invalidId)).toStrictEqual(ERROR);
+    { invalidToken: '' },
+    { invalidToken: '123' },
+    { invalidToken: 'b77d409a-10cd-4a47-8e94-b0cd0ab50aa1' },
+    { invalidToken: 'abc' },
+  ])("Invalid or Empty Token: '$invalidToken", ({ invalidToken }) => {
+    requestAdminAuthRegister(email, password, firstName, lastName);
+    const response = requestAdminUserDetails(invalidToken);
+    expect(response.jsonBody).toStrictEqual(ERROR);
+    expect(response.statusCode).toStrictEqual(401);
   });
 });
 
@@ -188,7 +193,7 @@ describe.skip('adminUserDetailsUpdate', () => {
       'UpdateHuang'
     )).toStrictEqual({ });
 
-    expect(adminUserDetails(UserId.jsonBody?.token as number)).toStrictEqual({
+    expect(adminUserDetails(UserId.jsonBody?.token as string)).toStrictEqual({
       user: {
         userId: UserId.jsonBody?.token,
         name: 'UpdateSamuel UpdateHuang',

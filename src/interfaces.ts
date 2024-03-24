@@ -27,6 +27,16 @@ export interface UserSessions {
     sessionId: string
 }
 
+export interface ReturnUser {
+    user:{
+        userId: number,
+        name: string,
+        email: string,
+        numSuccessfulLogins: number,
+        numFailedPasswordsSinceLastLogin: number,
+    }
+}
+
 export interface User {
     userId: number,
     email: string,
@@ -47,4 +57,10 @@ export interface DataStore {
 
 export interface ErrorObject {
     error: string;
+}
+
+export interface RequestHelperReturnType {
+    statusCode: number;
+    jsonBody?: Record<string, string | number>;
+    error?: string;
 }
