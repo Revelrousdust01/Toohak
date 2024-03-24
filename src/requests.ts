@@ -68,6 +68,12 @@ export const requestAdminAuthLogin = (email: string, password: string): RequestH
     { email: email, password: password });
 };
 
+export const requestAdminAuthLogout = (token: string): RequestHelperReturnType => {
+  return requestHelper('POST',
+    '/v1/admin/auth/logout',
+    { token: token });
+};
+
 export const requestAdminAuthRegister = (email: string, password: string, firstName: string, lastName: string): RequestHelperReturnType => {
   return requestHelper('POST',
     '/v1/admin/auth/register',

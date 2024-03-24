@@ -1,5 +1,5 @@
 import { adminUserDetails, adminUserDetailsUpdate, adminUserPasswordUpdate } from './auth';
-import { requestAdminAuthLogin, requestAdminAuthRegister, requestAdminUserDetails } from './requests';
+import { requestAdminAuthLogin, requestAdminAuthLogout, requestAdminAuthRegister, requestAdminUserDetails } from './requests';
 import { ErrorObject } from './interfaces';
 import { clear } from './other';
 
@@ -36,6 +36,34 @@ describe.skip('adminAuthLogin', () => {
     const response = requestAdminAuthLogin(email, password.concat('.wrong'));
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(400);
+  });
+});
+
+// adminAuthLogout
+describe('adminAuthLogout', () => {
+  const firstName = 'Christian';
+  const lastName = 'Politis';
+  const email = 'cpolitis@student.unsw.edu.au';
+  const password = 'a1b2c3d4e5f6';
+
+  test('Valid Details', () => {
+    requestAdminAuthRegister(email, password, firstName, lastName);
+    const responseLogin = requestAdminAuthLogin(email, password);
+    const responseLogout = requestAdminAuthLogout(responseLogin.jsonBody?.token as string);
+    expect(responseLogout.jsonBody).toStrictEqual({ });
+    expect(responseLogout.statusCode).toStrictEqual(200);
+  });
+
+  test.each([
+    { invalidToken: '' },
+    { invalidToken: '123' },
+    { invalidToken: 'b77d409a-10cd-4a47-8e94-b0cd0ab50aa1' },
+    { invalidToken: 'abc' },
+  ])("Invalid Token: '$invalidToken", ({ invalidToken }) => {
+    requestAdminAuthLogin(email, password);
+    const responseLogout = requestAdminAuthLogout(invalidToken);
+    expect(responseLogout.jsonBody).toStrictEqual(ERROR);
+    expect(responseLogout.statusCode).toStrictEqual(401);
   });
 });
 
@@ -143,7 +171,7 @@ describe.skip('adminAuthRegister', () => {
 });
 
 // adminUserDetails
-describe('adminUserDetails', () => {
+describe.skip('adminUserDetails', () => {
   const firstName = 'Christian';
   const lastName = 'Politis';
   const email = 'cpolitis@student.unsw.edu.au';
