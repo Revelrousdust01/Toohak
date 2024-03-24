@@ -6,6 +6,10 @@ export interface createTokenReturn {
     token: string
 }
 
+export interface createQuizReturn {
+    quizId: number
+}
+
 export interface Question {
     questionId: number,
     name: string,

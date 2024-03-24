@@ -1,4 +1,5 @@
 import { adminAuthLogin, adminAuthLogout, adminAuthRegister, adminUserDetails } from './auth';
+import { adminQuizCreate } from './quiz';
 import express, { json, Request, Response } from 'express';
 import { echo } from './newecho';
 import morgan from 'morgan';
@@ -71,6 +72,20 @@ app.get('/v1/admin/user/details', (req: Request, res: Response) => {
 
   if ('error' in response) {
     return res.status(401).json(response);
+  }
+  res.json(response);
+});
+
+app.post('/v1/admin/quiz', (req: Request, res: Response) => {
+  const { token, name, description } = req.body;
+  const response = adminQuizCreate(token, name, description);
+
+  if ('error' in response) {
+    if (response.error === 'Token is empty or invalid.') {
+      return res.status(401).json(response);
+    } else {
+      return res.status(400).json(response);
+    }
   }
   res.json(response);
 });

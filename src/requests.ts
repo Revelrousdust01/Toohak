@@ -80,6 +80,12 @@ export const requestAdminAuthRegister = (email: string, password: string, firstN
     { email: email, password: password, nameFirst: firstName, nameLast: lastName });
 };
 
+export const requestAdminQuizCreate = (token: string, name:string, description: string): RequestHelperReturnType => {
+  return requestHelper('POST',
+    '/v1/admin/quiz',
+    { token: token, name: name, description: description });
+};
+
 export const requestAdminUserDetails = (token: string): RequestHelperReturnType => {
   return requestHelper('GET',
     '/v1/admin/user/details',
