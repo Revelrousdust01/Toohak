@@ -21,7 +21,7 @@ describe('Test adminQuizCreate', () => {
     requestAdminAuthRegister(email, password, lastName, firstName);
     const login = requestAdminAuthLogin(email, password);
     const newQuiz = requestAdminQuizCreate(login.jsonBody.token as string, quizName, quizDescription);
-    expect(newQuiz).toStrictEqual({ quizId: expect.any(Number) });
+    expect(newQuiz.jsonBody).toMatchObject({ quizId: expect.any(Number) });
     expect(newQuiz.statusCode).toStrictEqual(200);
   });
 
@@ -34,7 +34,7 @@ describe('Test adminQuizCreate', () => {
     requestAdminAuthRegister(email, password, lastName, firstName);
     requestAdminAuthLogin(email, password);
     const newQuiz = requestAdminQuizCreate(invalidToken, quizName, quizDescription);
-    expect(newQuiz).toStrictEqual(ERROR);
+    expect(newQuiz.jsonBody).toStrictEqual(ERROR);
     expect(newQuiz.statusCode).toStrictEqual(401);
   });
 
@@ -50,7 +50,7 @@ describe('Test adminQuizCreate', () => {
     requestAdminAuthRegister(email, password, lastName, firstName);
     const login = requestAdminAuthLogin(email, password);
     const newQuiz = requestAdminQuizCreate(login.jsonBody.token as string, invalidCharacter, quizDescription);
-    expect(newQuiz).toStrictEqual(ERROR);
+    expect(newQuiz.jsonBody).toStrictEqual(ERROR);
     expect(newQuiz.statusCode).toStrictEqual(400);  
   });
 
@@ -62,7 +62,7 @@ describe('Test adminQuizCreate', () => {
     const login = requestAdminAuthLogin(email, password);
     const newQuiz = requestAdminQuizCreate(login.jsonBody.token as string, shortQuizName, quizDescription);
     requestAdminAuthRegister(email, password, lastName, firstName);
-    expect(newQuiz).toStrictEqual(ERROR);
+    expect(newQuiz.jsonBody).toStrictEqual(ERROR);
     expect(newQuiz.statusCode).toStrictEqual(400);
   });
 
@@ -70,7 +70,7 @@ describe('Test adminQuizCreate', () => {
     requestAdminAuthRegister(email, password, lastName, firstName);
     const login = requestAdminAuthLogin(email, password);
     const newQuiz = requestAdminQuizCreate(login.jsonBody.token as string, 'a'.repeat(31), quizDescription);
-    expect(newQuiz).toStrictEqual(ERROR);
+    expect(newQuiz.jsonBody).toStrictEqual(ERROR);
     expect(newQuiz.statusCode).toStrictEqual(400);
   });
 
@@ -79,7 +79,7 @@ describe('Test adminQuizCreate', () => {
     const login = requestAdminAuthLogin(email, password);
     requestAdminQuizCreate(login.jsonBody.token as string, quizName, quizDescription);
     const newQuiz = requestAdminQuizCreate(login.jsonBody.token as string, quizName, quizDescription);
-    expect(newQuiz).toStrictEqual(ERROR);
+    expect(newQuiz.jsonBody).toStrictEqual(ERROR);
     expect(newQuiz.statusCode).toStrictEqual(400);  
   });
 
@@ -88,7 +88,7 @@ describe('Test adminQuizCreate', () => {
     const login = requestAdminAuthLogin(email, password);
     requestAdminQuizCreate(login.jsonBody.token as string, quizName, quizDescription);
     const newQuiz = requestAdminQuizCreate(login.jsonBody.token as string, quizName, 'a'.repeat(101));
-    expect(newQuiz).toStrictEqual(ERROR);
+    expect(newQuiz.jsonBody).toStrictEqual(ERROR);
     expect(newQuiz.statusCode).toStrictEqual(400);  
   });
 });
