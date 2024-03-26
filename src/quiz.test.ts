@@ -12,7 +12,7 @@ beforeEach(() => {
 const ERROR: ErrorObject = { error: expect.any(String) };
 
 // adminQuizCreate
-describe('Test adminQuizCreate', () => {
+describe.skip('Test adminQuizCreate', () => {
   const firstName = 'Jeffery';
   const lastName = 'Zhang';
   const email = 'jeffery.zhang385@gmail.com';
@@ -154,7 +154,7 @@ describe.skip('Test adminQuizDescriptionUpdate', () => {
 });
 
 // adminQuizRemove
-describe.only('Test adminQuizRemove', () => {
+describe('Test adminQuizRemove', () => {
   const firstName = 'Jeffery';
   const lastName = 'Zhang';
   const email = 'jeffery.zhang385@gmail.com';
@@ -165,7 +165,6 @@ describe.only('Test adminQuizRemove', () => {
   test('Valid inputs', () => {
     const login = requestAdminAuthRegister(email, password, lastName, firstName);
     const quizId = requestAdminQuizCreate(login.jsonBody.token as string, quizName, quizDescription);
-    console.log(quizId.jsonBody.quizId);
     const response = requestAdminQuizRemove(login.jsonBody.token as string, quizId.jsonBody.quizId as number);
     expect(response.jsonBody).toStrictEqual({});
     expect(response.statusCode).toStrictEqual(200);

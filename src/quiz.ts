@@ -227,6 +227,10 @@ export function adminQuizRemove(token: string, quizid: number): object | ErrorOb
 
   if (!checkToken.ownedQuizzes.includes(quizid)) { return { error: 'Quiz ID does not refer to a quiz that this user owns.' }; }
 
+  data.quizzes[quizIndex].timeLastEdited = Date.now();
+
+  data.trash.push(data.quizzes[quizIndex]);
+
   data.quizzes.splice(quizIndex, 1);
 
   const ownedQuizIndex = checkToken.ownedQuizzes.indexOf(quizid);
@@ -237,24 +241,3 @@ export function adminQuizRemove(token: string, quizid: number): object | ErrorOb
 
   return { };
 }
-// export function adminQuizRemove(authUserId, quizId) {
-//   const data = getData();
-//   const user = data.users.find(user => user.userId === authUserId);
-//   const quizIndex = data.quizzes.findIndex(quizzes => quizzes.quizId === quizId);
-
-//   if (!user) { return { error: 'AuthUserId is not a valid user.' }; }
-
-//   if (quizIndex === -1) { return { error: 'Quiz ID does not refer to a valid quiz.' }; }
-
-//   if (!user.ownedQuizzes.includes(quizId)) { return { error: 'Quiz ID does not refer to a quiz that this user owns.' }; }
-
-//   data.quizzes.splice(quizIndex, 1);
-
-//   const ownedQuizIndex = user.ownedQuizzes.indexOf(quizId);
-
-//   if (ownedQuizIndex !== -1) { user.ownedQuizzes.splice(ownedQuizIndex, 1); }
-
-//   setData(data);
-
-//   return { };
-// }

@@ -6,6 +6,9 @@ let data: DataStore = {
    * We want data to store users and quizzes each within their own array.
    * Each one should contain their own specific data as reflected in data.md.
    */
+  trash: [
+
+  ],
   users: [
 
   ],
