@@ -86,8 +86,15 @@ export const requestAdminQuizCreate = (token: string, name:string, description: 
     { token: token, name: name, description: description });
 };
 
+export const requestAdminQuizRemove = (token: string, quizid: number): RequestHelperReturnType => {
+  return requestHelper('DELETE',
+    `/v1/admin/quiz/${quizid}`,
+    { token: token });
+};
+
 export const requestAdminUserDetails = (token: string): RequestHelperReturnType => {
   return requestHelper('GET',
     '/v1/admin/user/details',
     { token: token });
 };
+
