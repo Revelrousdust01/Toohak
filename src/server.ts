@@ -76,6 +76,23 @@ app.get('/v1/admin/user/details', (req: Request, res: Response) => {
   res.json(response);
 });
 
+app.put('/v1/admin/quiz/:quizid/name', (req: Request, res: Response) => {
+  const { token, quizId, name } = req.body;
+  
+  const updateResult = adminQuizNameUpdate(req.userId, quizId, name);
+  if ('error' in updateResult) {
+    if (updateResult.error === 'Quiz ID does not refer to a valid quiz.' || updateResult.error === 'Quiz ID does not refer to a quiz that this user owns.') {
+      return res.status(403).json(updateResult);
+    } else if (updateResult.error === 'Token is empty or invalid') {
+      return res.status(401).json(updateResult);
+    } else {
+      return res.status(400).json(updateResult);
+    }
+  }
+
+  return res.status(200).json({});
+});
+
 app.delete('/v1/admin/quiz/:quizid', (req: Request, res: Response) => {
   const response = adminQuizRemove(req.query.token as string, parseInt(req.params.quizid));
 
