@@ -97,3 +97,7 @@ export const requestAdminUserDetails = (token: string): RequestHelperReturnType 
     '/v1/admin/user/details',
     { token: token });
 };
+
+export const requestClear = (): RequestHelperReturnType => {
+  return requestHelper('DELETE', '/v1/clear');
+};

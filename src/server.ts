@@ -103,6 +103,11 @@ app.post('/v1/admin/quiz', (req: Request, res: Response) => {
   res.json(response);
 });
 
+app.delete('/v1/clear', (req: Request, res: Response) => {
+  const response = clear();
+  res.json(result);
+});
+
 // ====================================================================
 //  ================= WORK IS DONE ABOVE THIS LINE ===================
 // ====================================================================
