@@ -41,6 +41,15 @@ export interface ReturnUser {
     }
 }
 
+export interface Trash {
+    quizId: number,
+    description: string,
+    name: string,
+    timeCreated: number,
+    timeLastEdited: number,
+    question: Question[]
+}
+
 export interface User {
     userId: number,
     email: string,
@@ -54,6 +63,7 @@ export interface User {
 }
 
 export interface DataStore {
+    trash: Trash[],
     users: User[],
     userSessions: UserSessions[]
     quizzes: Quiz[]
