@@ -1,5 +1,5 @@
 import { adminAuthLogin, adminAuthLogout, adminAuthRegister, adminUserDetails } from './auth';
-import { adminQuizCreate, adminQuizRemove } from './quiz';
+import { adminQuizCreate, adminQuizRemove, adminQuizNameUpdate } from './quiz';
 import express, { json, Request, Response } from 'express';
 import { echo } from './newecho';
 import morgan from 'morgan';

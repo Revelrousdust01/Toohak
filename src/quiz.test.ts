@@ -1,6 +1,6 @@
 import {
   requestAdminAuthLogin, requestAdminAuthRegister,
-  requestAdminQuizCreate, requestAdminQuizRemove
+  requestAdminQuizCreate, requestAdminQuizNameUpdate, requestAdminQuizRemove
 } from './requests';
 import { ErrorObject } from './interfaces';
 import { clear } from './other';
