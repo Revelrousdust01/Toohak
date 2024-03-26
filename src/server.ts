@@ -1,5 +1,5 @@
 import { adminAuthLogin, adminAuthLogout, adminAuthRegister, adminUserDetails } from './auth';
-import { adminQuizCreate } from './quiz';
+import { adminQuizCreate, adminQuizRemove } from './quiz';
 import express, { json, Request, Response } from 'express';
 import { echo } from './newecho';
 import morgan from 'morgan';
@@ -72,6 +72,19 @@ app.get('/v1/admin/user/details', (req: Request, res: Response) => {
 
   if ('error' in response) {
     return res.status(401).json(response);
+  }
+  res.json(response);
+});
+
+app.delete('/v1/admin/quiz/:quizid', (req: Request, res: Response) => {
+  const response = adminQuizRemove(req.query.token as string, parseInt(req.params.quizid));
+
+  if ('error' in response) {
+    if (response.error === 'Token is empty or invalid.') {
+      return res.status(401).json(response);
+    } else {
+      return res.status(403).json(response);
+    }
   }
   res.json(response);
 });

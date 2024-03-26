@@ -97,4 +97,3 @@ export const requestAdminUserDetails = (token: string): RequestHelperReturnType 
     '/v1/admin/user/details',
     { token: token });
 };
-

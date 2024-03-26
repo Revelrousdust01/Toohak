@@ -201,12 +201,42 @@ export function adminQuizCreate(token: string, name: string, description: string
 /**
  * Given a particular quiz, permanently remove the quiz.
  *
- * @param {number} authUserId - User ID of admin
- * @param {number} quizId - relevant quizID
+ * @param {string} token - User ID of admin
+ * @param {number} quizid - relevant quizID
  *
- * @returns {} - returns an empty object when a quiz is removed
+ * @returns {ErrorObject} - returns error object based on following conditions:
+ *
+ * Token is empty or invalid (does not refer to valid logged in user session)
+ * Valid token is provided, but either the quiz ID is invalid, or the user does not own the quiz
+ *
+ * @returns {object} - returns an empty object when a quiz is removed
  */
 
+export function adminQuizRemove(token: string, quizid: number): object | ErrorObject {
+  const data = getData();
+  const quizIndex = data.quizzes.findIndex(quizzes => quizzes.quizId === quizid);
+  const checkToken = validToken(token);
+
+  if (isError(checkToken)) {
+    return {
+      error: checkToken.error
+    };
+  }
+
+  if (quizIndex === -1) { return { error: 'Quiz ID does not refer to a valid quiz.' }; }
+
+  if (!checkToken.ownedQuizzes.includes(quizid)) { return { error: 'Quiz ID does not refer to a quiz that this user owns.' }; }
+
+  data.quizzes.splice(quizIndex, 1);
+
+  const ownedQuizIndex = checkToken.ownedQuizzes.indexOf(quizid);
+
+  if (ownedQuizIndex !== -1) { checkToken.ownedQuizzes.splice(ownedQuizIndex, 1); }
+
+  setData(data);
+
+  return { };
+}
 // export function adminQuizRemove(authUserId, quizId) {
 //   const data = getData();
 //   const user = data.users.find(user => user.userId === authUserId);
