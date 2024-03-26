@@ -1,4 +1,4 @@
-import { adminAuthLogin, adminAuthLogout, adminAuthRegister, adminUserDetails } from './auth';
+import { adminAuthLogin, adminAuthLogout, adminAuthRegister, adminUserDetails, adminUserDetailsUpdate } from './auth';
 import { adminQuizCreate } from './quiz';
 import express, { json, Request, Response } from 'express';
 import { echo } from './newecho';
@@ -72,6 +72,20 @@ app.get('/v1/admin/user/details', (req: Request, res: Response) => {
 
   if ('error' in response) {
     return res.status(401).json(response);
+  }
+  res.json(response);
+});
+
+app.put('/v1/admin/user/details', (req: Request, res: Response) => {
+  const { token, email, nameFirst, nameLast} = req.body;
+  const response = adminUserDetailsUpdate(token, email, nameFirst, nameLast);
+
+  if ('error' in response) {
+    if (response.error === 'Token is empty or invalid.') {
+      return res.status(401).json(response);
+    } else {
+      return res.status(400).json(response);
+    }
   }
   res.json(response);
 });

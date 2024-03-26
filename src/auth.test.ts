@@ -215,6 +215,7 @@ describe('adminUserDetailsUpdate', () => {
 
   test('Valid Details', () => {
     const user = requestAdminAuthRegister(email, password, firstName, lastName);
+    requestAdminAuthLogin(email, password);
     const response = requestAdminUserDetailsUpdate(user.jsonBody.token as string, 
       'shuangupdated@student.unsw.edu.au', 'UpdateSamuel', 'UpdateHuang');
     expect(response.jsonBody).toStrictEqual({ });
@@ -223,6 +224,7 @@ describe('adminUserDetailsUpdate', () => {
 
   test('Email is currently used by another user', () => {
     const user = requestAdminAuthRegister(email, password, firstName, lastName);
+    requestAdminAuthLogin(email, password);
     const user2 = requestAdminAuthRegister('cpolitis@student.unsw.edu.au', 'a1b2c3d4e5f6', 
       'Christian', 'Politis');
     const response = requestAdminUserDetailsUpdate(user.jsonBody.token as string, 
@@ -240,7 +242,8 @@ describe('adminUserDetailsUpdate', () => {
     { badEmail: '[shuang@student.unsw.edu.au]' },
     { badEmail: 'shuang' }
   ])("Email does not satisfy validator: '$badEmail'", ({ badEmail }) => {
-    const user = requestAdminAuthRegister(email, password, firstName, lastName);
+    requestAdminAuthRegister(email, password, firstName, lastName);
+    const user = requestAdminAuthLogin(email, password);
     const response = requestAdminUserDetailsUpdate(user.jsonBody.token as string, 
       badEmail, firstName, lastName);
     expect(response.jsonBody).toStrictEqual(ERROR);
@@ -256,7 +259,8 @@ describe('adminUserDetailsUpdate', () => {
     { character: '*' },
     { character: '/' }
   ])("NameFirst contains unwanted Characters: '$character'", ({ character }) => {
-    const user = requestAdminAuthRegister(email, password, firstName.concat(character), lastName);
+    requestAdminAuthRegister(email, password, firstName.concat(character), lastName);
+    const user = requestAdminAuthLogin(email, password);
     const response = requestAdminUserDetailsUpdate(user.jsonBody.token as string, email, 
       firstName.concat(character), lastName);
     expect(response.jsonBody).toStrictEqual(ERROR);
@@ -272,7 +276,8 @@ describe('adminUserDetailsUpdate', () => {
     { character: '*' },
     { character: '/' }
   ])("NameLast contains unwanted Characters: '$character'", ({ character }) => {
-    const user = requestAdminAuthRegister(email, password, firstName, lastName);
+    requestAdminAuthRegister(email, password, firstName, lastName);
+    const user = requestAdminAuthLogin(email, password);
     const response = requestAdminUserDetailsUpdate(user.jsonBody.token as string, email, 
       firstName, lastName.concat(character));
     expect(response.jsonBody).toStrictEqual(ERROR);
@@ -286,6 +291,7 @@ describe('adminUserDetailsUpdate', () => {
     { invalidToken: 'abc' },
   ])("Invalid or Empty Token: '$invalidToken", ({ invalidToken }) => {
     requestAdminAuthRegister(email, password, firstName, lastName);
+    requestAdminAuthLogin(email, password);
     const response = requestAdminUserDetailsUpdate(invalidToken, email, firstName, lastName);
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(401);
