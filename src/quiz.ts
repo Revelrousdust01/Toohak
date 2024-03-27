@@ -168,7 +168,7 @@ export function adminQuizCreate(token: string, name: string, description: string
   * @param {number} quizid - relevant quizID
   * @param {string} name - new name for the relevant quiz
   *
-  * @returns {object} - returns an empty object when a quiz is removed
+  * @returns {object} - returns an empty object when a name is updated
 */
 
 export function adminQuizNameUpdate(token: string, quizid: number, name: string): ErrorObject | object {
