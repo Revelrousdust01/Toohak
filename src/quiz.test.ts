@@ -249,7 +249,7 @@ describe.skip('Test adminQuizInfo', () => {
 });
 
 // adminQuizList
-describe.only('adminQuizList', () => {
+describe('adminQuizList', () => {
   const firstName = 'Samuel';
   const lastName = 'Huang';
   const email = 'shuang@student.unsw.edu.au';
