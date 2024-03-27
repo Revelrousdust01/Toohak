@@ -135,7 +135,7 @@ export function adminQuizCreate(token: string, name: string, description: string
  * @return {QuizArray} - returns an array of quizzes in the list;
  */
 
-export function adminQuizList(token: string): ErrorObject | quizArray {
+export function adminQuizList(token: string): ErrorObject | QuizArray {
   const data = getData();
 
   const checkToken = validToken(token);
@@ -397,7 +397,7 @@ export function adminQuizEmptyTrash(token: string, quizids: number[]): object | 
  * @return {QuizArray} - returns an array of quizzes in the trash
  */
 
-export function adminQuizViewTrash(token: string): ErrorObject | quizArray {
+export function adminQuizViewTrash(token: string): ErrorObject | QuizArray {
   const data = getData();
 
   const checkToken = validToken(token);
