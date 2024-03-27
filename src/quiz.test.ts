@@ -12,7 +12,7 @@ beforeEach(() => {
 const ERROR: ErrorObject = { error: expect.any(String) };
 
 // adminQuizCreate
-describe.skip('Test adminQuizCreate', () => {
+describe('Test adminQuizCreate', () => {
   const firstName = 'Jeffery';
   const lastName = 'Zhang';
   const email = 'jeffery.zhang385@gmail.com';
@@ -154,7 +154,7 @@ describe.skip('Test adminQuizDescriptionUpdate', () => {
 });
 
 // adminQuizRemove
-describe.skip('Test adminQuizRemove', () => {
+describe('Test adminQuizRemove', () => {
   const firstName = 'Jeffery';
   const lastName = 'Zhang';
   const email = 'jeffery.zhang385@gmail.com';
