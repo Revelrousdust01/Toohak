@@ -77,7 +77,7 @@ describe('Test adminQuizCreate', () => {
     expect(newQuiz.statusCode).toStrictEqual(400);
   });
 
-  test('Name is already used', () => {
+  test('Name is already used by the current logged in user for another quiz', () => {
     requestAdminAuthRegister(email, password, lastName, firstName);
     const login = requestAdminAuthLogin(email, password);
     requestAdminQuizCreate(login.jsonBody.token as string, quizName, quizDescription);

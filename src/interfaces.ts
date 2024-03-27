@@ -66,6 +66,7 @@ export interface DataStore {
     trash: Trash[],
     users: User[],
     userSessions: UserSessions[]
+    quizCounter: number;
     quizzes: Quiz[]
 }
 

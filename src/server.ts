@@ -1,6 +1,6 @@
 import {
   adminAuthLogin, adminAuthLogout, adminAuthRegister,
-  adminUserDetails, adminUserDetailsUpdate
+  adminUserDetails, adminUserDetailsUpdate, adminUserPasswordUpdate
 } from './auth';
 import { adminQuizCreate, adminQuizRemove, adminQuizTransfer } from './quiz';
 import { clear } from './other';
@@ -95,6 +95,20 @@ app.put('/v1/admin/user/details', (req: Request, res: Response) => {
   res.json(response);
 });
 
+app.put('/v1/admin/user/password', (req: Request, res: Response) => {
+  const { token, oldPassword, newPassword } = req.body;
+  const response = adminUserPasswordUpdate(token, oldPassword, newPassword);
+
+  if ('error' in response) {
+    if (response.error === 'Token is empty or invalid.') {
+      return res.status(401).json(response);
+    } else {
+
+      return res.status(400).json(response);
+    }
+  }
+  res.json(response);
+});
 
 app.post('/v1/admin/quiz/:quizid/transfer', (req: Request, res: Response) => {
   const { token, userEmail } = req.body;
@@ -114,7 +128,6 @@ app.post('/v1/admin/quiz/:quizid/transfer', (req: Request, res: Response) => {
   }
   res.json(response);
 });
-
 
 app.delete('/v1/admin/quiz/:quizid', (req: Request, res: Response) => {
   const response = adminQuizRemove(req.query.token as string, parseInt(req.params.quizid), email);

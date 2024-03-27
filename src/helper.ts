@@ -14,7 +14,6 @@ import validator from 'validator';
 export function findQuiz(quizid: number): object {
   const data = getData();
   const quiz = data.quizzes.find(quiz => quiz.quizId === quizid);
-
   if (!quiz) {
     return { };
   }
@@ -41,7 +40,6 @@ export function isError(object: unknown): object is ErrorObject {
   *
   * @returns { } - Returns empty object when name is valid
 */
-
 export function validEmail(email: string): object | ErrorObject {
   const data = getData();
 
@@ -61,7 +59,6 @@ export function validEmail(email: string): object | ErrorObject {
   * @returns { { error: }  } - Returns object with error when name is invalid
   * @returns { } - Returns empty object when name is valid
 */
-
 export function validName(name: string, isFirst: boolean): object | ErrorObject {
   const characterRegex = /^[A-Za-z\s'-]+$/;
 
@@ -80,31 +77,12 @@ export function validName(name: string, isFirst: boolean): object | ErrorObject 
   * @returns { { error: }  } - Returns object with error when password is invalid
   * @returns { } - Returns empty object when name is valid
 */
-
 export function validPassword(password: string): object | ErrorObject {
   const digitsAndLetters = /^(?=.*[0-9])(?=.*[a-zA-Z]).+$/;
 
   if (password.length < 8) { return { error: 'Password must contain at least 8 characters.' }; } else if (!digitsAndLetters.test(password)) { return { error: 'Password must contain at least letter and one number.' }; }
 
   return { };
-}
-
-/**
-  * Checks for existence of a user
-  *
-  * @param {number} authUserId - Password of user
-  *
-  * @returns { { error: }  } - Returns object with error when authUserId is invalid
-  * @returns { { user: } } - Returns object containing the user when authUserId is valid
-
-*/
-export function validAuthUserId(authUserId: number) {
-  const data = getData();
-  const user = data.users.find(user => user.userId === authUserId);
-
-  if (!user) { return { error: 'AuthUserId is not a valid user.' }; }
-
-  return { user: user };
 }
 
 /**
@@ -134,7 +112,6 @@ export function validToken(token: string): User | ErrorObject {
   * @returns { { error: }  } - Returns object with error when quiz name is invalid
   * @returns { } - Returns empty object when name is valid
 */
-
 export function validQuizName(name: string): object | ErrorObject {
   const characterRegex = /^[a-zA-Z0-9 ]+$/;
 
