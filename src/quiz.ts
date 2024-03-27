@@ -1,5 +1,5 @@
 import { getData, setData } from './dataStore';
-import type { ErrorObject, Quiz, createQuizReturn } from './interfaces';
+import type { ErrorObject, Quiz, createQuizReturn, quizArray } from './interfaces';
 import { isError, validQuizName, validToken } from './helper';
 
 /**
@@ -247,16 +247,16 @@ export function adminQuizRemove(token: string, quizid: number): object | ErrorOb
 
 /**
  * Permanently delete specific quizzes currently sitting in the trash
- * 
+ *
  * @param {string} token - Session ID of admin
  * @param {array} quizids - JSONified array of quiz id numbers
- * 
+ *
  * @returns {ErrorObject} - returns error object based on following conditions:
- * 
+ *
  * One or more of the Quiz IDs is not currently in the trash
  * Token is empty or invalid (does not refer to valid logged in user session)
  * Valid token is provided, but one or more of the Quiz IDs refers to a quiz that this current user does not own
- * 
+ *
  * @returns {object} - returns an empty object when the trash is emptied
  */
 export function adminQuizEmptyTrash(token: string, quizids: number[]): object | ErrorObject {
@@ -302,17 +302,16 @@ export function adminQuizEmptyTrash(token: string, quizids: number[]): object | 
 
 /**
  * View the quizzes that are currently in the trash for the logged in user.
- * 
+ *
  * @param {string} token - Session ID of admin
- * 
+ *
  * @return {ErrorObject} - returns error object based on following conditions:
- * 
+ *
  * Token is empty or invalid (does not refer to valid logged in user session)
- * 
- * @return {array} - returns an array of quizzes in the trash
+ *
+ * @return {quizArray} - returns an array of quizzes in the trash
  */
-
-export function adminQuizViewTrash(token: string): ErrorObject | array {
+export function adminQuizViewTrash(token: string): ErrorObject | quizArray {
   const data = getData();
 
   const checkToken = validToken(token);
@@ -323,16 +322,16 @@ export function adminQuizViewTrash(token: string): ErrorObject | array {
   }
 
   const ownedQuizzes = checkToken.ownedQuizzes;
-  const quizInTrash = data.trash
-  let foundTrash = [];
+  const quizInTrash = data.trash;
+  const foundTrash = [];
 
   for (const ownedQuiz of ownedQuizzes) {
     for (const trashedQuiz of quizInTrash) {
       if (ownedQuiz === trashedQuiz.quizId) {
         const quiz = {
-          name: trashedQuiz.name,
-          quizId: trashedQuiz.quizId
-        }
+          quizId: trashedQuiz.quizId,
+          name: trashedQuiz.name
+        };
         foundTrash.push(quiz);
       }
     }
@@ -342,4 +341,3 @@ export function adminQuizViewTrash(token: string): ErrorObject | array {
     quizzes: foundTrash
   };
 }
-

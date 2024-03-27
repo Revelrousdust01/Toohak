@@ -420,7 +420,7 @@ describe('Test adminQuizNameUpdate', () => {
   });
 });
 
-//adminQuizViewTrash
+// adminQuizViewTrash
 describe('adminQuizViewTrash', () => {
   const firstName = 'Samuel';
   const lastName = 'Huang';
@@ -439,8 +439,8 @@ describe('adminQuizViewTrash', () => {
     expect(response.jsonBody).toMatchObject({
       quizzes: [
         {
-        quizId: quizId.jsonBody.quizId as number,
-        name: 'lebron my glorious king'
+          quizId: quizId.jsonBody.quizId as number,
+          name: 'lebron my glorious king'
         }
       ]
     });
@@ -467,7 +467,7 @@ describe('adminQuizViewTrash', () => {
       ]
     });
     expect(response.statusCode).toStrictEqual(200);
-  })
+  });
 
   test.each([
     { invalidToken: '' },
