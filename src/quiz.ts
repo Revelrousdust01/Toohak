@@ -239,3 +239,44 @@ export function adminQuizRemove(token: string, quizid: number): object | ErrorOb
 
   return { };
 }
+
+export function adminQuizEmptyTrash(token: string, quizids: number[]): object | ErrorObject {
+  const data = getData();
+
+  const checkToken = validToken(token);
+
+  if (isError(checkToken)) {
+    return {
+      error: checkToken.error
+    };
+  }
+
+  for (const quizInTrash of data.trash) {
+    const searchTrash = quizids.find(quiz => quiz === quizInTrash.quizId);
+    if (searchTrash === null) {
+      return {
+        error: 'One or more of the Quiz IDs is not currently in the trash.'
+      };
+    }
+  }
+
+  for (const ownedQuiz of checkToken.ownedQuizzes) {
+    const searchOwnedQuizzes = quizids.find(quiz => quiz === ownedQuiz);
+
+    if (!searchOwnedQuizzes) {
+      return {
+        error: 'Valid token is provided, but one or more of the Quiz IDs refers to a quiz that this current user does not own.'
+      };
+    }
+  }
+
+  for (const quizid of quizids) {
+    const removedTrash = data.trash.findIndex(trashedQuiz => trashedQuiz.quizId === quizid);
+
+    if (removedTrash) {
+      data.quizzes.splice(removedTrash, 1);
+    }
+  }
+
+  return {};
+}
