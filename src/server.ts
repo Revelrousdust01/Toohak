@@ -80,6 +80,22 @@ app.get('/v1/admin/user/details', (req: Request, res: Response) => {
   res.json(response);
 });
 
+app.put('/v1/admin/quiz/:quizid/description', (req: Request, res: Response) => {
+  const { token, quizid, description } = req.body;
+  const response = adminQuizDescriptionUpdate(token, quizid, newDescription);
+  if ('error' in response) {
+    if (response.error === 'Quiz ID does not refer to a valid quiz.' || response.error === 'Quiz ID does not refer to a quiz that this user owns.') {
+      return res.status(403).json(response);
+    } else if (response.error === 'Token is empty or invalid') {
+      return res.status(401).json(response);
+    } else {
+      return res.status(400).json(response);
+    }
+  }
+
+  return res.status(200).json({});
+});
+
 app.put('/v1/admin/quiz/:quizid/name', (req: Request, res: Response) => {
   const { token, quizid, name } = req.body;
   const response = adminQuizNameUpdate(token, quizid, name);
