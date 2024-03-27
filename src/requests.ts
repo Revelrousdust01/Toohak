@@ -86,10 +86,10 @@ export const requestAdminQuizCreate = (token: string, name:string, description: 
     { token: token, name: name, description: description });
 };
 
-export const requestAdminQuizNameUpdate = (token: string, quizId: number, newName: string): RequestHelperReturnType => {
-  return requestHelper('PUT',
-    `/v1/admin/quiz/${quizId}/name`,
-    { token: token, quizId: quizId, name: newName});
+export const requestAdminQuizNameUpdate = (token: string, quizid: number, newName: string): RequestHelperReturnType => {
+  return requestHelper('PUT', 
+    '/v1/admin/quiz/${quizid}/name',
+    { token: token, quizid: quizid, name: newName});
 };
 
 export const requestAdminQuizRemove = (token: string, quizid: number): RequestHelperReturnType => {
@@ -102,4 +102,14 @@ export const requestAdminUserDetails = (token: string): RequestHelperReturnType 
   return requestHelper('GET',
     '/v1/admin/user/details',
     { token: token });
+};
+
+export const requestAdminUserDetailsUpdate = (token: string, email: string, firstName: string, lastName: string): RequestHelperReturnType => {
+  return requestHelper('PUT',
+    '/v1/admin/user/details',
+    { token: token, email: email, nameFirst: firstName, nameLast: lastName });
+};
+
+export const requestClear = (): RequestHelperReturnType => {
+  return requestHelper('DELETE', '/v1/clear');
 };

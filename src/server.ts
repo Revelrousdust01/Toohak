@@ -1,5 +1,9 @@
-import { adminAuthLogin, adminAuthLogout, adminAuthRegister, adminUserDetails } from './auth';
+import {
+  adminAuthLogin, adminAuthLogout, adminAuthRegister,
+  adminUserDetails, adminUserDetailsUpdate
+} from './auth';
 import { adminQuizCreate, adminQuizRemove, adminQuizNameUpdate } from './quiz';
+import { clear } from './other';
 import express, { json, Request, Response } from 'express';
 import { echo } from './newecho';
 import morgan from 'morgan';
@@ -77,20 +81,34 @@ app.get('/v1/admin/user/details', (req: Request, res: Response) => {
 });
 
 app.put('/v1/admin/quiz/:quizid/name', (req: Request, res: Response) => {
-  const { token, quizId, name } = req.body;
-  
-  const updateResult = adminQuizNameUpdate(req.userId, quizId, name);
-  if ('error' in updateResult) {
-    if (updateResult.error === 'Quiz ID does not refer to a valid quiz.' || updateResult.error === 'Quiz ID does not refer to a quiz that this user owns.') {
-      return res.status(403).json(updateResult);
-    } else if (updateResult.error === 'Token is empty or invalid') {
-      return res.status(401).json(updateResult);
+  const { token, quizid, name } = req.body;
+  console.log(quizid);
+  const response = adminQuizNameUpdate(req.body.token as string, req.body.quizid as number, req.body.name as string);
+  if ('error' in response) {
+    if (response.error === 'Quiz ID does not refer to a valid quiz.' || response.error === 'Quiz ID does not refer to a quiz that this user owns.') {
+      return res.status(403).json(response);
+    } else if (response.error === 'Token is empty or invalid') {
+      return res.status(401).json(response);
     } else {
-      return res.status(400).json(updateResult);
+      return res.status(400).json(response);
     }
   }
 
   return res.status(200).json({});
+});
+
+app.put('/v1/admin/user/details', (req: Request, res: Response) => {
+  const { token, email, nameFirst, nameLast } = req.body;
+  const response = adminUserDetailsUpdate(token, email, nameFirst, nameLast);
+
+  if ('error' in response) {
+    if (response.error === 'Token is empty or invalid.') {
+      return res.status(401).json(response);
+    } else {
+      return res.status(400).json(response);
+    }
+  }
+  res.json(response);
 });
 
 app.delete('/v1/admin/quiz/:quizid', (req: Request, res: Response) => {
@@ -117,6 +135,11 @@ app.post('/v1/admin/quiz', (req: Request, res: Response) => {
       return res.status(400).json(response);
     }
   }
+  res.json(response);
+});
+
+app.delete('/v1/clear', (req: Request, res: Response) => {
+  const response = clear();
   res.json(response);
 });
 
