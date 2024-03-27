@@ -1,5 +1,5 @@
 import { getData, setData } from './dataStore';
-import type { DataStore } from './dataStore'
+import type { DataStore } from './dataStore';
 /**
   * Reset the state of the application back to the start.
   *
