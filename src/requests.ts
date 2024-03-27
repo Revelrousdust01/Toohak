@@ -86,6 +86,12 @@ export const requestAdminQuizCreate = (token: string, name:string, description: 
     { token: token, name: name, description: description });
 };
 
+export const requestAdminQuizNameUpdate = (token: string, quizid: number, newName: string): RequestHelperReturnType => {
+  return requestHelper('PUT',
+    '/v1/admin/quiz/$quizid/name',
+    { token: token, quizid: quizid, name: newName });
+};
+
 export const requestAdminQuizRemove = (token: string, quizid: number): RequestHelperReturnType => {
   return requestHelper('DELETE',
     `/v1/admin/quiz/${quizid}`,

@@ -165,40 +165,45 @@ export function adminQuizCreate(token: string, name: string, description: string
 /**
   * Update the name of the relevant quiz.
   *
-  * @param {number} authUserId - user id of admin
-  * @param {number} quizId - relevant quiz id
+  * @param {string} token - User ID of admin
+  * @param {number} quizid - relevant quizID
   * @param {string} name - new name for the relevant quiz
   *
-  * @returns {} - returns empty object when quiz name is updated
+  * @returns {object} - returns an empty object when a quiz is removed
 */
 
-// export function adminQuizNameUpdate(authUserId, quizId, name) {
-//   const currentState = getData();
+export function adminQuizNameUpdate(token: string, quizid: number, name: string): ErrorObject | object {
+  const data = getData();
+  const quizIndex = data.quizzes.findIndex(quizzes => quizzes.quizId === quizid);
+  const checkToken = validToken(token);
 
-//   const user = currentState.users.find(user => user.userId === authUserId);
+  // 401 error
+  if (isError(checkToken)) {
+    return { error: 'Token is empty or invalid' };
+  }
 
-//   if (!user) { return { error: 'AuthUserId is not a valid user.' }; }
+  // 400 error
+  const checkQuizName = validQuizName(name);
+  if (isError(checkQuizName)) {
+    return { error: 'Quiz name is not valid' };
+  }
 
-//   if (!user.ownedQuizzes.includes(quizId)) { return { error: 'Quiz ID does not refer to a valid quiz owned by this user.' }; }
+  // 400 error
+  const existingQuiz = data.quizzes.find(quiz => quiz.name === name);
+  if (existingQuiz) {
+    if (checkToken.ownedQuizzes.find(quiz => quiz === existingQuiz.quizId)) { return { error: 'Name is already used by the current logged in user for another quiz.' }; }
+  }
 
-//   const checkQuizName = validQuizName(name);
-//   if (checkQuizName.error) { return { error: checkQuizName.error }; }
+  // 403 error
+  if (quizIndex === -1) { return { error: 'Quiz ID does not refer to a valid quiz.' }; }
 
-//   const isNameUsed = currentState.quizzes.some(
-//     quiz => quiz.name === name &&
-//         quiz.quizId !== quizId &&
-//         user.ownedQuizzes.includes(quiz.quizId)
-//   );
+  // 403 error
+  if (!checkToken.ownedQuizzes.includes(quizid)) { return { error: 'Quiz ID does not refer to a quiz that this user owns.' }; }
 
-//   if (isNameUsed) { return { error: 'Name is already used by another quiz owned by the user.' }; }
-
-//   const quiz = currentState.quizzes.find(quiz => quiz.quizId === quizId);
-//   if (quiz) { quiz.name = name; } else { return { error: 'Quiz not found.' }; }
-
-//   setData(currentState);
-
-//   return { };
-// }
+  data.quizzes[quizIndex].name = name;
+  setData(data);
+  return { };
+}
 
 /**
  * Given a particular quiz, permanently remove the quiz.
@@ -240,6 +245,20 @@ export function adminQuizRemove(token: string, quizid: number): object | ErrorOb
   return { };
 }
 
+/**
+ * Permanently delete specific quizzes currently sitting in the trash
+ * 
+ * @param {string} token - Session ID of admin
+ * @param {array} quizids - JSONified array of quiz id numbers
+ * 
+ * @returns {ErrorObject} - returns error object based on following conditions:
+ * 
+ * One or more of the Quiz IDs is not currently in the trash
+ * Token is empty or invalid (does not refer to valid logged in user session)
+ * Valid token is provided, but one or more of the Quiz IDs refers to a quiz that this current user does not own
+ * 
+ * @returns {object} - returns an empty object when the trash is emptied
+ */
 export function adminQuizEmptyTrash(token: string, quizids: number[]): object | ErrorObject {
   const data = getData();
 
@@ -279,4 +298,48 @@ export function adminQuizEmptyTrash(token: string, quizids: number[]): object | 
   }
 
   return {};
+}
+
+/**
+ * View the quizzes that are currently in the trash for the logged in user.
+ * 
+ * @param {string} token - Session ID of admin
+ * 
+ * @return {ErrorObject} - returns error object based on following conditions:
+ * 
+ * Token is empty or invalid (does not refer to valid logged in user session)
+ * 
+ * @return {array} - returns an array of quizzes in the trash
+ */
+
+export function adminQuizViewTrash(token: string): ErrorObject | array {
+  const data = getData();
+
+  const checkToken = validToken(token);
+
+  if (isError(checkToken)) {
+    return {
+      error: checkToken.error
+    };
+  }
+
+  const ownedQuizzes = checkToken.ownedQuizzes;
+  const quizInTrash = data.trash
+  let foundTrash = [];
+
+  for (const ownedQuiz of ownedQuizzes) {
+    for (const trashedQuiz of quizInTrash) {
+      if (ownedQuiz === trashedQuiz.quizId) {
+        const quiz = {
+          name: trashedQuiz.name,
+          quizId: trashedQuiz.quizId
+        }
+        foundTrash.push(quiz);
+      }
+    }
+  }
+
+  return {
+    quizzes: foundTrash
+  };
 }
