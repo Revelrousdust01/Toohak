@@ -2,7 +2,7 @@ import {
   adminAuthLogin, adminAuthLogout, adminAuthRegister,
   adminUserDetails, adminUserDetailsUpdate
 } from './auth';
-import { adminQuizCreate, adminQuizRemove } from './quiz';
+import { adminQuizCreate, adminQuizRemove, adminQuizTransfer } from './quiz';
 import { clear } from './other';
 import express, { json, Request, Response } from 'express';
 import { echo } from './newecho';
@@ -88,14 +88,36 @@ app.put('/v1/admin/user/details', (req: Request, res: Response) => {
     if (response.error === 'Token is empty or invalid.') {
       return res.status(401).json(response);
     } else {
+
       return res.status(400).json(response);
     }
   }
   res.json(response);
 });
 
+
+app.post('/v1/admin/quiz/:quizid/transfer', (req: Request, res: Response) => {
+  const { token, userEmail } = req.body;
+  const response = adminQuizTransfer(token, parseInt(req.params.quizid), userEmail);
+
+  if ('error' in response) {
+      if (response.error === 'Token is empty or invalid.') {
+      return res.status(401).json(response);
+    } else if (response.error === 'Quiz ID does not refer to a valid quiz.')  {
+      return res.status(403).json(response);
+    } else if (response.error === 'Quiz ID does not refer to a quiz that this user owns.') {
+      return res.status(403).json(response);
+    }
+    else {
+      return res.status(400).json(response);
+    }
+  }
+  res.json(response);
+});
+
+
 app.delete('/v1/admin/quiz/:quizid', (req: Request, res: Response) => {
-  const response = adminQuizRemove(req.query.token as string, parseInt(req.params.quizid));
+  const response = adminQuizRemove(req.query.token as string, parseInt(req.params.quizid), email);
 
   if ('error' in response) {
     if (response.error === 'Token is empty or invalid.') {

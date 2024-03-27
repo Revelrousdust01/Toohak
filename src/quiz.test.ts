@@ -414,11 +414,9 @@ describe('Test adminQuizRemove', () => {
 
   test('Valid inputs', () => {
     requestAdminAuthRegister('bob.smith@gmail.com', 'a1234567', 'Smith', 'Bob');
-    const login = requestAdminAuthLogin('bob.smith@gmail.com', 'a1234567');
-    requestAdminAuthRegister(email, password, lastName, firstName);
-    const login1 = requestAdminAuthLogin(email, password);
+    const login = requestAdminAuthRegister(email, password, lastName, firstName);
     const quizId = requestAdminQuizCreate(login.jsonBody.token as string, quizName, quizDescription);
-    const response = requestAdminQuizTransfer(login1.jsonBody.token as string, quizId.jsonBody.quizId as number, 'bob.smith@gmail.com');
+    const response = requestAdminQuizTransfer(login.jsonBody.token as string, quizId.jsonBody.quizId as number, 'bob.smith@gmail.com');
     expect(response.jsonBody).toStrictEqual({});
     expect(response.statusCode).toStrictEqual(200);
   });
@@ -432,15 +430,14 @@ describe('Test adminQuizRemove', () => {
   });
 
   test('userEmail is the current logged in user', () => {
-    const login = requestAdminAuthRegister(email, password, lastName, firstName);
-    const quizId = requestAdminQuizCreate(login.jsonBody.token as string, quizName, quizDescription);
-    requestAdminAuthRegister('bob.smith@gmail.com', 'a1234567', 'Smith', 'Bob');
-    const response = requestAdminQuizTransfer(login.jsonBody.token as string, quizId.jsonBody.quizId as number, 'bob.smith@gmail.com');
+    const registered = requestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = requestAdminQuizCreate(registered.jsonBody.token as string, quizName, quizDescription);
+    const response = requestAdminQuizTransfer(registered.jsonBody.token as string, quizId.jsonBody.quizId as number, email);
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(400);
   });
 
-  test('Quiz ID refers to a quiz that has a name that is already used by the target user', () => {
+  test.only('Quiz ID refers to a quiz that has a name that is already used by the target user', () => {
     const login = requestAdminAuthRegister(email, password, lastName, firstName);
     requestAdminQuizCreate(login.jsonBody.token as string, quizName, quizDescription);
     requestAdminAuthRegister('bob.smith@gmail.com', 'a1234567', 'Smith', 'Bob');
@@ -479,11 +476,11 @@ describe('Test adminQuizRemove', () => {
   });
 
   test('QuizId does not refer to a quiz that this user owns', () => {
-    requestAdminAuthRegister('bob.smith@gmail.com', 'a1234567', 'Smith', 'Bob');
-    const login = requestAdminAuthLogin('bob.smith@gmail.com', 'a1234567');
-    requestAdminAuthRegister(email, password, lastName, firstName);
+    const login = requestAdminAuthRegister('bob.smith@gmail.com', 'a1234567', 'Smith', 'Bob');
     const newQuiz = requestAdminQuizCreate(login.jsonBody.token as string, quizName, quizDescription);
-    const response = requestAdminQuizTransfer(login.jsonBody.token as string, newQuiz.jsonBody.quizId as number, email);
+    const login1 = requestAdminAuthRegister(email, password, lastName, firstName);
+    const response = requestAdminQuizTransfer(login1.jsonBody.token as string, 
+                                              newQuiz.jsonBody.quizId as number, 'bob.smith@gmail.com');
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(403);
   });

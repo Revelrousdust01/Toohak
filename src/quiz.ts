@@ -1,6 +1,6 @@
 import { getData, setData } from './dataStore';
 import type { ErrorObject, Quiz, createQuizReturn } from './interfaces';
-import { isError, validQuizName, validToken } from './helper';
+import { findQuiz, isError, validQuizName, validToken } from './helper';
 
 let quizCounter = 1;
 
@@ -241,3 +241,62 @@ export function adminQuizRemove(token: string, quizid: number): object | ErrorOb
 
   return { };
 }
+
+/**
+ * Transfer ownership of a quiz to a different user based on their email.
+ *
+ * @param {string} token - User ID of admin
+ * @param {number} quizid - relevant quizID
+ * @param {string} email - Email of user to be transferred
+ *
+ * @returns {ErrorObject} - returns error object based on following conditions:
+ *
+ * userEmail is not a real user
+ * userEmail is the current logged in user
+ * Quiz ID refers to a quiz that has a name that is already used by the target user
+ * Token is empty or invalid (does not refer to valid logged in user session)
+ * Valid token is provided, but either the quiz ID is invalid, or the user does not own the quiz
+ *
+ * @returns {object} - returns an empty object when a quiz is transferred
+ */
+
+export function adminQuizTransfer(token: string, quizid: number, userEmail: string): object | ErrorObject {
+  const data = getData();
+  const quizIndex = data.quizzes.findIndex(quizzes => quizzes.quizId === quizid);
+  const user = data.users.find(users => users.email === userEmail);
+  const quiz = findQuiz(quizid);
+  const checkToken = validToken(token);
+
+  if (!user) {
+    return { error: 'userEmail is not a real user.' };
+  }
+
+  if (userEmail === checkToken.email) { return { error: 'userEmail is the current logged in user' }; }
+
+  for (let i; i < user.ownedQuizzes.length; i++) {
+    const ownedQuiz = data.users.ownedQuizzes[i]; 
+    if (findQuiz(ownedQuiz.quizId) === quiz.name) { 
+      return { error: 'Quiz ID refers to a quiz that has a name that is already used by the target user.' }; 
+    }
+  }
+  
+  if (isError(checkToken)) {
+    return {
+      error: checkToken.error
+    };
+  }
+
+  if (quizIndex === -1) { return { error: 'Quiz ID does not refer to a valid quiz.' }; }
+
+  if (!checkToken.ownedQuizzes.includes(quizid)) { return { error: 'Quiz ID does not refer to a quiz that this user owns.' }; }
+
+  user.ownedQuizzes.push(quiz);
+
+  const ownedQuizIndex = checkToken.ownedQuizzes.indexOf(quizid);
+
+  if (ownedQuizIndex !== -1) { checkToken.ownedQuizzes.splice(ownedQuizIndex, 1); }
+ 
+  setData(data);
+
+  return { };
+};

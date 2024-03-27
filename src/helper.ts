@@ -3,6 +3,25 @@ import type { ErrorObject, User } from './interfaces';
 import validator from 'validator';
 
 /**
+  * Return the quiz, given the quizId
+  *
+  * @param {number} quizId - relevent quizId
+  *
+  * @returns { Name } - Returns the quiz if quiz is found
+  * @returns { } - Returns empty object if quiz is not found
+*/
+
+export function findQuiz(quizid: number): object {
+  const data = getData();
+  const quiz = data.quizzes.find(quiz => quiz.quizId === quizid);
+
+  if (!quiz) {
+    return { };
+  }
+  return quiz;
+}
+
+/**
   * Check whether object is of type ErrorObject or not:
   *
   * @param {unknown} object - Unknown Object

@@ -92,10 +92,10 @@ export const requestAdminQuizRemove = (token: string, quizid: number): RequestHe
     { token: token });
 };
 
-export const requestAdminQuizTransfer = (token: string, quizid: number, email: string): RequestHelperReturnType => {
+export const requestAdminQuizTransfer = (token: string, quizid: number, userEmail: string): RequestHelperReturnType => {
   return requestHelper('POST',
     `/v1/admin/quiz/${quizid}/transfer`,
-    { token: token, email: email });
+    { token: token, userEmail: userEmail });
 };
 
 export const requestAdminUserDetails = (token: string): RequestHelperReturnType => {
