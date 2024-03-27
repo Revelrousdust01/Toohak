@@ -1,6 +1,6 @@
 import {
   adminAuthLogin, adminAuthLogout, adminAuthRegister,
-  adminUserDetails, adminUserDetailsUpdate
+  adminUserDetails, adminUserDetailsUpdate, adminUserPasswordUpdate
 } from './auth';
 import { adminQuizCreate, adminQuizRemove, adminQuizNameUpdate } from './quiz';
 import { clear } from './other';
@@ -100,6 +100,20 @@ app.put('/v1/admin/quiz/:quizid/name', (req: Request, res: Response) => {
 app.put('/v1/admin/user/details', (req: Request, res: Response) => {
   const { token, email, nameFirst, nameLast } = req.body;
   const response = adminUserDetailsUpdate(token, email, nameFirst, nameLast);
+
+  if ('error' in response) {
+    if (response.error === 'Token is empty or invalid.') {
+      return res.status(401).json(response);
+    } else {
+      return res.status(400).json(response);
+    }
+  }
+  res.json(response);
+});
+
+app.put('/v1/admin/user/password', (req: Request, res: Response) => {
+  const { token, oldPassword, newPassword } = req.body;
+  const response = adminUserPasswordUpdate(token, oldPassword, newPassword);
 
   if ('error' in response) {
     if (response.error === 'Token is empty or invalid.') {
