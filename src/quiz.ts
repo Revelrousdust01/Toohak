@@ -41,7 +41,9 @@ export function adminQuizCreate(token: string, name: string, description: string
 
   const existingQuiz = data.quizzes.find(quiz => quiz.name === name);
 
-  if (checkToken.ownedQuizzes.find(quiz => quiz === existingQuiz.quizId)) { return { error: 'Name is already used by the current logged in user for another quiz.' }; }
+  if (existingQuiz) {
+    if (checkToken.ownedQuizzes.find(quiz => quiz === existingQuiz.quizId)) { return { error: 'Name is already used by the current logged in user for another quiz.' }; }
+  }
 
   const quizId = data.quizCounter++;
 
