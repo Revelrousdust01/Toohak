@@ -1,13 +1,8 @@
 import {
   requestAdminAuthLogin, requestAdminAuthRegister,
-<<<<<<< Updated upstream
   requestAdminQuizCreate, requestAdminQuizNameUpdate, requestAdminQuizRemove,
   requestAdminQuizTransfer, requestAdminQuizTrashEmpty, requestClear,
   requestAdminQuizViewTrash
-=======
-  requestAdminQuizCreate, requestAdminQuizRemove,
-  requestAdminQuizTransfer, requestClear, requestAdminQuizTrashEmpty
->>>>>>> Stashed changes
 } from './requests';
 import { ErrorObject } from './interfaces';
 
@@ -493,7 +488,6 @@ describe('Test adminQuizTransfer', () => {
   });
 });
 
-<<<<<<< Updated upstream
 // adminQuizViewTrash
 describe('adminQuizViewTrash', () => {
   const firstName = 'Samuel';
@@ -558,8 +552,6 @@ describe('adminQuizViewTrash', () => {
   });
 });
 
-=======
->>>>>>> Stashed changes
 // adminQuizTrashEmpty
 describe.skip('Test adminQuizTrashEmpty', () => {
   const firstName = 'Christian';
