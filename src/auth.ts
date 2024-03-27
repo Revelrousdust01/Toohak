@@ -183,20 +183,20 @@ export function adminUserDetails(token: string): ReturnUser | ErrorObject {
  * @param {string} email - email of user
  * @param {string} nameFirst - first name of user
  * @param {string} nameLast - last name of user
- * 
+ *
  * @returns {ErrorObject} when criteria is not met:
- * 
+ *
  * Email address is used by another user.
  * Email does not satisfy this: https://www.npmjs.com/package/validator (validator.isEmail)
  * NameFirst contains characters other than lowercase letters, uppercase letters, spaces, hyphens, or apostrophes
  * NameFirst is less than 2 characters or more than 20 characters
  * NameLast contains characters other than lowercase letters, uppercase letters, spaces, hyphens, or apostrophes
  * NameLast is less than 2 characters or more than 20 characters
- * 
- * @returns { } - Returns empty object when admin user details is updated
+ *
+ * @returns {object} - Returns empty object when admin user details is updated
  */
 
-export function adminUserDetailsUpdate(token: string, email: string, nameFirst: string, nameLast: string): ErrorObject | {} {
+export function adminUserDetailsUpdate(token: string, email: string, nameFirst: string, nameLast: string): ErrorObject | object {
   const checkToken = validToken(token);
   if (isError(checkToken)) {
     return {

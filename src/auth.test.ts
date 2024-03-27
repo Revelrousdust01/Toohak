@@ -1,6 +1,8 @@
-import { adminUserDetails, adminUserDetailsUpdate, adminUserPasswordUpdate } from './auth';
-import { requestAdminAuthLogin, requestAdminAuthLogout, requestAdminAuthRegister,
-  requestAdminUserDetails, requestAdminUserDetailsUpdate } from './requests';
+import { adminUserPasswordUpdate } from './auth';
+import {
+  requestAdminAuthLogin, requestAdminAuthLogout, requestAdminAuthRegister,
+  requestAdminUserDetails, requestAdminUserDetailsUpdate
+} from './requests';
 import { ErrorObject } from './interfaces';
 import { clear } from './other';
 
@@ -216,7 +218,7 @@ describe('adminUserDetailsUpdate', () => {
   test('Valid Details', () => {
     const user = requestAdminAuthRegister(email, password, firstName, lastName);
     requestAdminAuthLogin(email, password);
-    const response = requestAdminUserDetailsUpdate(user.jsonBody.token as string, 
+    const response = requestAdminUserDetailsUpdate(user.jsonBody.token as string,
       'shuangupdated@student.unsw.edu.au', 'UpdateSamuel', 'UpdateHuang');
     expect(response.jsonBody).toStrictEqual({ });
     expect(response.statusCode).toStrictEqual(200);
@@ -225,9 +227,9 @@ describe('adminUserDetailsUpdate', () => {
   test('Email is currently used by another user', () => {
     const user = requestAdminAuthRegister(email, password, firstName, lastName);
     requestAdminAuthLogin(email, password);
-    const user2 = requestAdminAuthRegister('cpolitis@student.unsw.edu.au', 'a1b2c3d4e5f6', 
+    requestAdminAuthRegister('cpolitis@student.unsw.edu.au', 'a1b2c3d4e5f6',
       'Christian', 'Politis');
-    const response = requestAdminUserDetailsUpdate(user.jsonBody.token as string, 
+    const response = requestAdminUserDetailsUpdate(user.jsonBody.token as string,
       'cpolitis@student.unsw.edu.au', firstName, lastName);
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(400);
@@ -244,7 +246,7 @@ describe('adminUserDetailsUpdate', () => {
   ])("Email does not satisfy validator: '$badEmail'", ({ badEmail }) => {
     requestAdminAuthRegister(email, password, firstName, lastName);
     const user = requestAdminAuthLogin(email, password);
-    const response = requestAdminUserDetailsUpdate(user.jsonBody.token as string, 
+    const response = requestAdminUserDetailsUpdate(user.jsonBody.token as string,
       badEmail, firstName, lastName);
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(400);
@@ -261,7 +263,7 @@ describe('adminUserDetailsUpdate', () => {
   ])("NameFirst contains unwanted Characters: '$character'", ({ character }) => {
     requestAdminAuthRegister(email, password, firstName.concat(character), lastName);
     const user = requestAdminAuthLogin(email, password);
-    const response = requestAdminUserDetailsUpdate(user.jsonBody.token as string, email, 
+    const response = requestAdminUserDetailsUpdate(user.jsonBody.token as string, email,
       firstName.concat(character), lastName);
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(400);
@@ -278,7 +280,7 @@ describe('adminUserDetailsUpdate', () => {
   ])("NameLast contains unwanted Characters: '$character'", ({ character }) => {
     requestAdminAuthRegister(email, password, firstName, lastName);
     const user = requestAdminAuthLogin(email, password);
-    const response = requestAdminUserDetailsUpdate(user.jsonBody.token as string, email, 
+    const response = requestAdminUserDetailsUpdate(user.jsonBody.token as string, email,
       firstName, lastName.concat(character));
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(400);
