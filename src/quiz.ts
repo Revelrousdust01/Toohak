@@ -165,49 +165,45 @@ export function adminQuizCreate(token: string, name: string, description: string
 /**
   * Update the name of the relevant quiz.
   *
-  * @param {number} authUserId - user id of admin
-  * @param {number} quizId - relevant quiz id
+  * @param {string} token - User ID of admin
+  * @param {number} quizid - relevant quizID
   * @param {string} name - new name for the relevant quiz
   *
-  * @returns {} - returns empty object when quiz name is updated
+  * @returns {object} - returns an empty object when a quiz is removed
 */
 
-export function adminQuizNameUpdate(token: string, quizid: number, name: string): ErrorObject | {} {
+export function adminQuizNameUpdate(token: string, quizid: number, name: string): ErrorObject | object {
   const data = getData();
-  const quizIndex = data.quizzes.findIndex(quizzes => quizzes.quizid === quizid);
+  const quizIndex = data.quizzes.findIndex(quizzes => quizzes.quizId === quizid);
   const checkToken = validToken(token);
-  const user = data.users.find(user => user.token === token);
 
-  // 400
+  // 401 error
+  if (isError(checkToken)) {
+    return { error: 'Token is empty or invalid' };
+  }
+
+  // 400 error
   const checkQuizName = validQuizName(name);
   if (isError(checkQuizName)) {
     return { error: 'Quiz name is not valid' };
   }
 
-  // 400
-  const isNameUsed = data.quizzes.some(otherQuiz =>
-    otherQuiz.name === name && otherQuiz.quizid !== quizid && user.ownedQuizzes.includes(otherQuiz.quizid));
-
-  if (isNameUsed) {
-    return { error: 'Name is already used by the current logged in user for another quiz' };
+  // 400 error
+  const existingQuiz = data.quizzes.find(quiz => quiz.name === name);
+  if (existingQuiz) {
+    if (checkToken.ownedQuizzes.find(quiz => quiz === existingQuiz.quizId)) { return { error: 'Name is already used by the current logged in user for another quiz.' }; }
   }
 
-  //401
-  if (isError(checkToken)) {
-    return { error: "Token is empty or invalid" };
-  }
-
-  // 403
+  // 403 error
   if (quizIndex === -1) { return { error: 'Quiz ID does not refer to a valid quiz.' }; }
 
+  // 403 error
   if (!checkToken.ownedQuizzes.includes(quizid)) { return { error: 'Quiz ID does not refer to a quiz that this user owns.' }; }
 
-  quiz.name = name;
+  data.quizzes[quizIndex].name = name;
   setData(data);
-
   return { };
 }
-
 
 /**
  * Given a particular quiz, permanently remove the quiz.
