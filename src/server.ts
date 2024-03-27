@@ -3,6 +3,7 @@ import {
   adminUserDetails, adminUserDetailsUpdate
 } from './auth';
 import { adminQuizCreate, adminQuizRemove } from './quiz';
+import { clear } from './other';
 import express, { json, Request, Response } from 'express';
 import { echo } from './newecho';
 import morgan from 'morgan';
@@ -117,6 +118,11 @@ app.post('/v1/admin/quiz', (req: Request, res: Response) => {
       return res.status(400).json(response);
     }
   }
+  res.json(response);
+});
+
+app.delete('/v1/clear', (req: Request, res: Response) => {
+  const response = clear();
   res.json(response);
 });
 

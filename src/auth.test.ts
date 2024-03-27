@@ -1,20 +1,19 @@
 import { adminUserPasswordUpdate } from './auth';
 import {
   requestAdminAuthLogin, requestAdminAuthLogout, requestAdminAuthRegister,
-  requestAdminUserDetails, requestAdminUserDetailsUpdate
+  requestAdminUserDetails, requestAdminUserDetailsUpdate, requestClear
 } from './requests';
 import { ErrorObject } from './interfaces';
-import { clear } from './other';
 
 // Clear before each test
 beforeEach(() => {
-  clear();
+  requestClear();
 });
 
 const ERROR: ErrorObject = { error: expect.any(String) };
 
 // adminAuthLogin
-describe.skip('adminAuthLogin', () => {
+describe('adminAuthLogin', () => {
   const firstName = 'Christian';
   const lastName = 'Politis';
   const email = 'cpolitis@student.unsw.edu.au';
@@ -43,7 +42,7 @@ describe.skip('adminAuthLogin', () => {
 });
 
 // adminAuthLogout
-describe.skip('adminAuthLogout', () => {
+describe('adminAuthLogout', () => {
   const firstName = 'Christian';
   const lastName = 'Politis';
   const email = 'cpolitis@student.unsw.edu.au';
@@ -71,7 +70,7 @@ describe.skip('adminAuthLogout', () => {
 });
 
 // adminAuthRegister
-describe.skip('adminAuthRegister', () => {
+describe('adminAuthRegister', () => {
   const firstName = 'Christian';
   const lastName = 'Politis';
   const email = 'cpolitis@student.unsw.edu.au';
@@ -174,7 +173,7 @@ describe.skip('adminAuthRegister', () => {
 });
 
 // adminUserDetails
-describe.skip('adminUserDetails', () => {
+describe('adminUserDetails', () => {
   const firstName = 'Christian';
   const lastName = 'Politis';
   const email = 'cpolitis@student.unsw.edu.au';
@@ -261,7 +260,7 @@ describe('adminUserDetailsUpdate', () => {
     { character: '*' },
     { character: '/' }
   ])("NameFirst contains unwanted Characters: '$character'", ({ character }) => {
-    requestAdminAuthRegister(email, password, firstName.concat(character), lastName);
+    requestAdminAuthRegister(email, password, firstName, lastName);
     const user = requestAdminAuthLogin(email, password);
     const response = requestAdminUserDetailsUpdate(user.jsonBody.token as string, email,
       firstName.concat(character), lastName);
