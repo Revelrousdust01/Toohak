@@ -17,7 +17,8 @@ let data: DataStore = {
   ],
   quizzes: [
 
-  ]
+  ],
+  quizCounter: 1
 };
 
 // YOU SHOULD MODIFY THIS OBJECT ABOVE ONLY

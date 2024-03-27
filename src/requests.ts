@@ -109,3 +109,7 @@ export const requestAdminUserPasswordUpdate = (token: string, oldPassword: strin
     '/v1/admin/user/password',
     { token: token, oldPassword: oldPassword, newPassword: newPassword });
 };
+
+export const requestClear = (): RequestHelperReturnType => {
+  return requestHelper('DELETE', '/v1/clear');
+};
