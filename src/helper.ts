@@ -1,6 +1,24 @@
 import { getData } from './dataStore';
-import type { ErrorObject, User } from './interfaces';
+import type { ErrorObject, User, Quiz } from './interfaces';
 import validator from 'validator';
+
+// /**
+//   * Return the quiz, given the quizId
+//   *
+//   * @param {number} quizId - relevent quizId
+//   *
+//   * @returns { Quiz } - Returns the quiz if quiz is found
+//   * @returns { } - Returns empty object if quiz is not found
+// */
+
+export function findQuiz(quizid: number): object | Quiz {
+  const data = getData();
+  const quiz = data.quizzes.find(quiz => quiz.quizId === quizid);
+  if (!quiz) {
+    return { };
+  }
+  return quiz;
+}
 
 /**
   * Check whether object is of type ErrorObject or not:
@@ -68,14 +86,36 @@ export function validPassword(password: string): object | ErrorObject {
 }
 
 /**
+  * Checks for valid Quiz ID
+  *
+  * @param {string} token - Token of session
+  * @param {number} quizId - Relevent quizId
+  *
+  * @returns { { error: } } - Returns object with error when quizid is invalid
+  * @returns { } - Returns empty object if quizid is valid
+*/
+
+export function validQuizId(token: string, quizid: number, user: User): ErrorObject | object {
+  const data = getData();
+  const quizIndex = data.quizzes.findIndex(quizzes => quizzes.quizId === quizid);
+
+  if (quizIndex === -1) { return { error: 'Quiz ID does not refer to a valid quiz.' }; }
+
+  if (!user.ownedQuizzes.includes(quizid)) { return { error: 'Quiz ID does not refer to a quiz that this user owns.' }; }
+
+  return { };
+}
+
+/**
+
   * Checks for validToken
   *
   * @param {string} token - Token of session
   *
   * @returns { { error: }  } - Returns object with error when token is invalid
   * @returns { User } - Returns the user within the correct session when the token is valid
-
 */
+
 export function validToken(token: string): User | ErrorObject {
   const data = getData();
   const session = data.userSessions.find(session => session.sessionId === token);
