@@ -233,10 +233,6 @@ export function adminQuizRemove(token: string, quizid: number): object | ErrorOb
 
   data.quizzes.splice(quizIndex, 1);
 
-  const ownedQuizIndex = checkToken.ownedQuizzes.indexOf(quizid);
-
-  if (ownedQuizIndex !== -1) { checkToken.ownedQuizzes.splice(ownedQuizIndex, 1); }
-
   setData(data);
 
   return { };
