@@ -1,6 +1,6 @@
 import {
   requestAdminAuthLogin, requestAdminAuthRegister,
-  requestAdminQuizCreate, requestAdminQuizDescriptionUpdate, requestAdminQuizNameUpdate, 
+  requestAdminQuizCreate, requestAdminQuizDescriptionUpdate, requestAdminQuizNameUpdate,
   requestAdminQuizRemove, requestAdminQuizTransfer, requestAdminQuizTrashEmpty, requestClear,
   requestAdminQuizViewTrash
 } from './requests';
@@ -92,7 +92,7 @@ describe('Test adminQuizCreate', () => {
 });
 
 // adminQuizDescriptionUpdate
-describe.only('Test adminQuizDescriptionUpdate', () => {
+describe('Test adminQuizDescriptionUpdate', () => {
   const firstName = 'Leon';
   const lastName = 'Sun';
   const email = 'leonsun@gmail.com';
