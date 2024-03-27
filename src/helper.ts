@@ -91,7 +91,7 @@ export function validAuthUserId(authUserId: number) {
 /**
   * Checks for validToken
   *
-  * @param {string} token - Password of user
+  * @param {string} token - Token of session
   *
   * @returns { { error: }  } - Returns object with error when token is invalid
   * @returns { User } - Returns the user within the correct session when the token is valid
