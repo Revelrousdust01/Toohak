@@ -1,10 +1,11 @@
 import {
   adminAuthLogin, adminAuthLogout, adminAuthRegister,
-  adminUserDetails, adminUserDetailsUpdate, adminUserPasswordUpdate
+  adminUserDetails, adminUserDetailsUpdate, adminUserPasswordUpdate,
 } from './auth';
 import {
   adminQuizCreate, adminQuizRemove, adminQuizTransfer,
-  adminQuizEmptyTrash, adminQuizNameUpdate, adminQuizViewTrash
+  adminQuizEmptyTrash, adminQuizNameUpdate, adminQuizViewTrash,
+  adminQuizList
 } from './quiz';
 import { clear } from './other';
 import express, { json, Request, Response } from 'express';
@@ -193,6 +194,15 @@ app.delete('/v1/admin/quiz/trash/empty', (req: Request, res: Response) => {
     } else {
       return res.status(403).json(response);
     }
+  }
+  res.json(response);
+});
+
+app.get('/v1/admin/quiz/list', (req: Request, res: Response) => {
+  const response = adminQuizList(req.query.token as string);
+
+  if ('error' in response) {
+    return res.status(401).json(response);
   }
   res.json(response);
 });

@@ -1,5 +1,5 @@
 import { getData, setData } from './dataStore';
-import type { ErrorObject, Quiz, createQuizReturn, quizArray } from './interfaces';
+import type { ErrorObject, Quiz, createQuizReturn, QuizArray } from './interfaces';
 import { isError, findQuiz, validQuizName, validQuizId, validToken } from './helper';
 
 /**
@@ -126,40 +126,56 @@ export function adminQuizCreate(token: string, name: string, description: string
 /**
  * Provide a list of all quizzes that are owned by the currently logged in user.
  *
- * @param {number} authUserId - ID of user
+ * @param {string} token - ID of user
  *
- * @returns {array} - Returns array of all quizzes that are owned
- *                    by the currently logged in user.
+ * @return {ErrorObject} - returns error object based on following conditions:
+ *
+ * Token is empty or invalid (does not refer to valid logged in user session)
+ *
+ * @return {QuizArray} - returns an array of quizzes in the list;
  */
 
-// export function adminQuizList(authUserId) {
-//   const checkAuthUserId = validAuthUserId(authUserId);
-//   if (checkAuthUserId.error) {
-//     return {
-//       error: checkAuthUserId.error
-//     };
-//   }
+export function adminQuizList(token: string): ErrorObject | QuizArray {
+  const data = getData();
 
-//   const data = getData();
+  const checkToken = validToken(token);
+  if (isError(checkToken)) {
+    return {
+      error: checkToken.error
+    };
+  }
 
-//   const user = data.users.find(user => user.userId === authUserId);
-//   const ownedQuizzes = user.ownedQuizzes;
-//   const quizzes = [];
+  const ownedQuizzes = checkToken.ownedQuizzes;
+  const quizInTrash = data.trash;
+  const quizzes = [];
 
-//   for (const ownedQuiz of ownedQuizzes) {
-//     const quiz = {
-//       name: data.quizzes.find(quiz => quiz.quizId === ownedQuiz).name,
-//       quizId: ownedQuiz
-//     };
-//     quizzes.push(quiz);
-//   }
-
-//   setData(data);
-
-//   return {
-//     quizzes: quizzes
-//   };
-// }
+  if (quizInTrash.length === 0) {
+    for (const ownedQuiz of ownedQuizzes) {
+      const quizFind = findQuiz(ownedQuiz);
+      const quiz = {
+        quizId: ownedQuiz,
+        name: (quizFind as Quiz).name
+      };
+      quizzes.push(quiz);
+    }
+  } else {
+    for (const ownedQuiz of ownedQuizzes) {
+      for (const trashedQuiz of quizInTrash) {
+        if (ownedQuiz !== trashedQuiz.quizId) {
+          const quizFind = findQuiz(ownedQuiz);
+          const quiz = {
+            quizId: ownedQuiz,
+            name: (quizFind as Quiz).name
+          };
+          quizzes.push(quiz);
+        }
+      }
+    }
+  }
+  return {
+    quizzes: quizzes
+  };
+}
 
 /**
   * Update the name of the relevant quiz.
@@ -378,10 +394,10 @@ export function adminQuizEmptyTrash(token: string, quizids: number[]): object | 
  *
  * Token is empty or invalid (does not refer to valid logged in user session)
  *
- * @return {quizArray} - returns an array of quizzes in the trash
+ * @return {QuizArray} - returns an array of quizzes in the trash
  */
 
-export function adminQuizViewTrash(token: string): ErrorObject | quizArray {
+export function adminQuizViewTrash(token: string): ErrorObject | QuizArray {
   const data = getData();
 
   const checkToken = validToken(token);

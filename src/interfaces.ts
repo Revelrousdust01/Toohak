@@ -26,11 +26,11 @@ export interface Quiz {
     question: Question[]
 }
 
-export interface quizArray {
-    quizzes: quizList[]
+export interface QuizArray {
+    quizzes: QuizList[]
 }
 
-export interface quizList {
+export interface QuizList {
     quizId: number,
     name: string
 }

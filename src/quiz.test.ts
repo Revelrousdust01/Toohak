@@ -1,6 +1,6 @@
 import {
-  requestAdminAuthLogin, requestAdminAuthRegister,
-  requestAdminQuizCreate, requestAdminQuizNameUpdate, requestAdminQuizRemove,
+  requestAdminAuthLogin, requestAdminAuthRegister, requestAdminQuizCreate,
+  requestAdminQuizList, requestAdminQuizNameUpdate, requestAdminQuizRemove,
   requestAdminQuizTransfer, requestAdminQuizTrashEmpty, requestClear,
   requestAdminQuizViewTrash
 } from './requests';
@@ -249,67 +249,77 @@ describe.skip('Test adminQuizInfo', () => {
 });
 
 // adminQuizList
-describe.skip('adminQuizList', () => {
-  // const firstName = 'Samuel';
-  // const lastName = 'Huang';
-  // const email = 'shuang@student.unsw.edu.au';
-  // const password = 'a1b2c3d4e5f6';
+describe('adminQuizList', () => {
+  const firstName = 'Samuel';
+  const lastName = 'Huang';
+  const email = 'shuang@student.unsw.edu.au';
+  const password = 'a1b2c3d4e5f6';
+  const quizName = 'How to train your dragon';
+  const quizDescription = 'Quiz about the movie trivia of How to Train your dragon';
 
   test('One quiz in quizlist', () => {
-    // const UserId = adminAuthRegister(email, password, firstName, lastName);
-    // const quizId1 = adminQuizCreate(UserId.authUserId, 'How to train your dragon',
-    //   'Quiz about the movie trivia of How to Train your dragon');
-    // expect(adminQuizList(UserId.authUserId)).toStrictEqual({
-    //   quizzes: [
-    //     {
-    //       quizId: quizId1.quizId,
-    //       name: 'How to train your dragon'
-    //     }
-    //   ]
-    // });
+    const register = requestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = requestAdminQuizCreate(register.jsonBody.token as string, quizName, quizDescription);
+    const response = requestAdminQuizList(register.jsonBody.token as string);
+    expect(response.jsonBody).toMatchObject({
+      quizzes: [
+        {
+          quizId: quizId.jsonBody.quizId as number,
+          name: quizName
+        }
+      ]
+    });
+    expect(response.statusCode).toStrictEqual(200);
   });
 
   test('Multiple quiz in quizlist', () => {
-    // const UserId = adminAuthRegister(email, password, firstName, lastName);
-    // const quizId1 = adminQuizCreate(UserId.authUserId, 'How to train your dragon',
-    //   'Quiz about the movie trivia of How to Train your dragon');
-    // const quizId2 = adminQuizCreate(UserId.authUserId, 'Age of Adeline',
-    //   'Quiz about the movie trivia of Age of Adeline');
-    // const quizId3 = adminQuizCreate(UserId.authUserId, 'Kung Fu Panda',
-    //   'Quiz about the movie trivia of Kung Fu Panda');
-    // expect(adminQuizList(UserId.authUserId)).toStrictEqual({
-    //   quizzes: [
-    //     {
-    //       quizId: quizId1.quizId,
-    //       name: 'How to train your dragon'
-    //     },
-    //     {
-    //       quizId: quizId2.quizId,
-    //       name: 'Age of Adeline'
-    //     },
-    //     {
-    //       quizId: quizId3.quizId,
-    //       name: 'Kung Fu Panda'
-    //     }
-    //   ]
-    // });
+    const register = requestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = requestAdminQuizCreate(register.jsonBody.token as string, quizName, quizDescription);
+    const quizId1 = requestAdminQuizCreate(register.jsonBody.token as string, 'Age of Adeline',
+      'Quiz about the movie trivia of Age of Adeline');
+    const response = requestAdminQuizList(register.jsonBody.token as string);
+    expect(response.jsonBody).toMatchObject({
+      quizzes: [
+        {
+          quizId: quizId.jsonBody.quizId as number,
+          name: quizName
+        },
+        {
+          quizId: quizId1.jsonBody.quizId as number,
+          name: 'Age of Adeline'
+        }
+      ]
+    });
+    expect(response.statusCode).toStrictEqual(200);
   });
 
-  test('No quiz in quizlist', () => {
-    // const UserId = adminAuthRegister(email, password, firstName, lastName);
-    // expect(adminQuizList(UserId.authUserId)).toStrictEqual({
-    //   quizzes: []
-    // });
+  test('Multiple quizzes with one quiz in trash', () => {
+    const register = requestAdminAuthRegister(email, password, firstName, lastName);
+    const quizId = requestAdminQuizCreate(register.jsonBody.token as string, quizName, quizDescription);
+    const quizId1 = requestAdminQuizCreate(register.jsonBody.token as string, 'Age of Adeline',
+      'Quiz about the movie trivia of Age of Adeline');
+    requestAdminQuizRemove(register.jsonBody.token as string, quizId1.jsonBody.quizId as number);
+    const response = requestAdminQuizList(register.jsonBody.token as string);
+    expect(response.jsonBody).toMatchObject({
+      quizzes: [
+        {
+          quizId: quizId.jsonBody.quizId as number,
+          name: quizName
+        }
+      ]
+    });
+    expect(response.statusCode).toStrictEqual(200);
   });
 
   test.each([
-    { invalidId: '-1' },
-    { invalidId: 'a' },
-    { invalidId: '/' },
-  ])("AuthUserId is not a valid user: '$invalidId", ({ invalidId }) => {
-    // const admin = adminAuthRegister(email, password, lastName, firstName);
-    // adminQuizCreate(admin.authUserId, 'QuizName', 'QuizDescription');
-    // expect(adminQuizList(invalidId)).toStrictEqual(ERROR);
+    { invalidToken: '' },
+    { invalidToken: '123' },
+    { invalidToken: 'b77d409a-10cd-4a47-8e94-b0cd0ab50aa1' },
+    { invalidToken: 'abc' },
+  ])("Invalid Token: '$invalidToken", ({ invalidToken }) => {
+    const response = requestAdminQuizList(invalidToken);
+    expect(response.jsonBody).toStrictEqual(ERROR);
+    expect(response.statusCode).toStrictEqual(401);
   });
 });
 
@@ -451,7 +461,6 @@ describe('Test adminQuizTransfer', () => {
     const registered1 = requestAdminAuthRegister(email, password, lastName, firstName);
     const quizId = requestAdminQuizCreate(registered1.jsonBody.token as string, quizName, quizDescription);
     const response = requestAdminQuizTransfer(registered1.jsonBody.token as string, quizId.jsonBody.quizId as number, 'bob.smith@gmail.com');
-    console.log(response);
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(400);
   });
