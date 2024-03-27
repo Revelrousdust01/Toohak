@@ -323,7 +323,7 @@ describe('Test adminQuizNameUpdate', () => {
   const quizDescription = 'This is the first new quiz';
   const newQuizName = 'New Quiz 1 Name';
 
-  test.only('Working input, 0 errors expected', () => {
+  test('Working input, 0 errors expected', () => {
     const user = requestAdminAuthRegister(email, password, lastName, firstName);
     const newQuiz = requestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
     const response = requestAdminQuizNameUpdate(user.jsonBody.token as string, newQuiz.jsonBody.quizId as number, newQuizName);
