@@ -75,23 +75,29 @@ export function adminQuizCreate(token: string, name: string, description: string
   * @returns {} - returns empty array when quiz description is updated
 */
 
-// export function adminQuizDescriptionUpdate(authUserId, quizId, description) {
-//   const currentState = getData();
+export function adminQuizDescriptionUpdate(token: string, quizid: number, description: string): ErrorObject | object {
+  const data = getData();
+  const quizIndex = data.quizzes.findIndex(quizzes => quizzes.quizId === quizid);
+  const checkToken = validToken(token);
 
-//   const user = currentState.users.find(user => user.userId === authUserId);
-//   if (!user) { return { error: 'AuthUserId is not a valid user.' }; }
+  // 401 error
+  if (isError(checkToken)) {
+    return { error: 'Token is empty or invalid' };
+  }
 
-//   if (!user.ownedQuizzes.includes(quizId)) { return { error: 'Quiz ID does not refer to a valid quiz owned by this user.' }; }
+  // 400 error
+  if (description.length > 100) { return { error: 'Description must be less than 100 characters.' }; }
 
-//   if (description.length > 100) { return { error: 'Description is too long.' }; }
+  // 403 error
+  if (quizIndex === -1) { return { error: 'Quiz ID does not refer to a valid quiz.' }; }
 
-//   const quiz = currentState.quizzes.find(quiz => quiz.quizId === quizId);
-//   if (quiz) { quiz.description = description; } else { return { error: 'Quiz not found.' }; }
+  // 403 error
+  if (!checkToken.ownedQuizzes.includes(quizid)) { return { error: 'Quiz ID does not refer to a quiz that this user owns.' }; }
 
-//   setData(currentState);
-
-//   return { };
-// }
+  data.quizzes[quizIndex].description = description;
+  setData(data);
+  return { };
+}
 
 /**
  * Get all of the relevant information about the current quiz.

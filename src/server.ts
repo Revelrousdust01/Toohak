@@ -2,7 +2,10 @@ import {
   adminAuthLogin, adminAuthLogout, adminAuthRegister,
   adminUserDetails, adminUserDetailsUpdate, adminUserPasswordUpdate
 } from './auth';
-import { adminQuizCreate, adminQuizEmptyTrash, adminQuizRemove, adminQuizNameUpdate } from './quiz';
+import { 
+  adminQuizCreate, adminQuizEmptyTrash, adminQuizRemove, 
+  adminQuizDescriptionUpdate, adminQuizNameUpdate,  
+} from './quiz';
 import { clear } from './other';
 import express, { json, Request, Response } from 'express';
 import { echo } from './newecho';
@@ -82,7 +85,7 @@ app.get('/v1/admin/user/details', (req: Request, res: Response) => {
 
 app.put('/v1/admin/quiz/:quizid/description', (req: Request, res: Response) => {
   const { token, quizid, description } = req.body;
-  const response = adminQuizDescriptionUpdate(token, quizid, newDescription);
+  const response = adminQuizDescriptionUpdate(token, quizid, description);
   if ('error' in response) {
     if (response.error === 'Quiz ID does not refer to a valid quiz.' || response.error === 'Quiz ID does not refer to a quiz that this user owns.') {
       return res.status(403).json(response);
@@ -92,7 +95,6 @@ app.put('/v1/admin/quiz/:quizid/description', (req: Request, res: Response) => {
       return res.status(400).json(response);
     }
   }
-
   return res.status(200).json({});
 });
 
