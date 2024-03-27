@@ -1,5 +1,5 @@
 import { getData, setData } from './dataStore';
-import type { ErrorObject, Quiz, createQuizReturn } from './interfaces';
+import type { ErrorObject, Quiz, createQuizReturn, quizArray } from './interfaces';
 import { isError, findQuiz, validQuizName, validQuizId, validToken } from './helper';
 
 /**
@@ -314,6 +314,21 @@ export function adminQuizTransfer(token: string, quizid: number, userEmail: stri
   return { };
 }
 
+/**
+ * Permanently delete specific quizzes currently sitting in the trash
+ *
+ * @param {string} token - Session ID of admin
+ * @param {array} quizids - JSONified array of quiz id numbers
+ *
+ * @returns {ErrorObject} - returns error object based on following conditions:
+ *
+ * One or more of the Quiz IDs is not currently in the trash
+ * Token is empty or invalid (does not refer to valid logged in user session)
+ * Valid token is provided, but one or more of the Quiz IDs refers to a quiz that this current user does not own
+ *
+ * @returns {object} - returns an empty object when the trash is emptied
+ */
+
 export function adminQuizEmptyTrash(token: string, quizids: number[]): object | ErrorObject {
   const data = getData();
 
@@ -351,6 +366,48 @@ export function adminQuizEmptyTrash(token: string, quizids: number[]): object | 
       data.quizzes.splice(removedTrash, 1);
     }
   }
-
   return {};
+}
+
+/**
+ * View the quizzes that are currently in the trash for the logged in user.
+ *
+ * @param {string} token - Session ID of admin
+ *
+ * @return {ErrorObject} - returns error object based on following conditions:
+ *
+ * Token is empty or invalid (does not refer to valid logged in user session)
+ *
+ * @return {quizArray} - returns an array of quizzes in the trash
+ */
+
+export function adminQuizViewTrash(token: string): ErrorObject | quizArray {
+  const data = getData();
+
+  const checkToken = validToken(token);
+  if (isError(checkToken)) {
+    return {
+      error: checkToken.error
+    };
+  }
+
+  const ownedQuizzes = checkToken.ownedQuizzes;
+  const quizInTrash = data.trash;
+  const foundTrash = [];
+
+  for (const ownedQuiz of ownedQuizzes) {
+    for (const trashedQuiz of quizInTrash) {
+      if (ownedQuiz === trashedQuiz.quizId) {
+        const quiz = {
+          quizId: trashedQuiz.quizId,
+          name: trashedQuiz.name
+        };
+        foundTrash.push(quiz);
+      }
+    }
+  }
+
+  return {
+    quizzes: foundTrash
+  };
 }

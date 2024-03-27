@@ -26,6 +26,15 @@ export interface Quiz {
     question: Question[]
 }
 
+export interface quizArray {
+    quizzes: quizList[]
+}
+
+export interface quizList {
+    quizId: number,
+    name: string
+}
+
 export interface UserSessions {
     userId: number
     sessionId: string

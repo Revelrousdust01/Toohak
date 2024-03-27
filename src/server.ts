@@ -2,7 +2,8 @@ import {
   adminAuthLogin, adminAuthLogout, adminAuthRegister,
   adminUserDetails, adminUserDetailsUpdate, adminUserPasswordUpdate
 } from './auth';
-import { adminQuizCreate, adminQuizRemove, adminQuizTransfer, adminQuizEmptyTrash, adminQuizNameUpdate } from './quiz';
+import { adminQuizCreate, adminQuizRemove, adminQuizTransfer, 
+adminQuizEmptyTrash, adminQuizNameUpdate, adminQuizViewTrash } from './quiz';
 import { clear } from './other';
 import express, { json, Request, Response } from 'express';
 import { echo } from './newecho';
@@ -138,6 +139,15 @@ app.post('/v1/admin/quiz/:quizid/transfer', (req: Request, res: Response) => {
     } else {
       return res.status(400).json(response);
     }
+  }
+  res.json(response);
+});
+
+app.get('/v1/admin/quiz/trash', (req: Request, res: Response) => {
+  const response = adminQuizViewTrash(req.query.token as string);
+
+  if ('error' in response) {
+    return res.status(401).json(response);
   }
   res.json(response);
 });
