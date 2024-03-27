@@ -322,7 +322,7 @@ describe.skip('adminQuizList', () => {
 });
 
 // adminQuizNameUpdate
-describe.only('Test adminQuizNameUpdate', () => {
+describe('Test adminQuizNameUpdate', () => {
   const firstName = 'Leon';
   const lastName = 'Sun';
   const email = 'leonsun@gmail.com';
