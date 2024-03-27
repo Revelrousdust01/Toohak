@@ -1,6 +1,6 @@
 import { getData, setData } from './dataStore';
-import type { ErrorObject, Quiz, createQuizReturn } from './interfaces';
-import { isError, validQuizName, validToken } from './helper';
+import type { ErrorObject, Quiz, createQuizReturn, quizArray } from './interfaces';
+import { isError, findQuiz, validQuizName, validQuizId, validToken } from './helper';
 
 /**
  * Given basic details about a new quiz, create one for the logged in user.
@@ -59,7 +59,6 @@ export function adminQuizCreate(token: string, name: string, description: string
   data.users.find(user => user.userId === checkToken.userId).ownedQuizzes.push(quizId);
 
   data.quizzes.push(newQuiz);
-
   setData(data);
 
   return { quizId: newQuiz.quizId };
@@ -230,9 +229,13 @@ export function adminQuizRemove(token: string, quizid: number): object | ErrorOb
     };
   }
 
-  if (quizIndex === -1) { return { error: 'Quiz ID does not refer to a valid quiz.' }; }
+  const checkQuizId = validQuizId(token, quizid, checkToken);
 
-  if (!checkToken.ownedQuizzes.includes(quizid)) { return { error: 'Quiz ID does not refer to a quiz that this user owns.' }; }
+  if (isError(checkQuizId)) {
+    return {
+      error: checkQuizId.error
+    };
+  }
 
   data.quizzes[quizIndex].timeLastEdited = Date.now();
 
@@ -244,6 +247,87 @@ export function adminQuizRemove(token: string, quizid: number): object | ErrorOb
 
   return { };
 }
+
+/**
+ * Transfer ownership of a quiz to a different user based on their email.
+ *
+ * @param {string} token - User ID of admin
+ * @param {number} quizid - relevant quizID
+ * @param {string} userEmail - Email of user to be transferred
+ *
+ * @returns {ErrorObject} - returns error object based on following conditions:
+ *
+ * userEmail is not a real user
+ * userEmail is the current logged in user
+ * Quiz ID refers to a quiz that has a name that is already used by the target user
+ * Token is empty or invalid (does not refer to valid logged in user session)
+ * Valid token is provided, but either the quiz ID is invalid, or the user does not own the quiz
+ *
+ * @returns {object} - returns an empty object when a quiz is transferred
+ */
+
+export function adminQuizTransfer(token: string, quizid: number, userEmail: string): object | ErrorObject {
+  const data = getData();
+  const user = data.users.find(users => users.email === userEmail);
+  const checkToken = validToken(token);
+
+  if (isError(checkToken)) {
+    return {
+      error: checkToken.error
+    };
+  }
+
+  if (!user) {
+    return { error: 'userEmail is not a real user.' };
+  }
+
+  if (userEmail === checkToken.email) { return { error: 'userEmail is the current logged in user' }; }
+
+  const tokenQuiz = findQuiz(checkToken.userId);
+
+  for (const quiz in user.ownedQuizzes) {
+    const ownedQuiz = user.ownedQuizzes[quiz];
+    const userQuiz = findQuiz(ownedQuiz);
+    if (tokenQuiz != null && userQuiz != null) {
+      if ((tokenQuiz as Quiz).name === (userQuiz as Quiz).name) {
+        return { error: 'Quiz ID refers to a quiz that has a name that is already used by the target user.' };
+      }
+    }
+  }
+
+  const checkQuizId = validQuizId(token, quizid, checkToken);
+
+  if (isError(checkQuizId)) {
+    return {
+      error: checkQuizId.error
+    };
+  }
+
+  user.ownedQuizzes.push(quizid);
+
+  const ownedQuizIndex = checkToken.ownedQuizzes.indexOf(quizid);
+
+  if (ownedQuizIndex !== -1) { checkToken.ownedQuizzes.splice(ownedQuizIndex, 1); }
+
+  setData(data);
+
+  return { };
+}
+
+/**
+ * Permanently delete specific quizzes currently sitting in the trash
+ *
+ * @param {string} token - Session ID of admin
+ * @param {array} quizids - JSONified array of quiz id numbers
+ *
+ * @returns {ErrorObject} - returns error object based on following conditions:
+ *
+ * One or more of the Quiz IDs is not currently in the trash
+ * Token is empty or invalid (does not refer to valid logged in user session)
+ * Valid token is provided, but one or more of the Quiz IDs refers to a quiz that this current user does not own
+ *
+ * @returns {object} - returns an empty object when the trash is emptied
+ */
 
 export function adminQuizEmptyTrash(token: string, quizids: number[]): object | ErrorObject {
   const data = getData();
@@ -282,6 +366,48 @@ export function adminQuizEmptyTrash(token: string, quizids: number[]): object | 
       data.quizzes.splice(removedTrash, 1);
     }
   }
-
   return {};
+}
+
+/**
+ * View the quizzes that are currently in the trash for the logged in user.
+ *
+ * @param {string} token - Session ID of admin
+ *
+ * @return {ErrorObject} - returns error object based on following conditions:
+ *
+ * Token is empty or invalid (does not refer to valid logged in user session)
+ *
+ * @return {quizArray} - returns an array of quizzes in the trash
+ */
+
+export function adminQuizViewTrash(token: string): ErrorObject | quizArray {
+  const data = getData();
+
+  const checkToken = validToken(token);
+  if (isError(checkToken)) {
+    return {
+      error: checkToken.error
+    };
+  }
+
+  const ownedQuizzes = checkToken.ownedQuizzes;
+  const quizInTrash = data.trash;
+  const foundTrash = [];
+
+  for (const ownedQuiz of ownedQuizzes) {
+    for (const trashedQuiz of quizInTrash) {
+      if (ownedQuiz === trashedQuiz.quizId) {
+        const quiz = {
+          quizId: trashedQuiz.quizId,
+          name: trashedQuiz.name
+        };
+        foundTrash.push(quiz);
+      }
+    }
+  }
+
+  return {
+    quizzes: foundTrash
+  };
 }
