@@ -1,6 +1,5 @@
 import {
-  requestAdminAuthRegister, requestAdminAuthLogin,
-  requestAdminQuizCreate, requestAdminQuizRemove, requestClear
+  requestAdminAuthRegister, requestAdminQuizCreate, requestAdminQuizRemove, requestClear
 } from './requests';
 
 beforeEach(() => {
@@ -13,7 +12,6 @@ describe('Iteration 2: Test "clear" function', () => {
   const email = 'leonsun@gmail.com';
   const password = 'Leonsunspassword1';
   const quizName = 'The Quiz 1';
-  const quizName2 = 'The Quiz 2';
   const quizDescription = 'Description for first quiz';
 
   test('Returns empty object from an empty test', () => {
@@ -22,15 +20,14 @@ describe('Iteration 2: Test "clear" function', () => {
   });
 
   test('Resets users list to empty', () => {
-    const user = requestAdminAuthRegister(email, password, lastName, firstName);
+    requestAdminAuthRegister(email, password, lastName, firstName);
     const response = requestClear();
     expect(response.jsonBody).toStrictEqual({});
   });
 
   test('Resets quizzes list to empty', () => {
     const user = requestAdminAuthRegister(email, password, lastName, firstName);
-    const quiz = requestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
-    console.log(quiz);
+    requestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
     const response = requestClear();
     expect(response.jsonBody).toStrictEqual({});
   });
