@@ -93,9 +93,9 @@ export const requestAdminQuizRemove = (token: string, quizid: number): RequestHe
 };
 
 export const requestAdminQuizTrashEmpty = (token: string, quizids: number[]): RequestHelperReturnType => {
-  return requestHelper('GET',
+  return requestHelper('DELETE',
     '/v1/admin/quiz/trash/empty',
-    { token: token, quizIds:quizids });
+    { token: token, quizIds: quizids });
 };
 
 export const requestAdminUserDetails = (token: string): RequestHelperReturnType => {
