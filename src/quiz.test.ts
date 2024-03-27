@@ -1,7 +1,7 @@
 import {
-  requestAdminAuthLogin, requestAdminAuthRegister,requestAdminQuizCreate, 
-  requestAdminQuizList, requestAdminQuizNameUpdate, requestAdminQuizRemove, 
-  requestAdminQuizTransfer, requestAdminQuizTrashEmpty, requestClear, 
+  requestAdminAuthLogin, requestAdminAuthRegister, requestAdminQuizCreate,
+  requestAdminQuizList, requestAdminQuizNameUpdate, requestAdminQuizRemove,
+  requestAdminQuizTransfer, requestAdminQuizTrashEmpty, requestClear,
   requestAdminQuizViewTrash
 } from './requests';
 import { ErrorObject } from './interfaces';
@@ -259,38 +259,55 @@ describe.only('adminQuizList', () => {
 
   test('One quiz in quizlist', () => {
     const register = requestAdminAuthRegister(email, password, lastName, firstName);
-    const newQuiz = requestAdminQuizCreate(register.jsonBody.token as string, quizName, quizDescription);
     const quizId = requestAdminQuizCreate(register.jsonBody.token as string, quizName, quizDescription);
     const response = requestAdminQuizList(register.jsonBody.token as string);
-    expect(response.jsonBody).toMatchObject({ 
+    expect(response.jsonBody).toMatchObject({
       quizzes: [
         {
           quizId: quizId.jsonBody.quizId as number,
           name: quizName
         }
-      ] 
-    })
-    expect(newQuiz.statusCode).toStrictEqual(200);
+      ]
+    });
+    expect(response.statusCode).toStrictEqual(200);
   });
 
   test('Multiple quiz in quizlist', () => {
     const register = requestAdminAuthRegister(email, password, lastName, firstName);
     const quizId = requestAdminQuizCreate(register.jsonBody.token as string, quizName, quizDescription);
     const quizId1 = requestAdminQuizCreate(register.jsonBody.token as string, 'Age of Adeline',
-    'Quiz about the movie trivia of Age of Adeline');
+      'Quiz about the movie trivia of Age of Adeline');
     const response = requestAdminQuizList(register.jsonBody.token as string);
-    expect(response.jsonBody).toMatchObject({ 
+    expect(response.jsonBody).toMatchObject({
       quizzes: [
         {
           quizId: quizId.jsonBody.quizId as number,
           name: quizName
         },
         {
-          quizId: quizId.jsonBody.quizId as number,
+          quizId: quizId1.jsonBody.quizId as number,
           name: 'Age of Adeline'
         }
-      ] 
-    })
+      ]
+    });
+    expect(response.statusCode).toStrictEqual(200);
+  });
+
+  test('Multiple quizzes with one quiz in trash', () => {
+    const register = requestAdminAuthRegister(email, password, firstName, lastName);
+    const quizId = requestAdminQuizCreate(register.jsonBody.token as string, quizName, quizDescription);
+    const quizId1 = requestAdminQuizCreate(register.jsonBody.token as string, 'Age of Adeline',
+      'Quiz about the movie trivia of Age of Adeline');
+    requestAdminQuizRemove(register.jsonBody.token as string, quizId1.jsonBody.quizId as number);
+    const response = requestAdminQuizList(register.jsonBody.token as string);
+    expect(response.jsonBody).toMatchObject({
+      quizzes: [
+        {
+          quizId: quizId.jsonBody.quizId as number,
+          name: quizName
+        }
+      ]
+    });
     expect(response.statusCode).toStrictEqual(200);
   });
 
@@ -444,7 +461,6 @@ describe('Test adminQuizTransfer', () => {
     const registered1 = requestAdminAuthRegister(email, password, lastName, firstName);
     const quizId = requestAdminQuizCreate(registered1.jsonBody.token as string, quizName, quizDescription);
     const response = requestAdminQuizTransfer(registered1.jsonBody.token as string, quizId.jsonBody.quizId as number, 'bob.smith@gmail.com');
-    console.log(response);
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(400);
   });

@@ -126,13 +126,57 @@ export function adminQuizCreate(token: string, name: string, description: string
 /**
  * Provide a list of all quizzes that are owned by the currently logged in user.
  *
- * @param {number} authUserId - ID of user
+ * @param {string} token - ID of user
  *
- * @returns {array} - Returns array of all quizzes that are owned
- *                    by the currently logged in user.
+ * @return {ErrorObject} - returns error object based on following conditions:
+ *
+ * Token is empty or invalid (does not refer to valid logged in user session)
+ *
+ * @return {quizArray} - returns an array of quizzes in the list;
  */
 
-// export function adminQuizList(authUserId) {
+export function adminQuizList(token: string): ErrorObject | quizArray {
+  const data = getData();
+
+  const checkToken = validToken(token);
+  if (isError(checkToken)) {
+    return {
+      error: checkToken.error
+    };
+  }
+
+  const ownedQuizzes = checkToken.ownedQuizzes;
+  const quizInTrash = data.trash;
+  const quizzes = [];
+
+  if (quizInTrash.length === 0) {
+    for (const ownedQuiz of ownedQuizzes) {
+      const quizFind = findQuiz(ownedQuiz);
+      const quiz = {
+        quizId: ownedQuiz,
+        name: (quizFind as Quiz).name
+      };
+      quizzes.push(quiz);
+    }
+  } else {
+    for (const ownedQuiz of ownedQuizzes) {
+      for (const trashedQuiz of quizInTrash) {
+        if (ownedQuiz !== trashedQuiz.quizId) {
+          const quizFind = findQuiz(ownedQuiz);
+          const quiz = {
+            quizId: ownedQuiz,
+            name: (quizFind as Quiz).name
+          };
+          quizzes.push(quiz);
+        }
+      }
+    }
+  }
+  return {
+    quizzes: quizzes
+  };
+}
+
 //   const checkAuthUserId = validAuthUserId(authUserId);
 //   if (checkAuthUserId.error) {
 //     return {
@@ -159,7 +203,6 @@ export function adminQuizCreate(token: string, name: string, description: string
 //   return {
 //     quizzes: quizzes
 //   };
-// }
 
 /**
   * Update the name of the relevant quiz.
