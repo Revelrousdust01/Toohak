@@ -149,7 +149,6 @@ describe('Test adminQuizDescriptionUpdate', () => {
     expect(response.statusCode).toStrictEqual(403);
   });
 
-
   test('Quiz description is greater than 100 characters', () => {
     const user = requestAdminAuthRegister(email, password, lastName, firstName);
     const newQuiz = requestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
