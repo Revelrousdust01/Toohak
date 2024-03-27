@@ -88,7 +88,7 @@ export const requestAdminQuizCreate = (token: string, name:string, description: 
 
 export const requestAdminQuizDescriptionUpdate = (token: string, quizid: number, description: string): RequestHelperReturnType => {
   return requestHelper('PUT',
-    '/v1/admin/quiz/$quizid/description',
+    `/v1/admin/quiz/${quizid}/description`,
     { token: token, quizid: quizid, description: description });
 };
 

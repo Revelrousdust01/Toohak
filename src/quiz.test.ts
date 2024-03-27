@@ -92,7 +92,7 @@ describe('Test adminQuizCreate', () => {
 });
 
 // adminQuizDescriptionUpdate
-describe('Test adminQuizDescriptionUpdate', () => {
+describe.only('Test adminQuizDescriptionUpdate', () => {
   const firstName = 'Leon';
   const lastName = 'Sun';
   const email = 'leonsun@gmail.com';
