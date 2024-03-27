@@ -1,6 +1,7 @@
 import {
   requestAdminAuthLogin, requestAdminAuthRegister,
-  requestAdminQuizCreate, requestAdminQuizRemove, requestClear
+  requestAdminQuizCreate, requestAdminQuizRemove, requestClear,
+  requestAdminQuizViewTrash
 } from './requests';
 import { ErrorObject } from './interfaces';
 
@@ -399,5 +400,67 @@ describe.skip('Test adminQuizNameUpdate', () => {
     // adminQuizCreate(admin.authUserId, quizName, quizDescription);
     // const quiz2 = adminQuizCreate(admin.authUserId, 'Quiz 2', 'This is the second test quiz');
     // expect(adminQuizNameUpdate(admin.authUserId, quiz2.quizId, quizName)).toStrictEqual(ERROR);
+  });
+});
+
+//adminQuizViewTrash
+describe('adminQuizViewTrash', () => {
+  const firstName = 'Samuel';
+  const lastName = 'Huang';
+  const email = 'shuang@student.unsw.edu.au';
+  const password = 'a1b2c3d4e5f6';
+  const quizName1 = 'lebron my glorious king';
+  const quizName2 = 'jo mama';
+  const quizDescr1 = 'quiz about my glorious king';
+  const quizDescr2 = 'quiz about my mummy';
+
+  test('Valid inputs with one quiz in trash', () => {
+    const user = requestAdminAuthRegister(email, password, firstName, lastName);
+    const quizId = requestAdminQuizCreate(user.jsonBody.token as string, quizName1, quizDescr1);
+    requestAdminQuizRemove(user.jsonBody.token as string, quizId.jsonBody.quizId as number);
+    const response = requestAdminQuizViewTrash(user.jsonBody.token as string);
+    expect(response.jsonBody).toMatchObject({
+      quizzes: {
+        quizId: quizId,
+        name: 'lebron my glorious king'
+      }
+    });
+    expect(response.statusCode).toStrictEqual(200);
+  });
+
+  test('Valid inputs with two quiz in trash', () => {
+    const user = requestAdminAuthRegister(email, password, firstName, lastName);
+    const quizId1 = requestAdminQuizCreate(user.jsonBody.token as string, quizName1, quizDescr1);
+    const quizId2 = requestAdminQuizCreate(user.jsonBody.token as string, quizName2, quizDescr2);
+    requestAdminQuizRemove(user.jsonBody.token as string, quizId1.jsonBody.quizId as number);
+    requestAdminQuizRemove(user.jsonBody.token as string, quizId2.jsonBody.quizId as number);
+    const response = requestAdminQuizViewTrash(user.jsonBody.token as string);
+    expect(response.jsonBody).toMatchObject({
+      quizzes: [
+        {
+          quizId: quizId1,
+          name: 'lebron my glorious king'
+        },
+        {
+          quizId: quizId2,
+          name: 'jo mama'
+        }
+      ]
+    });
+    expect(response.statusCode).toStrictEqual(200);
+  })
+
+  test.each([
+    { invalidToken: '' },
+    { invalidToken: '123' },
+    { invalidToken: 'b77d409a-10cd-4a47-8e94-b0cd0ab50aa1' },
+    { invalidToken: 'abc' },
+  ])("Invalid or Empty Token: '$invalidToken", ({ invalidToken }) => {
+    const user = requestAdminAuthRegister(email, password, firstName, lastName);
+    const quizId1 = requestAdminQuizCreate(user.jsonBody.token as string, quizName1, quizDescr1);
+    requestAdminQuizRemove(user.jsonBody.token as string, quizId1.jsonBody.quizId as number);
+    const response = requestAdminQuizViewTrash(invalidToken);
+    expect(response.jsonBody).toStrictEqual(ERROR);
+    expect(response.statusCode).toStrictEqual(401);
   });
 });
