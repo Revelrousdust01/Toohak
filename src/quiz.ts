@@ -39,7 +39,9 @@ export function adminQuizCreate(token: string, name: string, description: string
 
   if (description.length > 100) { return { error: 'Description must be less than 100 charactes.' }; }
 
-  if (data.quizzes.find(quiz => quiz.name === name)) { return { error: 'Name is already used in another quiz.' }; }
+  const existingQuiz = data.quizzes.find(quiz => quiz.name === name);
+
+  if (checkToken.ownedQuizzes.find(quiz => quiz === existingQuiz.quizId)) { return { error: 'Name is already used by the current logged in user for another quiz.' }; }
 
   const quizId = data.quizCounter++;
 
