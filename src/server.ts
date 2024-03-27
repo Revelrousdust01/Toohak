@@ -5,6 +5,7 @@ import {
 import {
   adminQuizCreate, adminQuizEmptyTrash, adminQuizRemove,
   adminQuizDescriptionUpdate, adminQuizNameUpdate,
+  adminQuizTransfer, adminQuizViewTrash
 } from './quiz';
 import { clear } from './other';
 import express, { json, Request, Response } from 'express';
@@ -99,8 +100,9 @@ app.put('/v1/admin/quiz/:quizid/description', (req: Request, res: Response) => {
 });
 
 app.put('/v1/admin/quiz/:quizid/name', (req: Request, res: Response) => {
-  const { token, quizid, name } = req.body;
-  const response = adminQuizNameUpdate(token, quizid, name);
+  const { token, name } = req.body;
+  const response = adminQuizNameUpdate(token, parseInt(req.params.quizid), name);
+
   if ('error' in response) {
     if (response.error === 'Quiz ID does not refer to a valid quiz.' || response.error === 'Quiz ID does not refer to a quiz that this user owns.') {
       return res.status(403).json(response);
@@ -138,6 +140,33 @@ app.put('/v1/admin/user/password', (req: Request, res: Response) => {
     } else {
       return res.status(400).json(response);
     }
+  }
+  res.json(response);
+});
+
+app.post('/v1/admin/quiz/:quizid/transfer', (req: Request, res: Response) => {
+  const { token, userEmail } = req.body;
+  const response = adminQuizTransfer(token, parseInt(req.params.quizid), userEmail);
+
+  if ('error' in response) {
+    if (response.error === 'Token is empty or invalid.') {
+      return res.status(401).json(response);
+    } else if (response.error === 'Quiz ID does not refer to a valid quiz.') {
+      return res.status(403).json(response);
+    } else if (response.error === 'Quiz ID does not refer to a quiz that this user owns.') {
+      return res.status(403).json(response);
+    } else {
+      return res.status(400).json(response);
+    }
+  }
+  res.json(response);
+});
+
+app.get('/v1/admin/quiz/trash', (req: Request, res: Response) => {
+  const response = adminQuizViewTrash(req.query.token as string);
+
+  if ('error' in response) {
+    return res.status(401).json(response);
   }
   res.json(response);
 });
