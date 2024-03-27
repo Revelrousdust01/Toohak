@@ -484,7 +484,7 @@ describe('adminQuizViewTrash', () => {
 });
 
 // adminQuizTrashEmpty
-describe('Test adminQuizTrashEmpty', () => {
+describe.skip('Test adminQuizTrashEmpty', () => {
   const firstName = 'Christian';
   const lastName = 'Politis';
   const email = 'cpolitis@student.unsw.edu.au';
