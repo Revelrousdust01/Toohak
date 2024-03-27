@@ -50,3 +50,4 @@ function setData(newData: DataStore) {
 }
 
 export { getData, setData };
+export type { DataStore };
