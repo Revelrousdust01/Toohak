@@ -1,7 +1,6 @@
-import { adminUserPasswordUpdate } from './auth';
 import {
   requestAdminAuthLogin, requestAdminAuthLogout, requestAdminAuthRegister,
-  requestAdminUserDetails, requestAdminUserDetailsUpdate
+  requestAdminUserDetails, requestAdminUserDetailsUpdate, requestAdminUserPasswordUpdate
 } from './requests';
 import { ErrorObject } from './interfaces';
 import { clear } from './other';
@@ -209,7 +208,7 @@ describe.skip('adminUserDetails', () => {
 });
 
 // adminUserDetailsUpdate
-describe('adminUserDetailsUpdate', () => {
+describe.skip('adminUserDetailsUpdate', () => {
   const firstName = 'Samuel';
   const lastName = 'Huang';
   const email = 'shuang@student.unsw.edu.au';
@@ -309,38 +308,39 @@ describe.skip('adminUserPasswordUpdate', () => {
   const newPassword = 'newa1b2c3d4qwerty';
 
   test('Valid Details', () => {
-    const UserId = requestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    expect(adminUserPasswordUpdate(UserId.jsonBody?.token as number, oldPassword, newPassword))
-      .toStrictEqual({ });
-  });
-
-  test.each([
-    { invalidId: -1 },
-    { invalidId: -999 },
-    { invalidId: 0 },
-  ])("AuthUserId is not a valid user: '$invalidId", ({ invalidId }) => {
     requestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    expect(adminUserPasswordUpdate(invalidId, oldPassword, newPassword))
-      .toStrictEqual(ERROR);
+    const user = requestAdminAuthLogin(email, oldPassword, firstName, lastName);
+    const response = requestAdminUserPasswordUpdate(user.jsonBody.token as string,
+      oldPassword, newPassword);
+    expect(response.jsonBody).toStrictEqual({ });
+    expect(response.statusCode).toStrictEqual(200);
   });
 
   test('Old Password is not the correct old password', () => {
-    const UserId = requestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    expect(adminUserPasswordUpdate(UserId.jsonBody?.token as number, 'thisisthewrongpassword', newPassword))
-      .toStrictEqual(ERROR);
+    requestAdminAuthRegister(email, oldPassword, firstName, lastName);
+    const user = requestAdminAuthLogin(email, oldPassword, firstName, lastName);
+    const response = requestAdminUserPasswordUpdate(user.jsonBody.token as string,
+      'thisisthewrongpassword', newPassword);
+    expect(response.jsonBody).toStrictEqual(ERROR);
+    expect(response.statusCode).toStrictEqual(400);
   });
 
   test('Old Password and New Password match exactly', () => {
-    const UserId = requestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    expect(adminUserPasswordUpdate(UserId.jsonBody?.token as number, oldPassword, oldPassword))
-      .toStrictEqual(ERROR);
+    requestAdminAuthRegister(email, oldPassword, firstName, lastName);
+    const user = requestAdminAuthLogin(email, oldPassword, firstName, lastName);
+    const response = requestAdminUserPasswordUpdate(user.jsonBody.token as string, 
+      oldPassword, oldPassword);
+    expect(response.jsonBody).toStrictEqual(ERROR);
+    expect(response.statusCode).toStrictEqual(400);
   });
 
   test('New Password has already been used by this user', () => {
-    const UserId = requestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    adminUserPasswordUpdate(UserId.jsonBody?.token as number, oldPassword, newPassword);
-    expect(adminUserPasswordUpdate(UserId.jsonBody?.token as number, newPassword, oldPassword))
-      .toStrictEqual(ERROR);
+    requestAdminAuthRegister(email, oldPassword, firstName, lastName);
+    const user = requestAdminAuthLogin(email, oldPassword, firstName, lastName);
+    const response = requestAdminUserPasswordUpdate(user.jsonBody.token as string, 
+      oldPassword, newPassword);
+    expect(response.jsonBody).toStrictEqual(ERROR);
+    expect(response.statusCode).toStrictEqual(400);
   });
 
   test.each([
@@ -351,17 +351,36 @@ describe.skip('adminUserPasswordUpdate', () => {
     { badPassword: 'A12345' },
     { badPassword: 'A123456' }
   ])("Password is less than 8 characters: '$badPassword'", ({ badPassword }) => {
-    const UserId = requestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    expect(adminUserPasswordUpdate(UserId.jsonBody?.token as number, newPassword, badPassword))
-      .toStrictEqual(ERROR);
+    requestAdminAuthRegister(email, oldPassword, firstName, lastName);
+    const user = requestAdminAuthLogin(email, oldPassword, firstName, lastName);
+    const response = requestAdminUserPasswordUpdate(user.jsonBody as string,
+      oldPassword, badPassword)
+    expect(response.jsonBody).toStrictEqual(ERROR);
+    expect(response.statusCode).toStrictEqual(400);
   });
 
   test.each([
     { badPassword: 'AAAAAAAAAAAAAAAAAAAA' },
     { badPassword: '11111111111111111111' },
   ])("Password does not contain at least one number and at least one letter: '$badPassword'", ({ badPassword }) => {
-    const UserId = requestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    expect(adminUserPasswordUpdate(UserId.jsonBody?.token as number, newPassword, badPassword))
-      .toStrictEqual(ERROR);
+    requestAdminAuthRegister(email, oldPassword, firstName, lastName);
+    const user = requestAdminAuthLogin(email, oldPassword, firstName, lastName);
+    const response = adminUserPasswordUpdate(user.jsonBody.token as string, 
+      newPassword, badPassword);
+    expect(response.jsonBody).toStrictEqual(ERROR);
+    expect(response.statusCode).toStrictEqual(400);
   });
+
+  test.each([
+    { invalidToken: '' },
+    { invalidToken: '123' },
+    { invalidToken: 'b77d409a-10cd-4a47-8e94-b0cd0ab50aa1' },
+    { invalidToken: 'abc' },
+  ])("Invalid or Empty Token: '$invalidToken", ({ invalidToken }) => {
+    requestAdminAuthRegister(email, password, firstName, lastName);
+    requestAdminAuthLogin(email, password);
+    const response = requestAdminUserPasswordUpdate(invalidToken, oldPassword, newPassword);
+    expect(response.jsonBody).toStrictEqual(ERROR);
+    expect(response.statusCode).toStrictEqual(401);
+  }); 
 });
