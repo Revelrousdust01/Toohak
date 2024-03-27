@@ -414,7 +414,6 @@ describe('Test adminQuizNameUpdate', () => {
     requestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
     const newQuiz2 = requestAdminQuizCreate(user.jsonBody.token as string, 'Quiz 2', 'This is the second test quiz');
     const response = requestAdminQuizNameUpdate(user.jsonBody.token as string, newQuiz2.jsonBody.quizId as number, quizName);
-    console.log(user);
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(400);
   });
