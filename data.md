@@ -13,7 +13,7 @@ let data = {
          password: 'hayden1!'
         }
     ]
-    quizCounter = 1;
+    quizCounter = 2;
     quizzes: [
         {
          quizId: 1,
