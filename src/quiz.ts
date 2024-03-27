@@ -1,5 +1,5 @@
 import { getData, setData } from './dataStore';
-import type { ErrorObject, Quiz, createQuizReturn, quizArray } from './interfaces';
+import type { ErrorObject, Quiz, createQuizReturn, QuizArray } from './interfaces';
 import { isError, findQuiz, validQuizName, validQuizId, validToken } from './helper';
 
 /**
@@ -132,7 +132,7 @@ export function adminQuizCreate(token: string, name: string, description: string
  *
  * Token is empty or invalid (does not refer to valid logged in user session)
  *
- * @return {quizArray} - returns an array of quizzes in the list;
+ * @return {QuizArray} - returns an array of quizzes in the list;
  */
 
 export function adminQuizList(token: string): ErrorObject | quizArray {
@@ -176,33 +176,6 @@ export function adminQuizList(token: string): ErrorObject | quizArray {
     quizzes: quizzes
   };
 }
-
-//   const checkAuthUserId = validAuthUserId(authUserId);
-//   if (checkAuthUserId.error) {
-//     return {
-//       error: checkAuthUserId.error
-//     };
-//   }
-
-//   const data = getData();
-
-//   const user = data.users.find(user => user.userId === authUserId);
-//   const ownedQuizzes = user.ownedQuizzes;
-//   const quizzes = [];
-
-//   for (const ownedQuiz of ownedQuizzes) {
-//     const quiz = {
-//       name: data.quizzes.find(quiz => quiz.quizId === ownedQuiz).name,
-//       quizId: ownedQuiz
-//     };
-//     quizzes.push(quiz);
-//   }
-
-//   setData(data);
-
-//   return {
-//     quizzes: quizzes
-//   };
 
 /**
   * Update the name of the relevant quiz.
@@ -421,7 +394,7 @@ export function adminQuizEmptyTrash(token: string, quizids: number[]): object | 
  *
  * Token is empty or invalid (does not refer to valid logged in user session)
  *
- * @return {quizArray} - returns an array of quizzes in the trash
+ * @return {QuizArray} - returns an array of quizzes in the trash
  */
 
 export function adminQuizViewTrash(token: string): ErrorObject | quizArray {
