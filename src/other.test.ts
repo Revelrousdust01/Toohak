@@ -1,6 +1,5 @@
 import {
-  requestAdminAuthRegister, requestAdminAuthLogin,
-  requestAdminQuizCreate, requestClear
+  requestAdminAuthRegister, requestAdminQuizCreate, requestAdminQuizRemove, requestClear
 } from './requests';
 
 beforeEach(() => {
@@ -10,9 +9,9 @@ beforeEach(() => {
 describe('Iteration 2: Test "clear" function', () => {
   const firstName = 'Leon';
   const lastName = 'Sun';
-  const email = 'leonsun';
+  const email = 'leonsun@gmail.com';
   const password = 'Leonsunspassword1';
-  const quizName = 'Quiz 1';
+  const quizName = 'The Quiz 1';
   const quizDescription = 'Description for first quiz';
 
   test('Returns empty object from an empty test', () => {
@@ -21,23 +20,36 @@ describe('Iteration 2: Test "clear" function', () => {
   });
 
   test('Resets users list to empty', () => {
-    requestAdminAuthRegister(email, password, firstName, lastName);
+    requestAdminAuthRegister(email, password, lastName, firstName);
     const response = requestClear();
     expect(response.jsonBody).toStrictEqual({});
   });
 
   test('Resets quizzes list to empty', () => {
-    requestAdminAuthRegister(email, password, lastName, firstName);
-    const login = requestAdminAuthLogin(email, password);
-    requestAdminQuizCreate(login.jsonBody.token as string, quizName, quizDescription);
+    const user = requestAdminAuthRegister(email, password, lastName, firstName);
+    requestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
     const response = requestClear();
     expect(response.jsonBody).toStrictEqual({});
   });
 
-  test('Resets both quizzes list and users list to empty', () => {
-    requestAdminAuthRegister(email, password, lastName, firstName);
-    const login = requestAdminAuthLogin(email, password);
-    requestAdminQuizCreate(login.jsonBody.token as string, quizName, quizDescription);
+  test('Resets trash list to empty', () => {
+    const user = requestAdminAuthRegister(email, password, lastName, firstName);
+    const newQuiz = requestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
+    requestAdminQuizRemove(user.jsonBody.token as string, newQuiz.jsonBody.quizId as number);
+    const response = requestClear();
+    expect(response.jsonBody).toStrictEqual({});
+  });
+
+  test('Resets quiz counter to 1', () => {
+    const user = requestAdminAuthRegister(email, password, lastName, firstName);
+    requestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
+    const response = requestClear();
+    expect(response.jsonBody).toStrictEqual({});
+  });
+
+  test('Resets user sessions list to empty', () => {
+    const user = requestAdminAuthRegister(email, password, lastName, firstName);
+    requestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
     const response = requestClear();
     expect(response.jsonBody).toStrictEqual({});
   });
