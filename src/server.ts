@@ -3,7 +3,7 @@ import {
   adminUserDetails, adminUserDetailsUpdate, adminUserPasswordUpdate
 } from './auth';
 import {
-  adminQuizCreate, adminQuestionCreate, adminQuizEmptyTrash, adminQuizRemove,
+  adminQuizCreate, adminQuizEmptyTrash, adminQuizRemove,
   adminQuizNameUpdate, adminQuizViewTrash
 } from './quiz';
 import { clear } from './other';
