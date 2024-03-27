@@ -1,6 +1,6 @@
 import { getData, setData } from './dataStore';
 import type { ErrorObject, Quiz, createQuizReturn } from './interfaces';
-import { isError, validQuizName, validQuizId, validToken } from './helper';
+import { isError, findQuiz, validQuizName, validQuizId, validToken } from './helper';
 
 /**
  * Given basic details about a new quiz, create one for the logged in user.
@@ -41,7 +41,9 @@ export function adminQuizCreate(token: string, name: string, description: string
 
   const existingQuiz = data.quizzes.find(quiz => quiz.name === name);
 
-  if (checkToken.ownedQuizzes.find(quiz => quiz === existingQuiz.quizId)) { return { error: 'Name is already used by the current logged in user for another quiz.' }; }
+  if (existingQuiz) {
+    if (checkToken.ownedQuizzes.find(quiz => quiz === existingQuiz.quizId)) { return { error: 'Name is already used by the current logged in user for another quiz.' }; }
+  }
 
   const quizId = data.quizCounter++;
 
@@ -276,12 +278,15 @@ export function adminQuizTransfer(token: string, quizid: number, userEmail: stri
 
   if (userEmail === checkToken.email) { return { error: 'userEmail is the current logged in user' }; }
 
-  for (const searchedUser of data.users) {
-    const findOwnedQuiz = searchedUser.userId === user.userId
-      ? null
-      : user.ownedQuizzes.find(ownedQuiz => ownedQuiz === quizid);
-    if (findOwnedQuiz) {
-      return { error: 'Quiz ID refers to a quiz that has a name that is already used by the target user.' };
+  const tokenQuiz = findQuiz(checkToken.userId);
+    
+  for (let quiz in user.ownedQuizzes) {
+    const ownedQuiz = user.ownedQuizzes[quiz];
+    const userQuiz = findQuiz(ownedQuiz);
+    if (tokenQuiz != null && userQuiz != null) {
+      if ((tokenQuiz as Quiz).name === (userQuiz as Quiz).name) {
+        return { error: 'Quiz ID refers to a quiz that has a name that is already used by the target user.' }
+      }
     }
   }
 

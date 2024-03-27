@@ -11,14 +11,14 @@ import validator from 'validator';
 //   * @returns { } - Returns empty object if quiz is not found
 // */
 
-// export function findQuiz(quizid: number): object | Quiz {
-//   const data = getData();
-//   const quiz = data.quizzes.find(quiz => quiz.quizId === quizid);
-//   if (!quiz) {
-//     return { };
-//   }
-//   return quiz;
-// }
+export function findQuiz(quizid: number): object | Quiz {
+  const data = getData();
+  const quiz = data.quizzes.find(quiz => quiz.quizId === quizid);
+  if (!quiz) {
+    return { };
+  }
+  return quiz;
+}
 
 /**
   * Check whether object is of type ErrorObject or not:

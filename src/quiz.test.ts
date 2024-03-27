@@ -395,7 +395,7 @@ describe.skip('Test adminQuizNameUpdate', () => {
 });
 
 // adminQuizTransfer
-describe('Test adminQuizTransfer', () => {
+describe.only('Test adminQuizTransfer', () => {
   const firstName = 'Jeffery';
   const lastName = 'Zhang';
   const email = 'jeffery.zhang385@gmail.com';
@@ -434,6 +434,7 @@ describe('Test adminQuizTransfer', () => {
     const registered1 = requestAdminAuthRegister(email, password, lastName, firstName);
     const quizId = requestAdminQuizCreate(registered1.jsonBody.token as string, quizName, quizDescription);
     const response = requestAdminQuizTransfer(registered1.jsonBody.token as string, quizId.jsonBody.quizId as number, 'bob.smith@gmail.com');
+    console.log(response);
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(400);
   });
