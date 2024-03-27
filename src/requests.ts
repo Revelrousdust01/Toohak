@@ -107,5 +107,5 @@ export const requestAdminUserDetailsUpdate = (token: string, email: string, firs
 export const requestAdminUserPasswordUpdate = (token: string, oldPassword: string, newPassword: string): RequestHelperReturnType => {
   return requestHelper('PUT',
     '/v1/admin/user/password',
-    { token:token, oldPassword: oldPassword, newPassword: newPassword });
+    { token: token, oldPassword: oldPassword, newPassword: newPassword });
 };

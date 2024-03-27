@@ -300,7 +300,7 @@ describe.skip('adminUserDetailsUpdate', () => {
 });
 
 // adminUserPasswordUpdate
-describe.skip('adminUserPasswordUpdate', () => {
+describe('adminUserPasswordUpdate', () => {
   const firstName = 'Samuel';
   const lastName = 'Huang';
   const email = 'shuang@student.unsw.edu.au';
@@ -309,7 +309,7 @@ describe.skip('adminUserPasswordUpdate', () => {
 
   test('Valid Details', () => {
     requestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    const user = requestAdminAuthLogin(email, oldPassword, firstName, lastName);
+    const user = requestAdminAuthLogin(email, oldPassword);
     const response = requestAdminUserPasswordUpdate(user.jsonBody.token as string,
       oldPassword, newPassword);
     expect(response.jsonBody).toStrictEqual({ });
@@ -318,7 +318,7 @@ describe.skip('adminUserPasswordUpdate', () => {
 
   test('Old Password is not the correct old password', () => {
     requestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    const user = requestAdminAuthLogin(email, oldPassword, firstName, lastName);
+    const user = requestAdminAuthLogin(email, oldPassword);
     const response = requestAdminUserPasswordUpdate(user.jsonBody.token as string,
       'thisisthewrongpassword', newPassword);
     expect(response.jsonBody).toStrictEqual(ERROR);
@@ -327,7 +327,7 @@ describe.skip('adminUserPasswordUpdate', () => {
 
   test('Old Password and New Password match exactly', () => {
     requestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    const user = requestAdminAuthLogin(email, oldPassword, firstName, lastName);
+    const user = requestAdminAuthLogin(email, oldPassword);
     const response = requestAdminUserPasswordUpdate(user.jsonBody.token as string, 
       oldPassword, oldPassword);
     expect(response.jsonBody).toStrictEqual(ERROR);
@@ -336,9 +336,11 @@ describe.skip('adminUserPasswordUpdate', () => {
 
   test('New Password has already been used by this user', () => {
     requestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    const user = requestAdminAuthLogin(email, oldPassword, firstName, lastName);
-    const response = requestAdminUserPasswordUpdate(user.jsonBody.token as string, 
+    const user = requestAdminAuthLogin(email, oldPassword);
+    requestAdminUserPasswordUpdate(user.jsonBody.token as string, 
       oldPassword, newPassword);
+    const response = requestAdminUserPasswordUpdate(user.jsonBody.token as string, 
+      newPassword, oldPassword);
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(400);
   });
@@ -352,8 +354,8 @@ describe.skip('adminUserPasswordUpdate', () => {
     { badPassword: 'A123456' }
   ])("Password is less than 8 characters: '$badPassword'", ({ badPassword }) => {
     requestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    const user = requestAdminAuthLogin(email, oldPassword, firstName, lastName);
-    const response = requestAdminUserPasswordUpdate(user.jsonBody as string,
+    const user = requestAdminAuthLogin(email, oldPassword);
+    const response = requestAdminUserPasswordUpdate(user.jsonBody.token as string,
       oldPassword, badPassword)
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(400);
@@ -364,8 +366,8 @@ describe.skip('adminUserPasswordUpdate', () => {
     { badPassword: '11111111111111111111' },
   ])("Password does not contain at least one number and at least one letter: '$badPassword'", ({ badPassword }) => {
     requestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    const user = requestAdminAuthLogin(email, oldPassword, firstName, lastName);
-    const response = adminUserPasswordUpdate(user.jsonBody.token as string, 
+    const user = requestAdminAuthLogin(email, oldPassword);
+    const response = requestAdminUserPasswordUpdate(user.jsonBody.token as string, 
       newPassword, badPassword);
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(400);
@@ -377,8 +379,8 @@ describe.skip('adminUserPasswordUpdate', () => {
     { invalidToken: 'b77d409a-10cd-4a47-8e94-b0cd0ab50aa1' },
     { invalidToken: 'abc' },
   ])("Invalid or Empty Token: '$invalidToken", ({ invalidToken }) => {
-    requestAdminAuthRegister(email, password, firstName, lastName);
-    requestAdminAuthLogin(email, password);
+    requestAdminAuthRegister(email, oldPassword, firstName, lastName);
+    const user = requestAdminAuthLogin(email, oldPassword);
     const response = requestAdminUserPasswordUpdate(invalidToken, oldPassword, newPassword);
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(401);
