@@ -2,6 +2,18 @@
  * Stores all unique interfaces that maybe used throughout the project
  */
 
+export interface Answer {
+    answerId: number,
+    answer: string,
+    color: string,
+    correct: boolean
+}
+
+export interface AnswerBody {
+    answer: string,
+    correct: boolean
+}
+
 export interface createTokenReturn {
     token: string
 }
@@ -12,9 +24,17 @@ export interface createQuizReturn {
 
 export interface Question {
     questionId: number,
-    name: string,
-    answers: string[],
-    correctAnswer: string
+    duration: number,
+    points: number
+    question: string,
+    answers: Answer[],
+}
+
+export interface QuestionBody {
+    answers: AnswerBody[],
+    duration: number,
+    points: number
+    question: string
 }
 
 export interface Quiz {
