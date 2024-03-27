@@ -98,6 +98,12 @@ export const requestAdminUserDetails = (token: string): RequestHelperReturnType 
     { token: token });
 };
 
+export const requestAdminUserDetailsUpdate = (token: string, email: string, firstName: string, lastName: string): RequestHelperReturnType => {
+  return requestHelper('PUT',
+    '/v1/admin/user/details',
+    { token: token, email: email, nameFirst: firstName, nameLast: lastName });
+};
+
 export const requestClear = (): RequestHelperReturnType => {
   return requestHelper('DELETE', '/v1/clear');
 };

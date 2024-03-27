@@ -1,5 +1,9 @@
-import { adminAuthLogin, adminAuthLogout, adminAuthRegister, adminUserDetails } from './auth';
+import {
+  adminAuthLogin, adminAuthLogout, adminAuthRegister,
+  adminUserDetails, adminUserDetailsUpdate
+} from './auth';
 import { adminQuizCreate, adminQuizRemove } from './quiz';
+import { clear } from './other';
 import express, { json, Request, Response } from 'express';
 import { echo } from './newecho';
 import morgan from 'morgan';
@@ -76,6 +80,20 @@ app.get('/v1/admin/user/details', (req: Request, res: Response) => {
   res.json(response);
 });
 
+app.put('/v1/admin/user/details', (req: Request, res: Response) => {
+  const { token, email, nameFirst, nameLast } = req.body;
+  const response = adminUserDetailsUpdate(token, email, nameFirst, nameLast);
+
+  if ('error' in response) {
+    if (response.error === 'Token is empty or invalid.') {
+      return res.status(401).json(response);
+    } else {
+      return res.status(400).json(response);
+    }
+  }
+  res.json(response);
+});
+
 app.delete('/v1/admin/quiz/:quizid', (req: Request, res: Response) => {
   const response = adminQuizRemove(req.query.token as string, parseInt(req.params.quizid));
 
@@ -105,7 +123,7 @@ app.post('/v1/admin/quiz', (req: Request, res: Response) => {
 
 app.delete('/v1/clear', (req: Request, res: Response) => {
   const response = clear();
-  res.json(result);
+  res.json(response);
 });
 
 // ====================================================================

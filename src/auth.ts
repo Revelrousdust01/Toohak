@@ -184,14 +184,23 @@ export function adminUserDetails(token: string): ReturnUser | ErrorObject {
  * @param {string} nameFirst - first name of user
  * @param {string} nameLast - last name of user
  *
- * @returns {} - Returns empty object when admin user details is updated
+ * @returns {ErrorObject} when criteria is not met:
+ *
+ * Email address is used by another user.
+ * Email does not satisfy this: https://www.npmjs.com/package/validator (validator.isEmail)
+ * NameFirst contains characters other than lowercase letters, uppercase letters, spaces, hyphens, or apostrophes
+ * NameFirst is less than 2 characters or more than 20 characters
+ * NameLast contains characters other than lowercase letters, uppercase letters, spaces, hyphens, or apostrophes
+ * NameLast is less than 2 characters or more than 20 characters
+ *
+ * @returns {object} - Returns empty object when admin user details is updated
  */
 
-export function adminUserDetailsUpdate(authUserId: number, email: string, nameFirst: string, nameLast: string) {
-  const checkAuthUserId = validAuthUserId(authUserId);
-  if (checkAuthUserId.error) {
+export function adminUserDetailsUpdate(token: string, email: string, nameFirst: string, nameLast: string): ErrorObject | object {
+  const checkToken = validToken(token);
+  if (isError(checkToken)) {
     return {
-      error: checkAuthUserId.error
+      error: checkToken.error
     };
   }
 
@@ -218,10 +227,9 @@ export function adminUserDetailsUpdate(authUserId: number, email: string, nameFi
 
   const data = getData();
 
-  const user = data.users.find(user => user.userId === authUserId);
-  user.email = email;
-  user.nameFirst = nameFirst;
-  user.nameLast = nameLast;
+  checkToken.email = email;
+  checkToken.nameFirst = nameFirst;
+  checkToken.nameLast = nameLast;
 
   setData(data);
 

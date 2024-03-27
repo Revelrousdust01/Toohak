@@ -1,18 +1,17 @@
 import {
   requestAdminAuthLogin, requestAdminAuthRegister,
-  requestAdminQuizCreate, requestAdminQuizRemove
+  requestAdminQuizCreate, requestAdminQuizRemove, requestClear
 } from './requests';
 import { ErrorObject } from './interfaces';
-import { clear } from './other';
 
 beforeEach(() => {
-  clear();
+  requestClear();
 });
 
 const ERROR: ErrorObject = { error: expect.any(String) };
 
 // adminQuizCreate
-describe.skip('Test adminQuizCreate', () => {
+describe('Test adminQuizCreate', () => {
   const firstName = 'Jeffery';
   const lastName = 'Zhang';
   const email = 'jeffery.zhang385@gmail.com';
