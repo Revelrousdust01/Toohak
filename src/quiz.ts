@@ -41,7 +41,9 @@ export function adminQuizCreate(token: string, name: string, description: string
 
   const existingQuiz = data.quizzes.find(quiz => quiz.name === name);
 
-  if (checkToken.ownedQuizzes.find(quiz => quiz === existingQuiz.quizId)) { return { error: 'Name is already used by the current logged in user for another quiz.' }; }
+  if (existingQuiz) {
+    if (checkToken.ownedQuizzes.find(quiz => quiz === existingQuiz.quizId)) { return { error: 'Name is already used by the current logged in user for another quiz.' }; }
+  }
 
   const quizId = data.quizCounter++;
 
@@ -241,10 +243,6 @@ export function adminQuizRemove(token: string, quizid: number): object | ErrorOb
   data.trash.push(data.quizzes[quizIndex]);
 
   data.quizzes.splice(quizIndex, 1);
-
-  const ownedQuizIndex = checkToken.ownedQuizzes.indexOf(quizid);
-
-  if (ownedQuizIndex !== -1) { checkToken.ownedQuizzes.splice(ownedQuizIndex, 1); }
 
   setData(data);
 
