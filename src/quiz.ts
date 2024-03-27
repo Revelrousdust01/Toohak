@@ -1,6 +1,6 @@
 import { getData, setData } from './dataStore';
 import type { ErrorObject, Quiz, createQuizReturn } from './interfaces';
-import { findQuiz, isError, validQuizName, validToken } from './helper';
+import { isError, validQuizName, validQuizId, validToken } from './helper';
 
 /**
  * Given basic details about a new quiz, create one for the logged in user.
@@ -57,7 +57,6 @@ export function adminQuizCreate(token: string, name: string, description: string
   data.users.find(user => user.userId === checkToken.userId).ownedQuizzes.push(quizId);
 
   data.quizzes.push(newQuiz);
-
   setData(data);
 
   return { quizId: newQuiz.quizId };
@@ -223,19 +222,19 @@ export function adminQuizRemove(token: string, quizid: number): object | ErrorOb
     };
   }
 
-  if (quizIndex === -1) { return { error: 'Quiz ID does not refer to a valid quiz.' }; }
+  const checkQuizId = validQuizId(token, quizid, checkToken);
 
-  if (!checkToken.ownedQuizzes.includes(quizid)) { return { error: 'Quiz ID does not refer to a quiz that this user owns.' }; }
+  if (isError(checkQuizId)) {
+    return {
+      error: checkQuizId.error
+    };
+  }
 
   data.quizzes[quizIndex].timeLastEdited = Date.now();
 
   data.trash.push(data.quizzes[quizIndex]);
 
   data.quizzes.splice(quizIndex, 1);
-
-  const ownedQuizIndex = checkToken.ownedQuizzes.indexOf(quizid);
-
-  if (ownedQuizIndex !== -1) { checkToken.ownedQuizzes.splice(ownedQuizIndex, 1); }
 
   setData(data);
 
@@ -262,10 +261,14 @@ export function adminQuizRemove(token: string, quizid: number): object | ErrorOb
 
 export function adminQuizTransfer(token: string, quizid: number, userEmail: string): object | ErrorObject {
   const data = getData();
-  const quizIndex = data.quizzes.findIndex(quizzes => quizzes.quizId === quizid);
   const user = data.users.find(users => users.email === userEmail);
-  const quiz = findQuiz(quizid);
   const checkToken = validToken(token);
+
+  if (isError(checkToken)) {
+    return {
+      error: checkToken.error
+    };
+  }
 
   if (!user) {
     return { error: 'userEmail is not a real user.' };
@@ -273,32 +276,30 @@ export function adminQuizTransfer(token: string, quizid: number, userEmail: stri
 
   if (userEmail === checkToken.email) { return { error: 'userEmail is the current logged in user' }; }
 
-  for (let i = 0; i < user.ownedQuizzes.length; i++) {
-    const ownedQuiz = user.ownedQuizzes[i]; 
-    console.log(quiz);
-    console.log(ownedQuiz);
-    if (ownedQuiz.name === quiz.name) { 
-      return { error: 'Quiz ID refers to a quiz that has a name that is already used by the target user.' }; 
+  for (const searchedUser of data.users) {
+    const findOwnedQuiz = searchedUser.userId === user.userId
+      ? null
+      : user.ownedQuizzes.find(ownedQuiz => ownedQuiz === quizid);
+    if (findOwnedQuiz) {
+      return { error: 'Quiz ID refers to a quiz that has a name that is already used by the target user.' };
     }
   }
-  
-  if (isError(checkToken)) {
+
+  const checkQuizId = validQuizId(token, quizid, checkToken);
+
+  if (isError(checkQuizId)) {
     return {
-      error: checkToken.error
+      error: checkQuizId.error
     };
   }
 
-  if (quizIndex === -1) { return { error: 'Quiz ID does not refer to a valid quiz.' }; }
-
-  if (!checkToken.ownedQuizzes.includes(quizid)) { return { error: 'Quiz ID does not refer to a quiz that this user owns.' }; }
-
-  user.ownedQuizzes.push(quiz);
+  user.ownedQuizzes.push(quizid);
 
   const ownedQuizIndex = checkToken.ownedQuizzes.indexOf(quizid);
 
   if (ownedQuizIndex !== -1) { checkToken.ownedQuizzes.splice(ownedQuizIndex, 1); }
- 
+
   setData(data);
 
   return { };
-};
+}
