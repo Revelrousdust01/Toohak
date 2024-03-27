@@ -86,24 +86,6 @@ export function validPassword(password: string): object | ErrorObject {
 }
 
 /**
-  * Checks for existence of a user
-  *
-  * @param {number} authUserId - Password of user
-  *
-  * @returns { { error: }  } - Returns object with error when authUserId is invalid
-  * @returns { { user: } } - Returns object containing the user when authUserId is valid
-
-*/
-export function validAuthUserId(authUserId: number) {
-  const data = getData();
-  const user = data.users.find(user => user.userId === authUserId);
-
-  if (!user) { return { error: 'AuthUserId is not a valid user.' }; }
-
-  return { user: user };
-}
-
-/**
   * Checks for valid Quiz ID
   *
   * @param {string} token - Token of session
