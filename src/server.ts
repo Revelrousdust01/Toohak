@@ -2,8 +2,10 @@ import {
   adminAuthLogin, adminAuthLogout, adminAuthRegister,
   adminUserDetails, adminUserDetailsUpdate, adminUserPasswordUpdate
 } from './auth';
-import { adminQuizCreate, adminQuizRemove, adminQuizTransfer, 
-adminQuizEmptyTrash, adminQuizNameUpdate, adminQuizViewTrash } from './quiz';
+import {
+  adminQuizCreate, adminQuizRemove, adminQuizTransfer,
+  adminQuizEmptyTrash, adminQuizNameUpdate, adminQuizViewTrash
+} from './quiz';
 import { clear } from './other';
 import express, { json, Request, Response } from 'express';
 import { echo } from './newecho';
