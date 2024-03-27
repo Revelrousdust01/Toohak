@@ -248,7 +248,7 @@ export function adminQuizRemove(token: string, quizid: number): object | ErrorOb
  *
  * @param {string} token - User ID of admin
  * @param {number} quizid - relevant quizID
- * @param {string} email - Email of user to be transferred
+ * @param {string} userEmail - Email of user to be transferred
  *
  * @returns {ErrorObject} - returns error object based on following conditions:
  *
@@ -279,13 +279,13 @@ export function adminQuizTransfer(token: string, quizid: number, userEmail: stri
   if (userEmail === checkToken.email) { return { error: 'userEmail is the current logged in user' }; }
 
   const tokenQuiz = findQuiz(checkToken.userId);
-    
-  for (let quiz in user.ownedQuizzes) {
+
+  for (const quiz in user.ownedQuizzes) {
     const ownedQuiz = user.ownedQuizzes[quiz];
     const userQuiz = findQuiz(ownedQuiz);
     if (tokenQuiz != null && userQuiz != null) {
       if ((tokenQuiz as Quiz).name === (userQuiz as Quiz).name) {
-        return { error: 'Quiz ID refers to a quiz that has a name that is already used by the target user.' }
+        return { error: 'Quiz ID refers to a quiz that has a name that is already used by the target user.' };
       }
     }
   }
@@ -307,4 +307,45 @@ export function adminQuizTransfer(token: string, quizid: number, userEmail: stri
   setData(data);
 
   return { };
+}
+
+export function adminQuizEmptyTrash(token: string, quizids: number[]): object | ErrorObject {
+  const data = getData();
+
+  const checkToken = validToken(token);
+
+  if (isError(checkToken)) {
+    return {
+      error: checkToken.error
+    };
+  }
+
+  for (const quizInTrash of data.trash) {
+    const searchTrash = quizids.find(quiz => quiz === quizInTrash.quizId);
+    if (searchTrash === null) {
+      return {
+        error: 'One or more of the Quiz IDs is not currently in the trash.'
+      };
+    }
+  }
+
+  for (const ownedQuiz of checkToken.ownedQuizzes) {
+    const searchOwnedQuizzes = quizids.find(quiz => quiz === ownedQuiz);
+
+    if (!searchOwnedQuizzes) {
+      return {
+        error: 'Valid token is provided, but one or more of the Quiz IDs refers to a quiz that this current user does not own.'
+      };
+    }
+  }
+
+  for (const quizid of quizids) {
+    const removedTrash = data.trash.findIndex(trashedQuiz => trashedQuiz.quizId === quizid);
+
+    if (removedTrash) {
+      data.quizzes.splice(removedTrash, 1);
+    }
+  }
+
+  return {};
 }
