@@ -1,7 +1,7 @@
 import {
-  requestAdminAuthLogin, requestAdminAuthRegister,
-  requestAdminQuizCreate, requestAdminQuizNameUpdate, requestAdminQuizRemove,
-  requestAdminQuizTransfer, requestAdminQuizTrashEmpty, requestClear,
+  requestAdminAuthLogin, requestAdminAuthRegister,requestAdminQuizCreate, 
+  requestAdminQuizList, requestAdminQuizNameUpdate, requestAdminQuizRemove, 
+  requestAdminQuizTransfer, requestAdminQuizTrashEmpty, requestClear, 
   requestAdminQuizViewTrash
 } from './requests';
 import { ErrorObject } from './interfaces';
@@ -249,7 +249,7 @@ describe.skip('Test adminQuizInfo', () => {
 });
 
 // adminQuizList
-describe.skip('adminQuizList', () => {
+describe.only('adminQuizList', () => {
   const firstName = 'Samuel';
   const lastName = 'Huang';
   const email = 'shuang@student.unsw.edu.au';
@@ -258,7 +258,7 @@ describe.skip('adminQuizList', () => {
   const quizDescription = 'Quiz about the movie trivia of How to Train your dragon';
 
   test('One quiz in quizlist', () => {
-    const register = adminAuthRegister(email, password, lastName, firstName);
+    const register = requestAdminAuthRegister(email, password, lastName, firstName);
     const newQuiz = requestAdminQuizCreate(register.jsonBody.token as string, quizName, quizDescription);
     const quizId = requestAdminQuizCreate(register.jsonBody.token as string, quizName, quizDescription);
     const response = requestAdminQuizList(register.jsonBody.token as string);
@@ -291,7 +291,7 @@ describe.skip('adminQuizList', () => {
         }
       ] 
     })
-    expect(newQuiz.statusCode).toStrictEqual(200);
+    expect(response.statusCode).toStrictEqual(200);
   });
 
   test.each([
