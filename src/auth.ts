@@ -1,7 +1,7 @@
 import { Guid } from 'guid-typescript';
 import { getData, setData } from './dataStore';
 import type { createTokenReturn, ErrorObject, ReturnUser, User, UserSessions } from './interfaces';
-import { isError, validAuthUserId, validEmail, validName, validPassword, validToken } from './helper';
+import { isError, validEmail, validName, validPassword, validToken } from './helper';
 
 /**
   * Given a registered user's email and password returns their authUserId value.
@@ -244,22 +244,28 @@ export function adminUserDetailsUpdate(token: string, email: string, nameFirst: 
  * @param {string} oldPassword - Old password of user
  * @param {string} newPassword - New password of user
  *
+ * @returns {ErrorObject} when criteria is not met:
+ *
+ * Old Password is not the correct old password
+ * Old Password and New Password match exactly
+ * New Password has already been used before by this user
+ * New Password is less than 8 characters
+ * New Password does not contain at least one number and at least one letter
+ *
  * @returns {} - Returns empty object when password is updated.
  */
 
-export function adminUserPasswordUpdate(authUserId: number, oldPassword: string, newPassword: string) {
+export function adminUserPasswordUpdate(token: string, oldPassword: string, newPassword: string): ErrorObject | object {
   const data = getData();
 
-  const checkAuthUserId = validAuthUserId(authUserId);
-  if (checkAuthUserId.error) {
+  const checkToken = validToken(token);
+  if (isError(checkToken)) {
     return {
-      error: checkAuthUserId.error
+      error: checkToken.error
     };
   }
 
-  const user = data.users.find(user => user.userId === authUserId);
-
-  if (!(user.password === oldPassword)) {
+  if (!(checkToken.password === oldPassword)) {
     return {
       error: 'Old Password is not the correct old password'
     };
@@ -271,7 +277,7 @@ export function adminUserPasswordUpdate(authUserId: number, oldPassword: string,
     };
   }
 
-  const oldPasswordArray = user.oldPasswords;
+  const oldPasswordArray = checkToken.oldPasswords;
   for (const oldPasswordUsed of oldPasswordArray) {
     if (oldPasswordUsed === newPassword) {
       return {
@@ -287,8 +293,8 @@ export function adminUserPasswordUpdate(authUserId: number, oldPassword: string,
     };
   }
 
-  user.oldPasswords.push(oldPassword);
-  user.password = newPassword;
+  checkToken.oldPasswords.push(oldPassword);
+  checkToken.password = newPassword;
 
   setData(data);
 

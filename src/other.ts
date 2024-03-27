@@ -1,6 +1,7 @@
 import { getData, setData } from './dataStore';
 import type { DataStore } from './dataStore';
-import { quizCounter } from './quiz';
+import type { DataStore } from './interfaces';
+
 /**
   * Reset the state of the application back to the start.
   *
@@ -15,8 +16,7 @@ export function clear(): object {
   currentState.quizzes = [];
   currentState.userSessions = [];
   currentState.trash = [];
-
-  
+  currentState.quizCounter = 1;
 
   setData(currentState);
 

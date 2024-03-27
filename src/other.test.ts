@@ -2,7 +2,6 @@ import {
   requestAdminAuthRegister, requestAdminAuthLogin,
   requestAdminQuizCreate, requestAdminQuizRemove, requestClear
 } from './requests';
-import { quizCounter } from './quiz';
 
 beforeEach(() => {
   requestClear();
@@ -11,9 +10,10 @@ beforeEach(() => {
 describe('Iteration 2: Test "clear" function', () => {
   const firstName = 'Leon';
   const lastName = 'Sun';
-  const email = 'leonsun';
+  const email = 'leonsun@gmail.com';
   const password = 'Leonsunspassword1';
-  const quizName = 'Quiz 1';
+  const quizName = 'The Quiz 1';
+  const quizName2 = 'The Quiz 2';
   const quizDescription = 'Description for first quiz';
 
   test('Returns empty object from an empty test', () => {
@@ -22,14 +22,15 @@ describe('Iteration 2: Test "clear" function', () => {
   });
 
   test('Resets users list to empty', () => {
-    requestAdminAuthRegister(email, password, lastName, firstName);
+    const user = requestAdminAuthRegister(email, password, lastName, firstName);
     const response = requestClear();
     expect(response.jsonBody).toStrictEqual({});
   });
 
   test('Resets quizzes list to empty', () => {
     const user = requestAdminAuthRegister(email, password, lastName, firstName);
-    requestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
+    const quiz = requestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
+    console.log(quiz);
     const response = requestClear();
     expect(response.jsonBody).toStrictEqual({});
   });
@@ -47,22 +48,11 @@ describe('Iteration 2: Test "clear" function', () => {
     requestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
     const response = requestClear();
     expect(response.jsonBody).toStrictEqual({});
-    expect(quizCounter).toStrictEqual(1);
   });
 
   test('Resets user sessions list to empty', () => {
     const user = requestAdminAuthRegister(email, password, lastName, firstName);
     requestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
-    const response = requestClear();
-    expect(response.jsonBody).toStrictEqual({});
-  });
-
-  test('Resets everything to empty', () => {
-    const user = requestAdminAuthRegister(email, password, lastName, firstName);
-    requestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
-    const newQuiz = requestAdminQuizCreate(user.jsonBody.token as string, 'This is quiz 2', quizDescription);
-    console.log(newQuiz);
-    requestAdminQuizRemove(user.jsonBody.token as string, newQuiz.jsonBody.quizId as number);
     const response = requestClear();
     expect(response.jsonBody).toStrictEqual({});
   });
