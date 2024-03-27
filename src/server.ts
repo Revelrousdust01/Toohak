@@ -2,7 +2,10 @@ import {
   adminAuthLogin, adminAuthLogout, adminAuthRegister,
   adminUserDetails, adminUserDetailsUpdate, adminUserPasswordUpdate
 } from './auth';
-import { adminQuizCreate, adminQuizEmptyTrash, adminQuizRemove, adminQuizNameUpdate } from './quiz';
+import {
+  adminQuizCreate, adminQuestionCreate, adminQuizEmptyTrash, adminQuizRemove,
+  adminQuizNameUpdate, adminQuizViewTrash
+} from './quiz';
 import { clear } from './other';
 import express, { json, Request, Response } from 'express';
 import { echo } from './newecho';
@@ -81,7 +84,7 @@ app.get('/v1/admin/user/details', (req: Request, res: Response) => {
 });
 
 app.put('/v1/admin/quiz/:quizid/name', (req: Request, res: Response) => {
-  const { token, quizid, name } = req.body;
+  const { token, name } = req.body;
   const response = adminQuizNameUpdate(token, quizid, name);
   if ('error' in response) {
     if (response.error === 'Quiz ID does not refer to a valid quiz.' || response.error === 'Quiz ID does not refer to a quiz that this user owns.') {
@@ -120,6 +123,15 @@ app.put('/v1/admin/user/password', (req: Request, res: Response) => {
     } else {
       return res.status(400).json(response);
     }
+  }
+  res.json(response);
+});
+
+app.get('/v1/admin/quiz/trash', (req: Request, res: Response) => {
+  const response = adminQuizViewTrash(req.query.token as string);
+
+  if ('error' in response) {
+    return res.status(401).json(response);
   }
   res.json(response);
 });
