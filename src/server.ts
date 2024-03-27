@@ -84,8 +84,9 @@ app.get('/v1/admin/user/details', (req: Request, res: Response) => {
 });
 
 app.put('/v1/admin/quiz/:quizid/name', (req: Request, res: Response) => {
-  const { token, quizid, name } = req.body;
-  const response = adminQuizNameUpdate(token, quizid, name);
+  const { token, name } = req.body;
+  const response = adminQuizNameUpdate(token, parseInt(req.params.quizid), name);
+
   if ('error' in response) {
     if (response.error === 'Quiz ID does not refer to a valid quiz.' || response.error === 'Quiz ID does not refer to a quiz that this user owns.') {
       return res.status(403).json(response);
