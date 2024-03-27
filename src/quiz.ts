@@ -316,7 +316,6 @@ export function adminQuizViewTrash(token: string): ErrorObject | array {
   const data = getData();
 
   const checkToken = validToken(token);
-
   if (isError(checkToken)) {
     return {
       error: checkToken.error
@@ -343,3 +342,4 @@ export function adminQuizViewTrash(token: string): ErrorObject | array {
     quizzes: foundTrash
   };
 }
+

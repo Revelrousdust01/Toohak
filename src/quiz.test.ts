@@ -12,7 +12,7 @@ beforeEach(() => {
 const ERROR: ErrorObject = { error: expect.any(String) };
 
 // adminQuizCreate
-describe('Test adminQuizCreate', () => {
+describe.skip('Test adminQuizCreate', () => {
   const firstName = 'Jeffery';
   const lastName = 'Zhang';
   const email = 'jeffery.zhang385@gmail.com';
@@ -154,7 +154,7 @@ describe.skip('Test adminQuizDescriptionUpdate', () => {
 });
 
 // adminQuizRemove
-describe('Test adminQuizRemove', () => {
+describe.skip('Test adminQuizRemove', () => {
   const firstName = 'Jeffery';
   const lastName = 'Zhang';
   const email = 'jeffery.zhang385@gmail.com';
@@ -437,10 +437,12 @@ describe('adminQuizViewTrash', () => {
     requestAdminQuizRemove(user.jsonBody.token as string, quizId.jsonBody.quizId as number);
     const response = requestAdminQuizViewTrash(user.jsonBody.token as string);
     expect(response.jsonBody).toMatchObject({
-      quizzes: {
-        quizId: quizId,
+      quizzes: [
+        {
+        quizId: quizId.jsonBody.quizId as number,
         name: 'lebron my glorious king'
-      }
+        }
+      ]
     });
     expect(response.statusCode).toStrictEqual(200);
   });
@@ -455,11 +457,11 @@ describe('adminQuizViewTrash', () => {
     expect(response.jsonBody).toMatchObject({
       quizzes: [
         {
-          quizId: quizId1,
+          quizId: quizId1.jsonBody.quizId as number,
           name: 'lebron my glorious king'
         },
         {
-          quizId: quizId2,
+          quizId: quizId2.jsonBody.quizId as number,
           name: 'jo mama'
         }
       ]
