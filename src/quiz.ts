@@ -308,29 +308,29 @@ export function adminQuizQuestionDelete(token: string, quizid: number, questioni
   if (isError(checkToken)) {
     return { error: 'Token is empty or invalid.' };
   }
-  
+
   const quizIndex = data.quizzes.findIndex(quiz => quiz.quizId === quizid);
   if (quizIndex === -1) {
     return { error: 'Quiz ID does not refer to a valid quiz.' };
   }
-  
+
   if (!checkToken.ownedQuizzes.includes(quizid)) {
     return { error: 'Quiz ID does not refer to a quiz that this user owns.' };
   }
-  
+
   const questionIndex = data.quizzes[quizIndex].questions.findIndex(question => question.questionId === questionid);
   if (questionIndex === -1) {
     return { error: 'Question ID does not refer to a valid question within the quiz.' };
   }
-  
+
   data.quizzes[quizIndex].questions.splice(questionIndex, 1);
-  
+
   data.quizzes[quizIndex].timeLastEdited = Date.now();
-  
+
   console.log(data);
 
   setData(data);
-  
+
   return {};
 }
 

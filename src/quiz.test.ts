@@ -770,7 +770,7 @@ describe('Test adminQuizQuestionDelete', () => {
   ])("Question ID is invalid or user does not own the quiz '$invalidQuestionId'", ({ invalidQuestionId }) => {
     const user = requestAdminAuthRegister(email, password, lastName, firstName);
     const newQuiz = requestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
-    const newQuestion = requestAdminQuizQuestionCreate(user.jsonBody.token as string, newQuiz.jsonBody.quizId as number, question);
+    requestAdminQuizQuestionCreate(user.jsonBody.token as string, newQuiz.jsonBody.quizId as number, question);
     const response = requestAdminQuizQuestionDelete(user.jsonBody.token as string, newQuiz.jsonBody.quizId as number, invalidQuestionId);
     expect(response.statusCode).toStrictEqual(400);
     expect(response.jsonBody).toStrictEqual(ERROR);
