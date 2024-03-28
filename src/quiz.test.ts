@@ -2,7 +2,8 @@ import {
   requestAdminAuthLogin, requestAdminAuthRegister, requestAdminQuizCreate,
   requestAdminQuizViewTrash, requestAdminQuizRestore, requestAdminQuizDescriptionUpdate,
   requestAdminQuizList, requestAdminQuizNameUpdate, requestAdminQuizRemove,
-  requestAdminQuizQuestionCreate, requestAdminQuizQuestionMove, requestAdminQuizQuestionUpdate,
+  requestAdminQuizQuestionCreate, requestAdminQuizQuestionDelete,
+  requestAdminQuizQuestionMove, requestAdminQuizQuestionUpdate,
   requestAdminQuizTransfer, requestAdminQuizTrashEmpty, requestClear
 } from './requests';
 import { ErrorObject, QuestionBody } from './interfaces';
@@ -703,7 +704,7 @@ describe('Test adminQuizQuestionCreate', () => {
 });
 
 // adminQuizQuestionDelete
-describe('Test adminQuizQuestionDelete', () => {
+describe.only('Test adminQuizQuestionDelete', () => {
   const firstName = 'Leon';
   const lastName = 'Sun';
   const email = 'leonsun@gmail.com';
@@ -769,7 +770,7 @@ describe('Test adminQuizQuestionDelete', () => {
   ])("Question ID is invalid or user does not own the quiz '$invalidQuestionId'", ({ invalidQuestionId }) => {
     const user = requestAdminAuthRegister(email, password, lastName, firstName);
     const newQuiz = requestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
-    requestAdminQuizQuestionCreate(user.jsonBody.token as string, newQuiz.jsonBody.quizId as number, question);
+    const newQuestion = requestAdminQuizQuestionCreate(user.jsonBody.token as string, newQuiz.jsonBody.quizId as number, question);
     const response = requestAdminQuizQuestionDelete(user.jsonBody.token as string, newQuiz.jsonBody.quizId as number, newQuestion.jsonBody.questionId as number);
     expect(response.statusCode).toStrictEqual(400);
     expect(response.jsonBody).toStrictEqual(ERROR);
@@ -968,7 +969,7 @@ describe('Test adminQuizQuestionUpdate', () => {
 });
 
 // adminQuizQuestionMove
-describe.only('Test adminQuizQuestionMove', () => {
+describe('Test adminQuizQuestionMove', () => {
   const firstName = 'Leon';
   const lastName = 'Sun';
   const email = 'leonsun@gmail.com';
