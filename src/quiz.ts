@@ -101,33 +101,67 @@ export function adminQuizDescriptionUpdate(token: string, quizid: number, descri
 /**
  * Get all of the relevant information about the current quiz.
  *
- * @param {number} authUserId - ID of user
- * @param {number} quizId - quizID of current quiz
+ * @param {string} token - User ID of admin
+ * @param {number} quizid - quizID of current quiz
  *
- * @returns {Object} - Returns an object when relavent information found.
+ * @returns {ErrorObject} - returns error object based on following conditions:
+ *
+ * Token is empty or invalid (does not refer to valid logged in user session)
+ * Valid token is provided, but either the quiz ID is invalid, or the user does not own the quiz
+ *
+ * @return {QuizArray} - returns an array of quizzes
  */
 
-// export function adminQuizInfo(authUserId, quizId) {
-//   const data = getData();
-//   const user = data.users.find(user => user.userId === authUserId);
-//   const quiz = data.quizzes.find(quiz => quiz.quizId === quizId);
+export function adminQuizInfo(token: string, quizid: number): object | ErrorObject {
+  const checkToken = validToken(token);
 
-//   if (!user) { return { error: 'AuthUserId is not a valid user.' }; }
+  if (isError(checkToken)) {
+    return {
+      error: checkToken.error
+    };
+  }
 
-//   if (!quiz) { return { error: 'Quiz ID does not refer to a valid quiz.' }; }
+  const checkQuizId = validQuizId(token, quizid, checkToken);
 
-//   if (!user.ownedQuizzes.includes(quizId)) { return { error: 'Quiz ID does not refer to a quiz that this user owns.' }; }
+  if (isError(checkQuizId)) {
+    return {
+      error: checkQuizId.error
+    };
+  }
 
-//   setData(data);
+  const quiz = findQuiz(quizid);
+  const validQuiz = quiz as Quiz;
 
-//   return {
-//     quizId: quizId,
-//     name: quiz.name,
-//     timeCreated: quiz.timeCreated,
-//     timeLastEdited: quiz.timeLastEdited,
-//     description: quiz.description,
-//   };
-// }
+  const questionsWithAnswers = validQuiz.questions.map(question => {
+    const answers = question.answers.map(answer => ({
+      answerId: answer.answerId,
+      answer: answer.answer,
+      colour: answer.colour,
+      correct: answer.correct
+    }));
+
+    return {
+      questionId: question.questionId,
+      question: question.question,
+      duration: question.duration,
+      points: question.points,
+      answers: answers
+    };
+  });
+
+  const totalDuration = validQuiz.questions.reduce((acc, question) => acc + question.duration, 0);
+
+  return {
+    quizId: validQuiz.quizId,
+    name: validQuiz.name,
+    timeCreated: validQuiz.timeCreated,
+    timeLastEdited: validQuiz.timeLastEdited,
+    description: validQuiz.description,
+    numQuestions: validQuiz.questions.length,
+    questions: questionsWithAnswers,
+    duration: totalDuration,
+  };
+}
 
 /**
  * Provide a list of all quizzes that are owned by the currently logged in user.
@@ -241,7 +275,9 @@ export function adminQuizQuestionCreate(token: string, quizid: number, questionB
   const checkToken = validToken(token);
 
   if (isError(checkToken)) {
-    return { error: 'Token is empty or invalid.' };
+    return {
+      error: checkToken.error
+    };
   }
 
   const checkQuizId = validQuizId(token, quizid, checkToken);

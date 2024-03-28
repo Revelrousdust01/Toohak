@@ -3,8 +3,7 @@ import {
   requestAdminQuizViewTrash, requestAdminQuizRestore, requestAdminQuizDescriptionUpdate,
   requestAdminQuizList, requestAdminQuizNameUpdate, requestAdminQuizRemove,
   requestAdminQuizQuestionCreate, requestAdminQuizQuestionMove, requestAdminQuizQuestionUpdate,
-  requestAdminQuizTransfer, requestAdminQuizTrashEmpty, requestClear, 
-  requestAdminQuizInfo
+  requestAdminQuizTransfer, requestAdminQuizTrashEmpty, requestClear, requestAdminQuizInfo
 } from './requests';
 import { ErrorObject, QuestionBody } from './interfaces';
 
