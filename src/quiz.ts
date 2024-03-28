@@ -265,7 +265,10 @@ export function adminQuizQuestionCreate(token: string, quizid: number, questionB
       };
       newQuestion.answers.push(newAnswer);
     }
-    (quiz as Quiz).questions.push(newQuestion);
+
+    validQuiz.timeLastEdited = Date.now();
+
+    validQuiz.questions.push(newQuestion);
 
     setData(data);
 
