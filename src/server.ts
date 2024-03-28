@@ -4,9 +4,9 @@ import {
 } from './auth';
 import {
   adminQuizQuestionUpdate, adminQuizCreate, adminQuizDescriptionUpdate, adminQuizEmptyTrash,
-  adminQuizList, adminQuizNameUpdate, adminQuizQuestionCreate,
+  adminQuizList, adminQuizNameUpdate, adminQuizQuestionCreate, adminQuizQuestionDelete,
   adminQuizQuestionMove, adminQuizRemove, adminQuizTransfer, adminQuizViewTrash,
-  adminQuizRestore, adminQuizQuestionDuplicate
+  adminQuizRestore, adminQuizQuestionDuplicate, adminQuizInfo
 } from './quiz';
 import { clear } from './other';
 import express, { json, Request, Response } from 'express';
@@ -85,11 +85,61 @@ app.get('/v1/admin/user/details', (req: Request, res: Response) => {
   res.json(response);
 });
 
+app.get('/v1/admin/quiz/trash', (req: Request, res: Response) => {
+  const response = adminQuizViewTrash(req.query.token as string);
+
+  if ('error' in response) {
+    return res.status(401).json(response);
+  }
+  res.json(response);
+});
+
+app.delete('/v1/admin/quiz/trash/empty', (req: Request, res: Response) => {
+  const quizIds = req.query.quizIds as string[];
+  const numberQuizIds = quizIds.map(id => parseInt(id));
+  const response = adminQuizEmptyTrash(req.query.token as string, numberQuizIds);
+
+  if ('error' in response) {
+    if (response.error === 'One or more of the Quiz IDs is not currently in the trash.') {
+      return res.status(400).json(response);
+    } else if (response.error === 'Token is empty or invalid.') {
+      return res.status(401).json(response);
+    } else {
+      return res.status(403).json(response);
+    }
+  }
+  res.json(response);
+});
+
+app.get('/v1/admin/quiz/list', (req: Request, res: Response) => {
+  const response = adminQuizList(req.query.token as string);
+
+  if ('error' in response) {
+    return res.status(401).json(response);
+  }
+  res.json(response);
+});
+
+app.get('/v1/admin/quiz/:quizid', (req: Request, res: Response) => {
+  const response = adminQuizInfo(req.query.token as string, parseInt(req.params.quizid));
+
+  if ('error' in response) {
+    if (response.error === 'Token is empty or invalid.') {
+      return res.status(401).json(response);
+    } else if (response.error === 'Quiz ID does not refer to a valid quiz.' ||
+            response.error === 'Quiz ID does not refer to a quiz that this user owns.') {
+      return res.status(403).json(response);
+    }
+  }
+  res.json(response);
+});
+
 app.put('/v1/admin/quiz/:quizid/description', (req: Request, res: Response) => {
   const { token, description } = req.body;
   const response = adminQuizDescriptionUpdate(token, parseInt(req.params.quizid), description);
   if ('error' in response) {
-    if (response.error === 'Quiz ID does not refer to a valid quiz.' || response.error === 'Quiz ID does not refer to a quiz that this user owns.') {
+    if (response.error === 'Quiz ID does not refer to a valid quiz.' ||
+     response.error === 'Quiz ID does not refer to a quiz that this user owns.') {
       return res.status(403).json(response);
     } else if (response.error === 'Token is empty or invalid') {
       return res.status(401).json(response);
@@ -105,7 +155,8 @@ app.put('/v1/admin/quiz/:quizid/name', (req: Request, res: Response) => {
   const response = adminQuizNameUpdate(token, parseInt(req.params.quizid), name);
 
   if ('error' in response) {
-    if (response.error === 'Quiz ID does not refer to a valid quiz.' || response.error === 'Quiz ID does not refer to a quiz that this user owns.') {
+    if (response.error === 'Quiz ID does not refer to a valid quiz.' ||
+     response.error === 'Quiz ID does not refer to a quiz that this user owns.') {
       return res.status(403).json(response);
     } else if (response.error === 'Token is empty or invalid.') {
       return res.status(401).json(response);
@@ -124,13 +175,11 @@ app.post('/v1/admin/quiz/:quizid/restore', (req: Request, res: Response) => {
   if ('error' in response) {
     if (response.error === 'Token is empty or invalid.') {
       return res.status(401).json(response);
-    } else if (response.error === 'Quiz name of the restored quiz is already used by another active quiz') {
+    } else if (response.error === 'Quiz name of the restored quiz is already used by another active quiz' ||
+            response.error === 'Quiz ID refers to a quiz that is not currently in the trash') {
       return res.status(400).json(response);
-    } else if (response.error === 'Quiz ID refers to a quiz that is not currently in the trash') {
-      return res.status(400).json(response);
-    } else if (response.error === 'Quiz ID does not refer to a valid quiz.') {
-      return res.status(403).json(response);
-    } else if (response.error === 'Quiz ID does not refer to a quiz that this user owns.') {
+    } else if (response.error === 'Quiz ID does not refer to a valid quiz.' ||
+            response.error === 'Quiz ID does not refer to a quiz that this user owns.') {
       return res.status(403).json(response);
     }
   }
@@ -172,7 +221,8 @@ app.post('/v1/admin/quiz/:quizid/question', (req: Request, res: Response) => {
   if ('error' in response) {
     if (response.error === 'Token is empty or invalid.') {
       return res.status(401).json(response);
-    } else if (response.error === 'Quiz ID does not refer to a valid quiz.' || response.error === 'Quiz ID does not refer to a quiz that this user owns.') {
+    } else if (response.error === 'Quiz ID does not refer to a valid quiz.' ||
+            response.error === 'Quiz ID does not refer to a quiz that this user owns.') {
       return res.status(403).json(response);
     } else {
       return res.status(400).json(response);
@@ -204,7 +254,8 @@ app.put('/v1/admin/quiz/:quizid/question/:questionid/move', (req: Request, res: 
   if ('error' in response) {
     if (response.error === 'Token is empty or invalid.') {
       return res.status(401).json(response);
-    } else if (response.error === 'Quiz ID does not refer to a valid quiz.' || response.error === 'Quiz ID does not refer to a quiz that this user owns.') {
+    } else if (response.error === 'Quiz ID does not refer to a valid quiz.' ||
+            response.error === 'Quiz ID does not refer to a quiz that this user owns.') {
       return res.status(403).json(response);
     } else {
       return res.status(400).json(response);
@@ -216,6 +267,22 @@ app.put('/v1/admin/quiz/:quizid/question/:questionid/move', (req: Request, res: 
 app.put('/v1/admin/quiz/:quizid/question/:questionid', (req: Request, res: Response) => {
   const { token, questionBody } = req.body;
   const response = adminQuizQuestionUpdate(token, parseInt(req.params.quizid), parseInt(req.params.questionid), questionBody);
+
+  if ('error' in response) {
+    if (response.error === 'Token is empty or invalid.') {
+      return res.status(401).json(response);
+    } else if (response.error === 'Quiz ID does not refer to a valid quiz.' ||
+            response.error === 'Quiz ID does not refer to a quiz that this user owns.') {
+      return res.status(403).json(response);
+    } else {
+      return res.status(400).json(response);
+    }
+  }
+  res.json(response);
+});
+
+app.delete('/v1/admin/quiz/:quizid/question/:questionid', (req: Request, res: Response) => {
+  const response = adminQuizQuestionDelete(req.query.token as string, parseInt(req.params.quizid), parseInt(req.params.questionid));
 
   if ('error' in response) {
     if (response.error === 'Token is empty or invalid.') {
@@ -236,22 +303,12 @@ app.post('/v1/admin/quiz/:quizid/transfer', (req: Request, res: Response) => {
   if ('error' in response) {
     if (response.error === 'Token is empty or invalid.') {
       return res.status(401).json(response);
-    } else if (response.error === 'Quiz ID does not refer to a valid quiz.') {
-      return res.status(403).json(response);
-    } else if (response.error === 'Quiz ID does not refer to a quiz that this user owns.') {
+    } else if (response.error === 'Quiz ID does not refer to a valid quiz.' ||
+            response.error === 'Quiz ID does not refer to a quiz that this user owns.') {
       return res.status(403).json(response);
     } else {
       return res.status(400).json(response);
     }
-  }
-  res.json(response);
-});
-
-app.get('/v1/admin/quiz/trash', (req: Request, res: Response) => {
-  const response = adminQuizViewTrash(req.query.token as string);
-
-  if ('error' in response) {
-    return res.status(401).json(response);
   }
   res.json(response);
 });
@@ -279,32 +336,6 @@ app.post('/v1/admin/quiz', (req: Request, res: Response) => {
     } else {
       return res.status(400).json(response);
     }
-  }
-  res.json(response);
-});
-
-app.delete('/v1/admin/quiz/trash/empty', (req: Request, res: Response) => {
-  const quizIds = req.query.quizIds as string[];
-  const numberQuizIds = quizIds.map(id => parseInt(id));
-  const response = adminQuizEmptyTrash(req.query.token as string, numberQuizIds);
-
-  if ('error' in response) {
-    if (response.error === 'One or more of the Quiz IDs is not currently in the trash.') {
-      return res.status(400).json(response);
-    } else if (response.error === 'Token is empty or invalid.') {
-      return res.status(401).json(response);
-    } else {
-      return res.status(403).json(response);
-    }
-  }
-  res.json(response);
-});
-
-app.get('/v1/admin/quiz/list', (req: Request, res: Response) => {
-  const response = adminQuizList(req.query.token as string);
-
-  if ('error' in response) {
-    return res.status(401).json(response);
   }
   res.json(response);
 });

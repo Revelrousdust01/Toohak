@@ -101,33 +101,67 @@ export function adminQuizDescriptionUpdate(token: string, quizid: number, descri
 /**
  * Get all of the relevant information about the current quiz.
  *
- * @param {number} authUserId - ID of user
- * @param {number} quizId - quizID of current quiz
+ * @param {string} token - User ID of admin
+ * @param {number} quizid - quizID of current quiz
  *
- * @returns {Object} - Returns an object when relavent information found.
+ * @returns {ErrorObject} - returns error object based on following conditions:
+ *
+ * Token is empty or invalid (does not refer to valid logged in user session)
+ * Valid token is provided, but either the quiz ID is invalid, or the user does not own the quiz
+ *
+ * @return {QuizArray} - returns an array of quizzes
  */
 
-// export function adminQuizInfo(authUserId, quizId) {
-//   const data = getData();
-//   const user = data.users.find(user => user.userId === authUserId);
-//   const quiz = data.quizzes.find(quiz => quiz.quizId === quizId);
+export function adminQuizInfo(token: string, quizid: number): object | ErrorObject {
+  const checkToken = validToken(token);
 
-//   if (!user) { return { error: 'AuthUserId is not a valid user.' }; }
+  if (isError(checkToken)) {
+    return {
+      error: checkToken.error
+    };
+  }
 
-//   if (!quiz) { return { error: 'Quiz ID does not refer to a valid quiz.' }; }
+  const checkQuizId = validQuizId(token, quizid, checkToken);
 
-//   if (!user.ownedQuizzes.includes(quizId)) { return { error: 'Quiz ID does not refer to a quiz that this user owns.' }; }
+  if (isError(checkQuizId)) {
+    return {
+      error: checkQuizId.error
+    };
+  }
 
-//   setData(data);
+  const quiz = findQuiz(quizid);
+  const validQuiz = quiz as Quiz;
 
-//   return {
-//     quizId: quizId,
-//     name: quiz.name,
-//     timeCreated: quiz.timeCreated,
-//     timeLastEdited: quiz.timeLastEdited,
-//     description: quiz.description,
-//   };
-// }
+  const questionsWithAnswers = validQuiz.questions.map(question => {
+    const answers = question.answers.map(answer => ({
+      answerId: answer.answerId,
+      answer: answer.answer,
+      colour: answer.colour,
+      correct: answer.correct
+    }));
+
+    return {
+      questionId: question.questionId,
+      question: question.question,
+      duration: question.duration,
+      points: question.points,
+      answers: answers
+    };
+  });
+
+  const totalDuration = validQuiz.questions.reduce((acc, question) => acc + question.duration, 0);
+
+  return {
+    quizId: validQuiz.quizId,
+    name: validQuiz.name,
+    timeCreated: validQuiz.timeCreated,
+    timeLastEdited: validQuiz.timeLastEdited,
+    description: validQuiz.description,
+    numQuestions: validQuiz.questions.length,
+    questions: questionsWithAnswers,
+    duration: totalDuration,
+  };
+}
 
 /**
  * Provide a list of all quizzes that are owned by the currently logged in user.
@@ -241,7 +275,9 @@ export function adminQuizQuestionCreate(token: string, quizid: number, questionB
   const checkToken = validToken(token);
 
   if (isError(checkToken)) {
-    return { error: 'Token is empty or invalid.' };
+    return {
+      error: checkToken.error
+    };
   }
 
   const checkQuizId = validQuizId(token, quizid, checkToken);
@@ -291,6 +327,7 @@ export function adminQuizQuestionCreate(token: string, quizid: number, questionB
 }
 
 /**
+<<<<<<< HEAD
  * A particular question gets duplicated to immediately after where the source question is
  *
  * @param {string} token - Token
@@ -339,6 +376,60 @@ export function adminQuizQuestionDuplicate(token: string, quizid: number, questi
     newQuestionId: questionToDuplicate.questionId
   };
 }
+
+/**
+  * Delete a Quiz Question.
+  *
+  * @param {string} token - Token
+  * @param {number} quizid - Relevant quizID
+  * @param {number} questionid - Relevant questionID
+  *
+  * @returns { { error: }  } - Returns object when conditions fail
+  * @returns { object } - returns an empty object question is updated.
+*/
+export function adminQuizQuestionDelete(token: string, quizid: number, questionid: number): object | ErrorObject {
+  const data = getData();
+  const checkToken = validToken(token);
+
+  if (isError(checkToken)) {
+    return { error: 'Token is empty or invalid.' };
+  }
+
+  const quizIndex = data.quizzes.findIndex(quiz => quiz.quizId === quizid);
+  if (quizIndex === -1) {
+    return { error: 'Quiz ID does not refer to a valid quiz.' };
+  }
+
+  if (!checkToken.ownedQuizzes.includes(quizid)) {
+    return { error: 'Quiz ID does not refer to a quiz that this user owns.' };
+  }
+
+  const questionIndex = data.quizzes[quizIndex].questions.findIndex(question => question.questionId === questionid);
+
+  if (questionIndex === -1) {
+    return { error: 'Question ID does not refer to a valid question within the quiz.' };
+  }
+  data.quizzes[quizIndex].questions.splice(questionIndex, 1);
+
+  data.quizzes[quizIndex].timeLastEdited = Date.now();
+
+  console.log(data);
+
+  setData(data);
+
+  return {};
+}
+
+/**
+  * Move a Quiz Question.
+  *
+  * @param {string} token - Token
+  * @param {number} quizid - Relevant quizID
+  * @param {number} questionid - Relevant questionID
+  *
+  * @returns { { error: }  } - Returns object when conditions fail
+  * @returns { object } - returns an empty object question is moved.
+*/
 
 export function adminQuizQuestionMove(token: string, quizid: number, questionid: number, newPosition: number): object | ErrorObject {
   const data = getData();

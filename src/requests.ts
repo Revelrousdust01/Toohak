@@ -28,7 +28,7 @@ const requestHelper = (
     // PUT/POST
     json = payload;
   }
-  const res = request(method, SERVER_URL + path, { qs, json, timeout: 100 });
+  const res = request(method, SERVER_URL + path, { qs, json, timeout: 1000 });
   const bodyString = res.body.toString();
   let bodyObject: RequestHelperReturnType;
   try {
@@ -92,6 +92,12 @@ export const requestAdminQuizDescriptionUpdate = (token: string, quizid: number,
     { token: token, quizid: quizid, description: description });
 };
 
+export const requestAdminQuizInfo = (token: string, quizid: number): RequestHelperReturnType => {
+  return requestHelper('GET',
+    `/v1/admin/quiz/${quizid}`,
+    { token: token });
+};
+
 export const requestAdminQuizList = (token: string): RequestHelperReturnType => {
   return requestHelper('GET',
     '/v1/admin/quiz/list',
@@ -119,6 +125,12 @@ export const requestAdminQuizQuestionCreate = (token: string, quizid: number, qu
 export const requestAdminQuizQuestionDuplicate = (token: string, quizid: number, questionid: number): RequestHelperReturnType => {
   return requestHelper('POST',
     `/v1/admin/quiz/${quizid}/question/${questionid}/duplicate`,
+    { token: token });
+};
+
+export const requestAdminQuizQuestionDelete = (token: string, quizid: number, questionid: number): RequestHelperReturnType => {
+  return requestHelper('DELETE',
+    `/v1/admin/quiz/${quizid}/question/${questionid}`,
     { token: token });
 };
 
