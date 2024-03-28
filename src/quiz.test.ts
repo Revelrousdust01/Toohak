@@ -618,7 +618,7 @@ describe('Test adminQuizQuestionUpdate', () => {
     expect(response.statusCode).toStrictEqual(200);
   });
 
-  test.only('Invalid question string length', () => {
+  test('Invalid question string length', () => {
     const invalidQuestion = { ...updatedQuestion, question: 'A' };
     const user = requestAdminAuthRegister(email, password, lastName, firstName);
     const newQuiz = requestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
