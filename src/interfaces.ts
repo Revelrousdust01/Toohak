@@ -2,8 +2,24 @@
  * Stores all unique interfaces that maybe used throughout the project
  */
 
+export interface Answer {
+    answerId: number,
+    answer: string,
+    colour: string,
+    correct: boolean
+}
+
+export interface AnswerBody {
+    answer: string,
+    correct: boolean
+}
+
 export interface createTokenReturn {
     token: string
+}
+
+export interface createQuestionReturn{
+    questionId: number
 }
 
 export interface createQuizReturn {
@@ -12,9 +28,18 @@ export interface createQuizReturn {
 
 export interface Question {
     questionId: number,
-    name: string,
-    answers: string[],
-    correctAnswer: string
+    answerCounter: number,
+    duration: number,
+    points: number
+    question: string,
+    answers: Answer[],
+}
+
+export interface QuestionBody {
+    answers: AnswerBody[],
+    duration: number,
+    points: number
+    question: string
 }
 
 export interface Quiz {
@@ -23,7 +48,8 @@ export interface Quiz {
     name: string,
     timeCreated: number,
     timeLastEdited: number,
-    question: Question[]
+    questionCounter: number,
+    questions: Question[]
 }
 
 export interface QuizArray {
@@ -56,7 +82,7 @@ export interface Trash {
     name: string,
     timeCreated: number,
     timeLastEdited: number,
-    question: Question[]
+    questions: Question[]
 }
 
 export interface User {

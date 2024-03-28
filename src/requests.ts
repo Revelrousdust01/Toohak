@@ -1,6 +1,6 @@
 import { port, url } from './config.json';
 import request, { HttpVerb } from 'sync-request-curl';
-import type { RequestHelperReturnType } from './interfaces';
+import type { RequestHelperReturnType, QuestionBody } from './interfaces';
 
 const SERVER_URL = `${url}:${port}`;
 
@@ -102,6 +102,12 @@ export const requestAdminQuizRemove = (token: string, quizid: number): RequestHe
   return requestHelper('DELETE',
     `/v1/admin/quiz/${quizid}`,
     { token: token });
+};
+
+export const requestAdminQuizQuestionCreate = (token: string, quizid: number, questionBody: QuestionBody): RequestHelperReturnType => {
+  return requestHelper('POST',
+    `/v1/admin/quiz/${quizid}/question`,
+    { token: token, questionBody: questionBody });
 };
 
 export const requestAdminQuizTransfer = (token: string, quizid: number, userEmail: string): RequestHelperReturnType => {
