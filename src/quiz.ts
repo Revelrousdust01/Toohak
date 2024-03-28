@@ -399,7 +399,6 @@ export function adminQuizRemove(token: string, quizid: number): object | ErrorOb
 }
 
 /**
-<<<<<<< Updated upstream
  * Transfer ownership of a quiz to a different user based on their email.
  *
  * @param {string} token - User ID of admin
