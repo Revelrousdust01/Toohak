@@ -957,6 +957,20 @@ describe('Test adminQuizQuestionMove', () => {
   });
 
   test.each([
+    { invalidNewPosition: -1 },
+    { invalidNewPosition: 9999999 },
+    { invalidNewPosition: 0 }
+  ])("New position is invalid: '$invalidNewPosition'", ({ invalidNewPosition }) => {
+    const user = requestAdminAuthRegister(email, password, lastName, firstName);
+    const newQuiz = requestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
+    const newQuestion = requestAdminQuizQuestionCreate(user.jsonBody.token as string, newQuiz.jsonBody.quizId as number, question);
+    requestAdminQuizQuestionCreate(user.jsonBody.token as string, newQuiz.jsonBody.quizId as number, updatedQuestion);
+    const response = requestAdminQuizQuestionMove(user.jsonBody.token as string, newQuiz.jsonBody.quizId as number, newQuestion.jsonBody.questionId as number, invalidNewPosition);
+    expect(response.statusCode).toStrictEqual(400);
+    expect(response.jsonBody).toStrictEqual(ERROR);
+  });
+
+  test.each([
     { invalidToken: '' },
     { invalidToken: '123' },
     { invalidToken: 'b77d409a-10cd-4a47-8e94-b0cd0ab50aa1' },
