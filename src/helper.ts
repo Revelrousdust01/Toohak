@@ -87,7 +87,7 @@ export function validPassword(password: string): object | ErrorObject {
 
 /**
   * Retrieves a random colour
-  * 
+  *
   * @returns { string } - Returns a random colour as a string
 */
 export function getColour(): string {
