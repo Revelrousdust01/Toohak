@@ -290,6 +290,50 @@ export function adminQuizQuestionCreate(token: string, quizid: number, questionB
   }
 }
 
+/**
+  * Delete a Quiz Question.
+  *
+  * @param {string} token - Token
+  * @param {number} quizid - Relevant quizID
+  * @param {number} questionid - Relevant questionID
+  *
+  * @returns { { error: }  } - Returns object when conditions fail
+  * @returns { object } - returns an empty object question is updated.
+*/
+
+export function adminQuizQuestionDelete(token: string, quizid: number, questionid: number): object | ErrorObject {
+  const data = getData();
+  const checkToken = validToken(token);
+
+  if (isError(checkToken)) {
+    return { error: 'Token is empty or invalid.' };
+  }
+  
+  const quizIndex = data.quizzes.findIndex(quiz => quiz.quizId === quizid);
+  if (quizIndex === -1) {
+    return { error: 'Quiz ID does not refer to a valid quiz.' };
+  }
+  
+  if (!checkToken.ownedQuizzes.includes(quizid)) {
+    return { error: 'Quiz ID does not refer to a quiz that this user owns.' };
+  }
+  
+  const questionIndex = data.quizzes[quizIndex].questions.findIndex(question => question.questionId === questionid);
+  if (questionIndex === -1) {
+    return { error: 'Question ID does not refer to a valid question within the quiz.' };
+  }
+  
+  data.quizzes[quizIndex].questions.splice(questionIndex, 1);
+  
+  data.quizzes[quizIndex].timeLastEdited = Date.now();
+  
+  console.log(data);
+
+  setData(data);
+  
+  return {};
+}
+
 export function adminQuizQuestionMove(token: string, quizid: number, questionid: number, newPosition: number): object | ErrorObject {
   const data = getData();
   const checkToken = validToken(token);

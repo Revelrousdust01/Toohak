@@ -214,9 +214,8 @@ app.put('/v1/admin/quiz/:quizid/question/:questionid', (req: Request, res: Respo
 });
 
 app.delete('/v1/admin/quiz/:quizid/question/:questionid', (req: Request, res: Response) => {
-  const { token } = req.body;
-  const response = adminQuizQuestionDelete(token, parseInt(req.params.quizid), parseInt(req.params.questionid));
-
+  const response = adminQuizQuestionDelete(req.query.token, parseInt(req.params.quizid), parseInt(req.params.questionid));
+  
   if ('error' in response) {
     if (response.error === 'Token is empty or invalid.') {
       return res.status(401).json(response);
