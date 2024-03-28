@@ -1,9 +1,9 @@
 import {
   requestAdminAuthLogin, requestAdminAuthRegister, requestAdminQuizCreate,
-  requestAdminQuizList, requestAdminQuizNameUpdate, requestAdminQuizRemove,
-  requestAdminQuizQuestionCreate, requestAdminQuizTransfer, requestAdminQuizTrashEmpty, requestClear,
-  requestAdminQuizViewTrash,
   requestAdminQuizQuestionUpdate,
+  requestAdminQuizDescriptionUpdate, requestAdminQuizList, requestAdminQuizNameUpdate,
+  requestAdminQuizRemove, requestAdminQuizQuestionCreate, requestAdminQuizTransfer,
+  requestAdminQuizTrashEmpty, requestClear, requestAdminQuizViewTrash,
 } from './requests';
 import { ErrorObject, QuestionBody } from './interfaces';
 
@@ -93,59 +93,63 @@ describe('Test adminQuizCreate', () => {
 });
 
 // adminQuizDescriptionUpdate
-describe.skip('Test adminQuizDescriptionUpdate', () => {
-  // const nameFirst = 'Leon';
-  // const nameLast = 'Sun';
-  // const email = 'leonsun@gmail.com';
-  // const password = 'qwer88888888';
-  // const quizName = 'Quiz 1 Name';
-  // const quizDescription = 'This is the first new quiz';
-  // const newQuizDescription = 'New Quiz 1 description';
+describe('Test adminQuizDescriptionUpdate', () => {
+  const firstName = 'Leon';
+  const lastName = 'Sun';
+  const email = 'leonsun@gmail.com';
+  const password = 'qwer88888888';
+  const quizName = 'Quiz 1 Name';
+  const quizDescription = 'This is the first new quiz';
+  const newQuizDescription = 'New Quiz 1 description';
 
-  test('working input, 0 errors expected', () => {
-    // const admin = adminAuthRegister(email, password, nameFirst, nameLast);
-    // const quiz1 = adminQuizCreate(admin.authUserId, quizName, quizDescription);
-    // expect(adminQuizDescriptionUpdate(admin.authUserId, quiz1.quizId, newQuizDescription)).toStrictEqual({});
-  });
-
-  test('authUserId is not valid', () => {
-    // const admin = adminAuthRegister('leonsun@gmail.com', 'leonsunspassword', 'Leon', 'Sun');
-    // const quiz1 = adminQuizCreate(admin.authUserId, 'Quiz 1', 'This is the first test quiz');
-    // expect(adminQuizDescriptionUpdate(-1, quiz1.quizId,
-    //   'This is the new description for the first test quiz')).toStrictEqual(ERROR);
+  test('Working input, 0 errors expected', () => {
+    const user = requestAdminAuthRegister(email, password, lastName, firstName);
+    const newQuiz = requestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
+    const response = requestAdminQuizDescriptionUpdate(user.jsonBody.token as string, newQuiz.jsonBody.quizId as number, newQuizDescription);
+    expect(response.jsonBody).toStrictEqual({});
+    expect(response.statusCode).toStrictEqual(200);
   });
 
   test.each([
-    { invalidId: '-1' },
-    { invalidId: 'a' },
-    { invalidId: '/' },
-  ])("AuthUserId is not a valid user: '$invalidId", ({ invalidId }) => {
-    // const admin = adminAuthRegister(email, password, nameFirst, nameLast);
-    // const newQuiz = adminQuizCreate(admin.authUserId, quizName, quizDescription);
-    // expect(adminQuizDescriptionUpdate(invalidId, newQuiz.quizId, newQuizDescription)).toStrictEqual(ERROR);
+    { invalidToken: '' },
+    { invalidToken: '123' },
+    { invalidToken: 'b77d409a-10cd-4a47-8e94-b0cd0ab50aa1' },
+    { invalidToken: 'abc' },
+  ])("Invalid Token: '$invalidToken", ({ invalidToken }) => {
+    const user = requestAdminAuthRegister(email, password, lastName, firstName);
+    const newQuiz = requestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
+    const response = requestAdminQuizDescriptionUpdate(invalidToken, newQuiz.jsonBody.quizId as number, newQuizDescription);
+    expect(response.jsonBody).toStrictEqual(ERROR);
+    expect(response.statusCode).toStrictEqual(401);
   });
 
   test.each([
-    { invalidQuizId: '-1' },
-    { invalidQuizId: 'a' },
-    { invalidQuizId: '/' },
-  ])("QuizId does not refer to valid quiz: '$invalidQuizId", ({ invalidQuizId }) => {
-    // const admin = adminAuthRegister(email, password, nameFirst, nameLast);
-    // adminQuizCreate(admin.authUserId, quizName, quizDescription);
-    // expect(adminQuizDescriptionUpdate(admin.authUserId, invalidQuizId, newQuizDescription)).toStrictEqual(ERROR);
+    { invalidQuizId: null },
+    { invalidQuizId: 0 },
+    { invalidQuizId: 150 },
+  ])('QuizId does not refer to valid quiz: $invalidQuizId', ({ invalidQuizId }) => {
+    const user = requestAdminAuthRegister(email, password, lastName, firstName);
+    requestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
+    const response = requestAdminQuizDescriptionUpdate(user.jsonBody.token as string, invalidQuizId as number, newQuizDescription);
+    expect(response.jsonBody).toStrictEqual(ERROR);
+    expect(response.statusCode).toStrictEqual(403);
   });
 
-  test('quizId does not refer to a quiz that this user owns', () => {
-    // const admin = adminAuthRegister(email, password, nameFirst, nameLast);
-    // const otherAdmin = adminAuthRegister('johndoe@gmail.com', 'johndoespassword', 'John', 'Doe');
-    // const quizId = adminQuizCreate(otherAdmin.authUserId, quizName, quizDescription);
-    // expect(adminQuizDescriptionUpdate(admin.authUserId, quizId, newQuizDescription)).toStrictEqual(ERROR);
+  test('QuizId does not refer to a quiz that this user owns', () => {
+    const user = requestAdminAuthRegister(email, password, lastName, firstName);
+    const newQuiz = requestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
+    const user2 = requestAdminAuthRegister('bob.smith@gmail.com', 'a1234567', 'Smith', 'Bob');
+    const response = requestAdminQuizDescriptionUpdate(user2.jsonBody.token as string, newQuiz.jsonBody.quizId as number, newQuizDescription);
+    expect(response.jsonBody).toStrictEqual(ERROR);
+    expect(response.statusCode).toStrictEqual(403);
   });
 
-  test('Description length is greater than 100 characters', () => {
-    // const admin = adminAuthRegister(email, password, nameFirst, nameLast);
-    // const quiz1 = adminQuizCreate(admin.authUserId, 'Quiz 1', 'This is the first test quiz');
-    // expect(adminQuizDescriptionUpdate(admin.authUserId, quiz1.quizId, 'A'.repeat(999))).toStrictEqual(ERROR);
+  test('Quiz description is greater than 100 characters', () => {
+    const user = requestAdminAuthRegister(email, password, lastName, firstName);
+    const newQuiz = requestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
+    const response = requestAdminQuizDescriptionUpdate(user.jsonBody.token as string, newQuiz.jsonBody.quizId as number, 'A'.repeat(101));
+    expect(response.jsonBody).toStrictEqual(ERROR);
+    expect(response.statusCode).toStrictEqual(400);
   });
 });
 
