@@ -327,9 +327,10 @@ export function adminQuizQuestionUpdate(token: string, quizid: number, questioni
       };
     }
     const validQuiz = quiz as Quiz;
-
+    let checkValidQuestion = false;
     for (const question of validQuiz.questions) {
       if (question.questionId === questionid) {
+        checkValidQuestion = true;
         question.question = questionBody.question;
         question.duration = questionBody.duration;
         question.points = questionBody.points;
@@ -344,6 +345,12 @@ export function adminQuizQuestionUpdate(token: string, quizid: number, questioni
           question.answers.push(newAnswer);
         }
       }
+    }
+
+    if (!checkValidQuestion) {
+      return {
+        error: 'Question Id does not refer to a valid question within this quiz'
+      };
     }
 
     validQuiz.timeLastEdited = Date.now();
