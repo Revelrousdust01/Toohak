@@ -722,7 +722,7 @@ describe('adminQuizViewTrash', () => {
 });
 
 // adminQuizTrashEmpty
-describe.skip('Test adminQuizTrashEmpty', () => {
+describe('Test adminQuizTrashEmpty', () => {
   const firstName = 'Christian';
   const lastName = 'Politis';
   const email = 'cpolitis@student.unsw.edu.au';
@@ -772,17 +772,16 @@ describe.skip('Test adminQuizTrashEmpty', () => {
     expect(response.statusCode).toStrictEqual(401);
   });
 
-  test.each([
-    { invalidQuizId: 0 },
-    { invalidQuizId: null },
-    { invalidQuizId: 150 },
-  ])("QuizId does not refer to valid quiz: '$invalidQuizIds'", ({ invalidQuizId }) => {
+  test('QuizId does not refer to valid quiz', () => {
     const register = requestAdminAuthRegister(email, password, lastName, firstName);
-    const quiz1 = requestAdminQuizCreate(register.jsonBody.token as string, quizName, quizDescription);
-    const quiz2 = requestAdminQuizCreate(register.jsonBody.token as string, 'Special quiz name', quizDescription);
-    requestAdminQuizRemove(register.jsonBody.token as string, quiz1.jsonBody.quizId as number);
-    requestAdminQuizRemove(register.jsonBody.token as string, quiz2.jsonBody.quizId as number);
-    const response = requestAdminQuizTrashEmpty(register.jsonBody.token as string, [quiz1.jsonBody.quizId as number, invalidQuizId]);
+    requestAdminQuizCreate(register.jsonBody.token as string, quizName, quizDescription);
+    requestAdminQuizCreate(register.jsonBody.token as string, 'Special quiz name', quizDescription);
+    requestAdminAuthRegister(email, password, lastName, firstName);
+    const quiz3 = requestAdminQuizCreate(register.jsonBody.token as string, quizName, quizDescription);
+    const quiz4 = requestAdminQuizCreate(register.jsonBody.token as string, 'Special quiz name', quizDescription);
+    requestAdminQuizRemove(register.jsonBody.token as string, quiz3.jsonBody.quizId as number);
+    requestAdminQuizRemove(register.jsonBody.token as string, quiz4.jsonBody.quizId as number);
+    const response = requestAdminQuizTrashEmpty(register.jsonBody.token as string, [quiz3.jsonBody.quizId as number, quiz4.jsonBody.quizId as number]);
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(403);
   });

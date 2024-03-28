@@ -205,7 +205,9 @@ app.delete('/v1/admin/quiz/trash/empty', (req: Request, res: Response) => {
   const response = adminQuizEmptyTrash(req.query.token as string, numberQuizIds);
 
   if ('error' in response) {
-    if (response.error === 'Token is empty or invalid.') {
+    if (response.error === 'One or more of the Quiz IDs is not currently in the trash.') {
+      return res.status(400).json(response);
+    } else if (response.error === 'Token is empty or invalid.') {
       return res.status(401).json(response);
     } else {
       return res.status(403).json(response);
