@@ -3,7 +3,8 @@ import {
   requestAdminQuizViewTrash, requestAdminQuizRestore, requestAdminQuizDescriptionUpdate,
   requestAdminQuizList, requestAdminQuizNameUpdate, requestAdminQuizRemove,
   requestAdminQuizQuestionCreate, requestAdminQuizQuestionMove, requestAdminQuizQuestionUpdate,
-  requestAdminQuizTransfer, requestAdminQuizTrashEmpty, requestClear
+  requestAdminQuizTransfer, requestAdminQuizTrashEmpty, requestClear, 
+  requestAdminQuizInfo
 } from './requests';
 import { ErrorObject, QuestionBody } from './interfaces';
 
@@ -205,51 +206,99 @@ describe('Test adminQuizRemove', () => {
 });
 
 // adminQuizInfo
-describe.skip('Test adminQuizInfo', () => {
-  // const firstName = 'Jeffery';
-  // const lastName = 'Zhang';
-  // const email = 'jeffery.zhang385@gmail.com';
-  // const password = 'str0ngpassword';
-  // const quizName = 'New Quiz';
-  // const quizDescription = 'This is a new quiz';
+describe('Test adminQuizInfo', () => {
+  const firstName = 'Jeffery';
+  const lastName = 'Zhang';
+  const email = 'jeffery.zhang385@gmail.com';
+  const password = 'str0ngpassword';
+  const quizName = 'New Quiz';
+  const quizDescription = 'This is a new quiz';
+  const question: QuestionBody = {
+    question: 'Who is the Monarch of England?',
+    duration: 1,
+    points: 5,
+    answers: [
+      {
+        answer: 'Prince Charles',
+        correct: true
+      },
+      {
+        answer: 'Prince Charless',
+        correct: false
+      }
+    ]
+  };
 
   test('Valid inputs', () => {
-    // const admin = adminAuthRegister(email, password, lastName, firstName);
-    // const quizCreate = adminQuizCreate(admin.authUserId, quizName, quizDescription);
-    // expect(adminQuizInfo(admin.authUserId, quizCreate.quizId)).toStrictEqual(
-    //   {
-    //     quizId: quizCreate.quizId,
-    //     name: quizName,
-    //     timeCreated: expect.any(Number),
-    //     timeLastEdited: expect.any(Number),
-    //     description: quizDescription,
-    //   });
+    const registered = requestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = requestAdminQuizCreate(registered.jsonBody.token as string, quizName, quizDescription);
+    const questionId = requestAdminQuizQuestionCreate(registered.jsonBody.token as string, quizId.jsonBody.quizId as number, question);
+    const response = requestAdminQuizInfo(registered.jsonBody.token as string, quizId.jsonBody.quizId as number);
+    expect(response.jsonBody).toMatchObject({
+      quizId: quizId.jsonBody.quizId as number,
+      name: quizName,
+      timeCreated: expect.any(Number),
+      timeLastEdited: expect.any(Number),
+      description: quizDescription,
+      numQuestions: expect.any(Number),
+      questions: [
+        {
+          questionId: questionId.jsonBody.questionId as number,
+          question: 'Who is the Monarch of England?',
+          duration: 1,
+          points: 5,
+          answers: [
+            {
+              answerId: expect.any(Number),
+              answer: 'Prince Charles',
+              colour: expect.any(String),
+              correct: true
+            },
+            {
+              answerId: expect.any(Number),
+              answer: 'Prince Charless',
+              colour: expect.any(String),
+              correct: false
+            }
+          ]
+        }
+      ],
+      duration: expect.any(Number),
+    });
+    expect(response.statusCode).toStrictEqual(200);
   });
 
   test.each([
-    { invalidId: '-1' },
-    { invalidId: 'a' },
-    { invalidId: '/' },
-  ])("AuthUserId is not a valid user: '$invalidId", ({ invalidId }) => {
-    // const admin = adminAuthRegister(email, password, lastName, firstName);
-    // const quizId = adminQuizCreate(admin.authUserId, quizName, quizDescription);
-    // expect(adminQuizInfo(invalidId, quizId)).toStrictEqual(ERROR);
+    { invalidToken: '' },
+    { invalidToken: '123' },
+    { invalidToken: 'b77d409a-10cd-4a47-8e94-b0cd0ab50aa1' },
+    { invalidToken: 'abc' },
+  ])("Invalid Token: '$invalidToken", ({ invalidToken }) => {
+    const registered = requestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = requestAdminQuizCreate(registered.jsonBody.token as string, quizName, quizDescription);
+    const response = requestAdminQuizInfo(invalidToken, quizId.jsonBody.quizId as number);
+    expect(response.jsonBody).toStrictEqual(ERROR);
+    expect(response.statusCode).toStrictEqual(401);
   });
 
   test.each([
-    { invalidQuizId: '-1' },
-    { invalidQuizId: 'a' },
-    { invalidQuizId: '/' },
+    { invalidQuizId: null },
+    { invalidQuizId: 0 },
+    { invalidQuizId: 150 },
   ])("QuizId does not refer to valid quiz: '$invalidQuizId", ({ invalidQuizId }) => {
-    // const admin = adminAuthRegister(email, password, lastName, firstName);
-    // expect(adminQuizInfo(admin.authUserId, invalidQuizId)).toStrictEqual(ERROR);
+    const registered = requestAdminAuthRegister(email, password, lastName, firstName);
+    const response = requestAdminQuizInfo(registered.jsonBody.token as string, invalidQuizId);
+    expect(response.jsonBody).toStrictEqual(ERROR);
+    expect(response.statusCode).toStrictEqual(403);
   });
 
   test('QuizId does not refer to a quiz that this user owns', () => {
-    // const admin = adminAuthRegister(email, password, lastName, firstName);
-    // const admin1 = adminAuthRegister('bob.smith@gmail.com', '1234', 'Smith', 'Bob');
-    // const quizId = adminQuizCreate(admin1.authUserId, quizName, quizDescription);
-    // expect(adminQuizInfo(admin.authUserId, quizId)).toStrictEqual(ERROR);
+    const registered = requestAdminAuthRegister(email, password, lastName, firstName);
+    const newQuiz = requestAdminQuizCreate(registered.jsonBody.token as string, quizName, quizDescription);
+    const registered1 = requestAdminAuthRegister('bob.smith@gmail.com', 'a1234567', 'Smith', 'Bob');
+    const response = requestAdminQuizInfo(registered1.jsonBody.token as string, newQuiz.jsonBody.quizId as number);
+    expect(response.jsonBody).toStrictEqual(ERROR);
+    expect(response.statusCode).toStrictEqual(403);
   });
 });
 
