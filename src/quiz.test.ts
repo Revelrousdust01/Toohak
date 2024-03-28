@@ -755,6 +755,19 @@ describe('Test adminQuizQuestionUpdate', () => {
     expect(response.statusCode).toStrictEqual(403);
     expect(response.jsonBody).toStrictEqual(ERROR);
   });
+
+  test.each([
+    { invalidQuestionId: null },
+    { invalidQuestionId: 0 },
+    { invalidQuestionId: 150 },
+  ])("Question ID is invalid or user does not own the quiz '$invalidQuestionId'", ({ invalidQuestionId }) => {
+    const user = requestAdminAuthRegister(email, password, lastName, firstName);
+    const newQuiz = requestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
+    requestAdminQuizQuestionCreate(user.jsonBody.token as string, newQuiz.jsonBody.quizId as number, question);
+    const response = requestAdminQuizQuestionUpdate(user.jsonBody.token as string, newQuiz.jsonBody.quizId as number, invalidQuestionId, updatedQuestion);
+    expect(response.statusCode).toStrictEqual(400);
+    expect(response.jsonBody).toStrictEqual(ERROR);
+  });
 });
 
 // adminQuizTransfer
