@@ -28,7 +28,7 @@ const requestHelper = (
     // PUT/POST
     json = payload;
   }
-  const res = request(method, SERVER_URL + path, { qs, json, timeout: 100 });
+  const res = request(method, SERVER_URL + path, { qs, json, timeout: 1000 });
   const bodyString = res.body.toString();
   let bodyObject: RequestHelperReturnType;
   try {
@@ -120,6 +120,12 @@ export const requestAdminQuizQuestionUpdate = (token: string, quizid: number, qu
   return requestHelper('PUT',
     `/v1/admin/quiz/${quizid}/question/${questionid}`,
     { token: token, questionBody: questionBody });
+};
+
+export const requestAdminQuizQuestionMove = (token: string, quizid: number, questionid: number, newPosition: number): RequestHelperReturnType => {
+  return requestHelper('PUT',
+    `/v1/admin/quiz/${quizid}/question/${questionid}/move`,
+    { token: token, newPosition: newPosition });
 };
 
 export const requestAdminQuizTransfer = (token: string, quizid: number, userEmail: string): RequestHelperReturnType => {

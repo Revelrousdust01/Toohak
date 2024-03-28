@@ -290,6 +290,47 @@ export function adminQuizQuestionCreate(token: string, quizid: number, questionB
   }
 }
 
+export function adminQuizQuestionMove(token: string, quizid: number, questionid: number, newPosition: number): object | ErrorObject {
+  const data = getData();
+  const checkToken = validToken(token);
+
+  if (isError(checkToken)) {
+    return { error: 'Token is empty or invalid.' };
+  }
+
+  const quiz = data.quizzes.find(quiz => quiz.quizId === quizid);
+
+  if (!quiz) {
+    return { error: 'Quiz ID does not refer to a valid quiz.' };
+  }
+
+  if (!checkToken.ownedQuizzes.includes(quizid)) {
+    return { error: 'Quiz ID does not refer to a quiz that this user owns.' };
+  }
+
+  const questionIndex = quiz.questions.findIndex(question => question.questionId === questionid);
+  if (questionIndex === -1) {
+    return { error: 'Question ID does not refer to a valid question within the quiz.' };
+  }
+
+  if (newPosition < 0 || newPosition >= quiz.questions.length) {
+    return { error: 'New position is out of valid range.' };
+  }
+
+  if (newPosition === questionIndex) {
+    return { error: 'New position is the same as the current position of the question.' };
+  }
+
+  const [questionToMove] = quiz.questions.splice(questionIndex, 1);
+  quiz.questions.splice(newPosition, 0, questionToMove);
+
+  quiz.timeLastEdited = Date.now();
+
+  setData(data);
+
+  return {};
+}
+
 /**
   * Update Quiz Question.
   *
