@@ -455,9 +455,9 @@ describe('Test adminQuizQuestionCreate', () => {
   });
 
   test.each([
-    {questionString: 'A',},
-    {questionString:'A'.repeat(55)},
-  ])("Invalid question string length '$questionString'", ({questionString}) => {
+    { questionString: 'A' },
+    { questionString: 'A'.repeat(55) },
+  ])("Invalid question string length '$questionString'", ({ questionString }) => {
     const invalidQuestion = { ...question, question: questionString };
     const user = requestAdminAuthRegister(email, password, lastName, firstName);
     const newQuiz = requestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
@@ -519,9 +519,9 @@ describe('Test adminQuizQuestionCreate', () => {
   });
 
   test.each([
-    {questionString: 'A',},
-    {questionString:'A'.repeat(55)},
-  ])("Length of any answer is shorter than 1 character long, or longer than 30 characters long $'questionString'", ({questionString}) => {
+    { questionString: 'A' },
+    { questionString: 'A'.repeat(55) },
+  ])("Length of any answer is shorter than 1 character long, or longer than 30 characters long $'questionString'", ({ questionString }) => {
     const invalidQuestion = { ...question, answers: [{ answer: questionString, correct: true }] };
     const user = requestAdminAuthRegister(email, password, lastName, firstName);
     const newQuiz = requestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
