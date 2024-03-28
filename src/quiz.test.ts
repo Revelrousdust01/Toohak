@@ -448,8 +448,7 @@ describe('Test adminQuizQuestionCreate', () => {
   test('Valid inputs', () => {
     const user = requestAdminAuthRegister(email, password, lastName, firstName);
     const newQuiz = requestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
-    const invalidQuestion = { ...question, question: 'AAAAAAAAAAAAAAAAAAA' };
-    requestAdminQuizQuestionCreate(user.jsonBody.token as string, newQuiz.jsonBody.quizId as number, invalidQuestion);
+    requestAdminQuizQuestionCreate(user.jsonBody.token as string, newQuiz.jsonBody.quizId as number, question);
     const response = requestAdminQuizQuestionCreate(user.jsonBody.token as string, newQuiz.jsonBody.quizId as number, question);
     expect(response.jsonBody).toStrictEqual({ questionId: expect.any(Number) });
     expect(response.statusCode).toStrictEqual(200);
