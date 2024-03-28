@@ -66,32 +66,37 @@ export function adminQuizCreate(token: string, name: string, description: string
 }
 
 /**
-  * Update the description of the relevant quiz.
+  * Update the name of the relevant quiz.
   *
-  * @param {number} authUserId - user id of admin
-  * @param {number} quizId - relevant quiz id
+  * @param {string} token - User ID of admin
+  * @param {number} quizid - relevant quizID
   * @param {string} description - new description for the relevant quiz
   *
-  * @returns {} - returns empty array when quiz description is updated
+  * @returns {object} - returns an empty object when a quiz description is updated
 */
+export function adminQuizDescriptionUpdate(token: string, quizid: number, description: string): ErrorObject | object {
+  const data = getData();
+  const quizIndex = data.quizzes.findIndex(quizzes => quizzes.quizId === quizid);
+  const checkToken = validToken(token);
 
-// export function adminQuizDescriptionUpdate(authUserId, quizId, description) {
-//   const currentState = getData();
+  // 401 error
+  if (isError(checkToken)) {
+    return { error: 'Token is empty or invalid' };
+  }
 
-//   const user = currentState.users.find(user => user.userId === authUserId);
-//   if (!user) { return { error: 'AuthUserId is not a valid user.' }; }
+  // 400 error
+  if (description.length > 100) { return { error: 'Description must be less than 100 characters.' }; }
 
-//   if (!user.ownedQuizzes.includes(quizId)) { return { error: 'Quiz ID does not refer to a valid quiz owned by this user.' }; }
+  // 403 error
+  if (quizIndex === -1) { return { error: 'Quiz ID does not refer to a valid quiz.' }; }
 
-//   if (description.length > 100) { return { error: 'Description is too long.' }; }
+  // 403 error
+  if (!checkToken.ownedQuizzes.includes(quizid)) { return { error: 'Quiz ID does not refer to a quiz that this user owns.' }; }
 
-//   const quiz = currentState.quizzes.find(quiz => quiz.quizId === quizId);
-//   if (quiz) { quiz.description = description; } else { return { error: 'Quiz not found.' }; }
-
-//   setData(currentState);
-
-//   return { };
-// }
+  data.quizzes[quizIndex].description = description;
+  setData(data);
+  return { };
+}
 
 /**
  * Get all of the relevant information about the current quiz.
