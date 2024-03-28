@@ -298,7 +298,6 @@ export function adminQuizQuestionCreate(token: string, quizid: number, questionB
   * @param {number} questionid - Relevant questionID
   *
   * @returns { { error: }  } - Returns object when conditions fail
-  *
   * @returns { object } - returns an empty object question is updated.
 */
 
