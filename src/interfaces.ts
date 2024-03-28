@@ -22,6 +22,10 @@ export interface createQuestionReturn{
     questionId: number
 }
 
+export interface duplicateReturn {
+    newQuestionId: number
+}
+
 export interface createQuizReturn {
     quizId: number
 }
