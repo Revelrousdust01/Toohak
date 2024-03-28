@@ -122,6 +122,12 @@ export const requestAdminQuizQuestionUpdate = (token: string, quizid: number, qu
     { token: token, questionBody: questionBody });
 };
 
+export const requestAdminQuizQuestionMove = (token: string, quizid: number, questionid: number, newPosition: number): RequestHelperReturnType => {
+  return requestHelper('PUT',
+    `/v1/admin/quiz/${quizid}/question/${questionid}/move`,
+    { token: token, newPosition: newPosition });
+};
+
 export const requestAdminQuizTransfer = (token: string, quizid: number, userEmail: string): RequestHelperReturnType => {
   return requestHelper('POST',
     `/v1/admin/quiz/${quizid}/transfer`,
