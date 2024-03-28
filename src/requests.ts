@@ -106,7 +106,7 @@ export const requestAdminQuizRemove = (token: string, quizid: number): RequestHe
 
 export const requestAdminQuizQuestionCreate = (token: string, quizid: number, questionBody: QuestionBody): RequestHelperReturnType => {
   return requestHelper('POST',
-    `/v1/admin/quiz/${quizid}/transfer`,
+    `/v1/admin/quiz/${quizid}/question`,
     { token: token, questionBody: questionBody });
 };
 
