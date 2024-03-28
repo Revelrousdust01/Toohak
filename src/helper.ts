@@ -126,7 +126,7 @@ export function validQuestion(questionBody: QuestionBody, quiz: Quiz): object | 
   for (const question of quiz.questions) {
     counter = question.duration++;
   }
-  if (counter + questionBody.duration > 3) {
+  if (counter + questionBody.duration > 180) {
     return { error: 'The sum of the question durations in the quiz exceeds 3 minutes.' };
   } else if (questionBody.points < 1 || questionBody.points > 10) {
     return { error: 'The points awarded for the question are less than 1 or greater than 10.' };

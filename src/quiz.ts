@@ -484,10 +484,9 @@ export function adminQuizEmptyTrash(token: string, quizids: number[]): object | 
       error: checkToken.error
     };
   }
-
   for (const quizInTrash of data.trash) {
-    const searchTrash = quizids.find(quiz => quiz === quizInTrash.quizId);
-    if (searchTrash === null) {
+    const searchTrash = quizids.find(quizid => quizid === quizInTrash.quizId);
+    if (!searchTrash) {
       return {
         error: 'One or more of the Quiz IDs is not currently in the trash.'
       };
