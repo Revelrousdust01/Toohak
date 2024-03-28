@@ -3,7 +3,7 @@ import {
   adminUserDetails, adminUserDetailsUpdate, adminUserPasswordUpdate,
 } from './auth';
 import {
-  adminQuizCreate, adminQuizDescriptionUpdate, adminQuizEmptyTrash,
+  adminQuizQuestionUpdate, adminQuizCreate, adminQuizDescriptionUpdate, adminQuizEmptyTrash,
   adminQuizList, adminQuizNameUpdate, adminQuizQuestionCreate, adminQuizRemove,
   adminQuizTransfer, adminQuizViewTrash
 } from './quiz';
@@ -147,6 +147,22 @@ app.put('/v1/admin/user/password', (req: Request, res: Response) => {
 app.post('/v1/admin/quiz/:quizid/question', (req: Request, res: Response) => {
   const { token, questionBody } = req.body;
   const response = adminQuizQuestionCreate(token, parseInt(req.params.quizid), questionBody);
+
+  if ('error' in response) {
+    if (response.error === 'Token is empty or invalid.') {
+      return res.status(401).json(response);
+    } else if (response.error === 'Quiz ID does not refer to a valid quiz.' || response.error === 'Quiz ID does not refer to a quiz that this user owns.') {
+      return res.status(403).json(response);
+    } else {
+      return res.status(400).json(response);
+    }
+  }
+  res.json(response);
+});
+
+app.put('/v1/admin/quiz/:quizid/question/:questionid', (req: Request, res: Response) => {
+  const { token, questionBody } = req.body;
+  const response = adminQuizQuestionUpdate(token, parseInt(req.params.quizid), parseInt(req.params.questionid), questionBody);
 
   if ('error' in response) {
     if (response.error === 'Token is empty or invalid.') {

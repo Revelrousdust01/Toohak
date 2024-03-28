@@ -28,7 +28,6 @@ export interface createQuizReturn {
 
 export interface Question {
     questionId: number,
-    answerCounter: number,
     duration: number,
     points: number
     question: string,
