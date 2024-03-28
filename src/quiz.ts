@@ -1,6 +1,6 @@
 import { getData, setData } from './dataStore';
-import type { ErrorObject, Quiz, createQuizReturn, quizArray } from './interfaces';
-import { isError, findQuiz, validQuizName, validQuizId, validToken } from './helper';
+import type { ErrorObject, Quiz, createQuizReturn, QuizArray, QuestionBody, Question, Answer, createQuestionReturn } from './interfaces';
+import { isError, findQuiz, getColour, validQuestion, validQuizName, validQuizId, validToken } from './helper';
 
 /**
  * Given basic details about a new quiz, create one for the logged in user.
@@ -49,11 +49,12 @@ export function adminQuizCreate(token: string, name: string, description: string
 
   const newQuiz: Quiz = {
     quizId: quizId,
+    questionCounter: 1,
     description: description,
     name: name,
     timeCreated: Date.now(),
     timeLastEdited: Date.now(),
-    question: []
+    questions: []
   };
 
   data.users.find(user => user.userId === checkToken.userId).ownedQuizzes.push(quizId);
@@ -131,40 +132,56 @@ export function adminQuizDescriptionUpdate(token: string, quizid: number, descri
 /**
  * Provide a list of all quizzes that are owned by the currently logged in user.
  *
- * @param {number} authUserId - ID of user
+ * @param {string} token - ID of user
  *
- * @returns {array} - Returns array of all quizzes that are owned
- *                    by the currently logged in user.
+ * @return {ErrorObject} - returns error object based on following conditions:
+ *
+ * Token is empty or invalid (does not refer to valid logged in user session)
+ *
+ * @return {QuizArray} - returns an array of quizzes in the list;
  */
 
-// export function adminQuizList(authUserId) {
-//   const checkAuthUserId = validAuthUserId(authUserId);
-//   if (checkAuthUserId.error) {
-//     return {
-//       error: checkAuthUserId.error
-//     };
-//   }
+export function adminQuizList(token: string): ErrorObject | QuizArray {
+  const data = getData();
 
-//   const data = getData();
+  const checkToken = validToken(token);
+  if (isError(checkToken)) {
+    return {
+      error: checkToken.error
+    };
+  }
 
-//   const user = data.users.find(user => user.userId === authUserId);
-//   const ownedQuizzes = user.ownedQuizzes;
-//   const quizzes = [];
+  const ownedQuizzes = checkToken.ownedQuizzes;
+  const quizInTrash = data.trash;
+  const quizzes = [];
 
-//   for (const ownedQuiz of ownedQuizzes) {
-//     const quiz = {
-//       name: data.quizzes.find(quiz => quiz.quizId === ownedQuiz).name,
-//       quizId: ownedQuiz
-//     };
-//     quizzes.push(quiz);
-//   }
-
-//   setData(data);
-
-//   return {
-//     quizzes: quizzes
-//   };
-// }
+  if (quizInTrash.length === 0) {
+    for (const ownedQuiz of ownedQuizzes) {
+      const quizFind = findQuiz(ownedQuiz);
+      const quiz = {
+        quizId: ownedQuiz,
+        name: (quizFind as Quiz).name
+      };
+      quizzes.push(quiz);
+    }
+  } else {
+    for (const ownedQuiz of ownedQuizzes) {
+      for (const trashedQuiz of quizInTrash) {
+        if (ownedQuiz !== trashedQuiz.quizId) {
+          const quizFind = findQuiz(ownedQuiz);
+          const quiz = {
+            quizId: ownedQuiz,
+            name: (quizFind as Quiz).name
+          };
+          quizzes.push(quiz);
+        }
+      }
+    }
+  }
+  return {
+    quizzes: quizzes
+  };
+}
 
 /**
   * Update the name of the relevant quiz.
@@ -173,7 +190,7 @@ export function adminQuizDescriptionUpdate(token: string, quizid: number, descri
   * @param {number} quizid - relevant quizID
   * @param {string} name - new name for the relevant quiz
   *
-  * @returns {object} - returns an empty object when a quiz is removed
+  * @returns {object} - returns an empty object when a name is updated
 */
 
 export function adminQuizNameUpdate(token: string, quizid: number, name: string): ErrorObject | object {
@@ -183,13 +200,13 @@ export function adminQuizNameUpdate(token: string, quizid: number, name: string)
 
   // 401 error
   if (isError(checkToken)) {
-    return { error: 'Token is empty or invalid' };
+    return { error: 'Token is empty or invalid.' };
   }
 
   // 400 error
   const checkQuizName = validQuizName(name);
   if (isError(checkQuizName)) {
-    return { error: 'Quiz name is not valid' };
+    return { error: 'Quiz name is not valid.' };
   }
 
   // 400 error
@@ -207,6 +224,61 @@ export function adminQuizNameUpdate(token: string, quizid: number, name: string)
   data.quizzes[quizIndex].name = name;
   setData(data);
   return { };
+}
+
+export function adminQuizQuestionCreate(token: string, quizid: number, questionBody: QuestionBody): createQuestionReturn | ErrorObject {
+  const data = getData();
+  const checkToken = validToken(token);
+
+  if (isError(checkToken)) {
+    return { error: 'Token is empty or invalid.' };
+  }
+
+  const checkQuizId = validQuizId(token, quizid, checkToken);
+
+  if (isError(checkQuizId)) {
+    return {
+      error: checkQuizId.error
+    };
+  }
+
+  const quiz = findQuiz(quizid);
+
+  if (quiz != null) {
+    const checkQuestion = validQuestion(questionBody, quiz as Quiz);
+    if (isError(checkQuestion)) {
+      return {
+        error: checkQuestion.error
+      };
+    }
+    const validQuiz = quiz as Quiz;
+    const newQuestion: Question = {
+      questionId: validQuiz.questionCounter,
+      answerCounter: questionBody.answers.length,
+      duration: questionBody.duration,
+      question: questionBody.question,
+      points: questionBody.points,
+      answers: []
+    };
+    validQuiz.questionCounter++;
+    for (const [index, answer] of questionBody.answers.entries()) {
+      const newAnswer: Answer = {
+        answerId: index,
+        answer: answer.answer,
+        colour: getColour(),
+        correct: answer.correct
+      };
+      newQuestion.answers.push(newAnswer);
+    }
+
+    validQuiz.timeLastEdited = Date.now();
+
+    validQuiz.questions.push(newQuestion);
+
+    setData(data);
+
+    return { questionId: newQuestion.questionId };
+  }
 }
 
 /**
@@ -344,10 +416,9 @@ export function adminQuizEmptyTrash(token: string, quizids: number[]): object | 
       error: checkToken.error
     };
   }
-
   for (const quizInTrash of data.trash) {
-    const searchTrash = quizids.find(quiz => quiz === quizInTrash.quizId);
-    if (searchTrash === null) {
+    const searchTrash = quizids.find(quizid => quizid === quizInTrash.quizId);
+    if (!searchTrash) {
       return {
         error: 'One or more of the Quiz IDs is not currently in the trash.'
       };
@@ -383,10 +454,10 @@ export function adminQuizEmptyTrash(token: string, quizids: number[]): object | 
  *
  * Token is empty or invalid (does not refer to valid logged in user session)
  *
- * @return {quizArray} - returns an array of quizzes in the trash
+ * @return {QuizArray} - returns an array of quizzes in the trash
  */
 
-export function adminQuizViewTrash(token: string): ErrorObject | quizArray {
+export function adminQuizViewTrash(token: string): ErrorObject | QuizArray {
   const data = getData();
 
   const checkToken = validToken(token);
