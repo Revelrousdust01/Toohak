@@ -1,6 +1,6 @@
 import { port, url } from './config.json';
 import request, { HttpVerb } from 'sync-request-curl';
-import type { RequestHelperReturnType } from './interfaces';
+import type { RequestHelperReturnType, QuestionBody } from './interfaces';
 
 const SERVER_URL = `${url}:${port}`;
 
@@ -86,16 +86,40 @@ export const requestAdminQuizCreate = (token: string, name:string, description: 
     { token: token, name: name, description: description });
 };
 
+export const requestAdminQuizDescriptionUpdate = (token: string, quizid: number, description: string): RequestHelperReturnType => {
+  return requestHelper('PUT',
+    `/v1/admin/quiz/${quizid}/description`,
+    { token: token, quizid: quizid, description: description });
+};
+
+export const requestAdminQuizList = (token: string): RequestHelperReturnType => {
+  return requestHelper('GET',
+    '/v1/admin/quiz/list',
+    { token: token });
+};
+
 export const requestAdminQuizNameUpdate = (token: string, quizid: number, newName: string): RequestHelperReturnType => {
   return requestHelper('PUT',
-    '/v1/admin/quiz/$quizid/name',
-    { token: token, quizid: quizid, name: newName });
+    `/v1/admin/quiz/${quizid}/name`,
+    { token: token, name: newName });
 };
 
 export const requestAdminQuizRemove = (token: string, quizid: number): RequestHelperReturnType => {
   return requestHelper('DELETE',
     `/v1/admin/quiz/${quizid}`,
     { token: token });
+};
+
+export const requestAdminQuizQuestionCreate = (token: string, quizid: number, questionBody: QuestionBody): RequestHelperReturnType => {
+  return requestHelper('POST',
+    `/v1/admin/quiz/${quizid}/question`,
+    { token: token, questionBody: questionBody });
+};
+
+export const requestAdminQuizQuestionUpdate = (token: string, quizid: number, questionid: number, questionBody: QuestionBody): RequestHelperReturnType => {
+  return requestHelper('PUT',
+    `/v1/admin/quiz/${quizid}/question/${questionid}`,
+    { token: token, questionBody: questionBody });
 };
 
 export const requestAdminQuizTransfer = (token: string, quizid: number, userEmail: string): RequestHelperReturnType => {
