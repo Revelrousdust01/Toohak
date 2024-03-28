@@ -5,7 +5,7 @@ import {
 import {
   adminQuizQuestionUpdate, adminQuizCreate, adminQuizDescriptionUpdate, adminQuizEmptyTrash,
   adminQuizList, adminQuizNameUpdate, adminQuizQuestionCreate, adminQuizRemove,
-  adminQuizTransfer, adminQuizViewTrash
+  adminQuizTransfer, adminQuizViewTrash, adminQuizRestore
 } from './quiz';
 import { clear } from './other';
 import express, { json, Request, Response } from 'express';
@@ -114,6 +114,26 @@ app.put('/v1/admin/quiz/:quizid/name', (req: Request, res: Response) => {
   }
 
   return res.status(200).json({});
+});
+
+app.post('/v1/admin/quiz/:quizid/restore', (req: Request, res: Response) => {
+  const { token } = req.body;
+  const response = adminQuizRestore(token, parseInt(req.params.quizid));
+
+  if ('error' in response) {
+    if (response.error === 'Token is empty or invalid.') {
+      return res.status(401).json(response);
+    } else if (response.error === 'Quiz name of the restored quiz is already used by another active quiz') {
+      return res.status(400).json(response);
+    } else if (response.error === 'Quiz ID refers to a quiz that is not currently in the trash') {
+      return res.status(400).json(response);
+    } else if (response.error === 'Quiz ID does not refer to a valid quiz.') {
+      return res.status(403).json(response);
+    } else if (response.error === 'Quiz ID does not refer to a quiz that this user owns.') {
+      return res.status(403).json(response);
+    }
+  }
+  res.json(response);
 });
 
 app.put('/v1/admin/user/details', (req: Request, res: Response) => {

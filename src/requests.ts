@@ -152,6 +152,12 @@ export const requestAdminUserPasswordUpdate = (token: string, oldPassword: strin
     { token: token, oldPassword: oldPassword, newPassword: newPassword });
 };
 
+export const requestAdminQuizRestore = (token: string, quizid: number): RequestHelperReturnType => {
+  return requestHelper('POST',
+  `/v1/admin/quiz/${quizid}/restore`,
+  { token: token });
+};
+
 export const requestAdminQuizViewTrash = (token: string): RequestHelperReturnType => {
   return requestHelper('GET',
     '/v1/admin/quiz/trash',
