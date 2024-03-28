@@ -334,6 +334,17 @@ export function adminQuizQuestionDelete(token: string, quizid: number, questioni
   return {};
 }
 
+/**
+  * Move a Quiz Question.
+  *
+  * @param {string} token - Token
+  * @param {number} quizid - Relevant quizID
+  * @param {number} questionid - Relevant questionID
+  *
+  * @returns { { error: }  } - Returns object when conditions fail
+  * @returns { object } - returns an empty object question is moved.
+*/
+
 export function adminQuizQuestionMove(token: string, quizid: number, questionid: number, newPosition: number): object | ErrorObject {
   const data = getData();
   const checkToken = validToken(token);
