@@ -585,7 +585,7 @@ describe('Test adminQuizQuestionUpdate', () => {
   const quizDescription = 'This is a new quiz';
   const question: QuestionBody = {
     question: 'Who is the Monarch of England?',
-    duration: 1,
+    duration: 150,
     points: 5,
     answers: [
       {
@@ -624,8 +624,11 @@ describe('Test adminQuizQuestionUpdate', () => {
     expect(response.statusCode).toStrictEqual(200);
   });
 
-  test('Invalid question string length', () => {
-    const invalidQuestion = { ...updatedQuestion, question: 'A' };
+  test.each([
+    { questionString: 'A' },
+    { questionString: 'A'.repeat(55) },
+  ])("Invalid question string length '$questionString'", ({ questionString }) => {
+    const invalidQuestion = { ...updatedQuestion, question: questionString };
     const user = requestAdminAuthRegister(email, password, lastName, firstName);
     const newQuiz = requestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
     const newQuestion = requestAdminQuizQuestionCreate(user.jsonBody.token as string, newQuiz.jsonBody.quizId as number, question);
@@ -666,7 +669,7 @@ describe('Test adminQuizQuestionUpdate', () => {
   });
 
   test('The sum of the question durations in the quiz exceeds 3 minutes', () => {
-    const question1 = { ...updatedQuestion, duration: 10 };
+    const question1 = { ...updatedQuestion, duration: 250 };
     const user = requestAdminAuthRegister(email, password, lastName, firstName);
     const newQuiz = requestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
     requestAdminQuizQuestionCreate(user.jsonBody.token as string, newQuiz.jsonBody.quizId as number, question);
@@ -689,8 +692,11 @@ describe('Test adminQuizQuestionUpdate', () => {
     expect(response.jsonBody).toStrictEqual(ERROR);
   });
 
-  test('Length of any answer is shorter than 1 character long, or longer than 30 characters long', () => {
-    const invalidQuestion = { ...updatedQuestion, answers: [{ answer: '', correct: true }] };
+  test.each([
+    { answerString: 'A' },
+    { answerString: 'A'.repeat(55) },
+  ])("Length of any answer is shorter than 1 character long, or longer than 30 characters long $'questionString'", ({ answerString }) => {
+    const invalidQuestion = { ...updatedQuestion, answers: [{ answer: answerString, correct: true }] };
     const user = requestAdminAuthRegister(email, password, lastName, firstName);
     const newQuiz = requestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
     const newQuestion = requestAdminQuizQuestionCreate(user.jsonBody.token as string, newQuiz.jsonBody.quizId as number, question);
