@@ -116,6 +116,12 @@ export const requestAdminQuizQuestionCreate = (token: string, quizid: number, qu
     { token: token, questionBody: questionBody });
 };
 
+export const requestAdminQuizQuestionDelete = (token: string, quizid: number, questionid: number): RequestHelperReturnType => {
+  return requestHelper('DELETE',
+    `/v1/admin/quiz/${quizid}/question/${questionid}`,
+    { token: token });
+};
+
 export const requestAdminQuizQuestionUpdate = (token: string, quizid: number, questionid: number, questionBody: QuestionBody): RequestHelperReturnType => {
   return requestHelper('PUT',
     `/v1/admin/quiz/${quizid}/question/${questionid}`,
