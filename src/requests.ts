@@ -122,6 +122,12 @@ export const requestAdminQuizQuestionCreate = (token: string, quizid: number, qu
     { token: token, questionBody: questionBody });
 };
 
+export const requestAdminQuizQuestionDuplicate = (token: string, quizid: number, questionid: number): RequestHelperReturnType => {
+  return requestHelper('POST',
+    `/v1/admin/quiz/${quizid}/question/${questionid}/duplicate`,
+    { token: token });
+};
+
 export const requestAdminQuizQuestionDelete = (token: string, quizid: number, questionid: number): RequestHelperReturnType => {
   return requestHelper('DELETE',
     `/v1/admin/quiz/${quizid}/question/${questionid}`,

@@ -1,5 +1,5 @@
 import { getData, setData } from './dataStore';
-import type { ErrorObject, Quiz, createQuizReturn, QuizArray, QuestionBody, Question, Answer, createQuestionReturn } from './interfaces';
+import type { ErrorObject, Quiz, createQuizReturn, QuizArray, QuestionBody, Question, duplicateReturn, Answer, createQuestionReturn } from './interfaces';
 import { isError, findQuiz, getColour, validQuestion, validQuizName, validQuizId, validToken } from './helper';
 
 /**
@@ -327,6 +327,57 @@ export function adminQuizQuestionCreate(token: string, quizid: number, questionB
 }
 
 /**
+<<<<<<< HEAD
+ * A particular question gets duplicated to immediately after where the source question is
+ *
+ * @param {string} token - Token
+ * @param {number} quizid - Relevant quizId
+ * @param {number} questionid - Relevant questionId
+ *
+ * @returns {ErrorObject} - returns error object based on following conditions:
+ *
+ * Question Id does not refer to a valid question within this quiz
+ * Token is empty or invalid (does not refer to valid logged in user session)
+ * Valid token is provided, but either the quiz ID is invalid, or the user does not own the quiz
+ *
+ * @returns {duplicateReturn} - returns the new question id when duplicated.
+ */
+export function adminQuizQuestionDuplicate(token: string, quizid: number, questionid: number): duplicateReturn | ErrorObject {
+  const data = getData();
+
+  const checkToken = validToken(token);
+  if (isError(checkToken)) {
+    return { error: 'Token is empty or invalid.' };
+  }
+
+  const quiz = data.quizzes.find(quiz => quiz.quizId === quizid);
+  if (!quiz) {
+    return { error: 'Quiz ID does not refer to a valid quiz.' };
+  }
+
+  if (!checkToken.ownedQuizzes.includes(quizid)) {
+    return { error: 'Quiz ID does not refer to a quiz that this user owns.' };
+  }
+
+  const questionIndex = quiz.questions.findIndex(question => question.questionId === questionid);
+
+  if (questionIndex === -1) {
+    return { error: 'Question ID does not refer to a valid question within the quiz.' };
+  }
+
+  const questionToDuplicate = { ...quiz.questions[questionIndex], questionId: quiz.questionCounter };
+  quiz.questions.splice(questionIndex + 1, 0, questionToDuplicate);
+  quiz.timeLastEdited = Date.now();
+  quiz.questionCounter++;
+
+  setData(data);
+
+  return {
+    newQuestionId: questionToDuplicate.questionId
+  };
+}
+
+/**
   * Delete a Quiz Question.
   *
   * @param {string} token - Token
@@ -336,7 +387,6 @@ export function adminQuizQuestionCreate(token: string, quizid: number, questionB
   * @returns { { error: }  } - Returns object when conditions fail
   * @returns { object } - returns an empty object question is updated.
 */
-
 export function adminQuizQuestionDelete(token: string, quizid: number, questionid: number): object | ErrorObject {
   const data = getData();
   const checkToken = validToken(token);
@@ -355,10 +405,10 @@ export function adminQuizQuestionDelete(token: string, quizid: number, questioni
   }
 
   const questionIndex = data.quizzes[quizIndex].questions.findIndex(question => question.questionId === questionid);
+
   if (questionIndex === -1) {
     return { error: 'Question ID does not refer to a valid question within the quiz.' };
   }
-
   data.quizzes[quizIndex].questions.splice(questionIndex, 1);
 
   data.quizzes[quizIndex].timeLastEdited = Date.now();
