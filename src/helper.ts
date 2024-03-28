@@ -109,7 +109,6 @@ export function getColour(): string {
   *
   * @param {QuestionBody} questionBody - Question
   * @param {Quiz} quiz -  Assosicated Quiz
-  * @param {number | null} quizId -  Given Quiz Id
   *
   * @returns { { error: }  } - Returns object when conditions fail
   * @returns { } - Returns empty object when it clears all checks
