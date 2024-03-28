@@ -331,7 +331,6 @@ export function adminQuizQuestionMove(token: string, quizid: number, questionid:
   return {};
 }
 
-
 /**
   * Update Quiz Question.
   *
