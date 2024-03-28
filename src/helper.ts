@@ -1,5 +1,5 @@
 import { getData } from './dataStore';
-import type { ErrorObject, User, Quiz } from './interfaces';
+import type { ErrorObject, User, Quiz, QuestionBody } from './interfaces';
 import validator from 'validator';
 
 // /**
@@ -83,6 +83,71 @@ export function validPassword(password: string): object | ErrorObject {
   if (password.length < 8) { return { error: 'Password must contain at least 8 characters.' }; } else if (!digitsAndLetters.test(password)) { return { error: 'Password must contain at least letter and one number.' }; }
 
   return { };
+}
+
+/**
+  * Retrieves a random colour
+  * 
+  * @returns { string } - Returns a random colour as a string
+*/
+export function getColour(): string {
+  const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'brown', 'orange'];
+  const randomColorIndex = Math.floor(Math.random() * colors.length);
+  return colors[randomColorIndex];
+}
+
+/**
+  * Validates Question based on a few conditions:
+  * - Question string is less than 5 characters in length or greater than 50 characters in length
+  * - The question has more than 6 answers or less than 2 answers
+  * - The question duration is not a positive number
+  * - The sum of the question durations in the quiz exceeds 3 minutes
+  * - The points awarded for the question are less than 1 or greater than 10
+  * - The length of any answer is shorter than 1 character long, or longer than 30 characters long
+  * - Any answer strings are duplicates of one another (within the same question)
+  * - There are no correct answers
+  *
+  * @param {QuestionBody} questionBody - Question
+  * @param {Quiz} quiz -  Assosicated Quiz
+  *
+  * @returns { { error: }  } - Returns object when conditions fail
+  * @returns { } - Returns empty object when it clears all checks
+*/
+export function validQuestion(questionBody: QuestionBody, quiz: Quiz): object | ErrorObject {
+  if (questionBody.question.length < 5 || questionBody.question.length > 50) {
+    return { error: 'Question string is less than 5 characters in length or greater than 50 characters in length.' };
+  } else if (questionBody.answers.length > 6 || questionBody.answers.length < 2) {
+    return { error: 'The question has more than 6 answers or less than 2 answers.' };
+  } else if (questionBody.duration < 0) {
+    return { error: 'The question duration is not a positive number.' };
+  }
+  let counter = 0;
+  for (const question of quiz.questions) {
+    counter = question.duration++;
+  }
+  if (counter + questionBody.duration > 3) {
+    return { error: 'The sum of the question durations in the quiz exceeds 3 minutes.' };
+  } else if (questionBody.points < 1 || questionBody.points > 10) {
+    return { error: 'The points awarded for the question are less than 1 or greater than 10.' };
+  }
+  for (const questionAnswer of questionBody.answers) {
+    if (questionAnswer.answer.length < 1 || questionAnswer.answer.length > 30) {
+      return { error: 'The length of answer is shorter than 1 character long, or longer than 30 characters long.' };
+    }
+  }
+  const hasDuplicateNames = questionBody.answers.some((item, index) => {
+    const firstIndex = questionBody.answers.findIndex(a => a.answer === item.answer);
+    return firstIndex !== index;
+  });
+  if (hasDuplicateNames) {
+    return { error: 'Duplicate of answers exist in same question.' };
+  }
+  if (!questionBody.answers.find(answer => answer.correct === true)) {
+    return { error: 'There are no correct answers.' };
+  }
+  return {
+
+  };
 }
 
 /**

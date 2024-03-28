@@ -21,7 +21,7 @@ let data = {
          name: 'My Quiz',
          timeCreated: 1683125870,
          timeLastEdited: 1683125871,
-         question: [
+         questions: [
             {
                 questionId: 1,
                 name: 'On the scale from 1 through to 10 how silly is Willy?'
@@ -43,7 +43,7 @@ let data = {
          name: 'My Quiz',
          timeCreated: 1683125870,
          timeLastEdited: 1683125871,
-         question: [
+         questions: [
             {
                 questionId: 1,
                 name: 'On the scale from 1 through to 10 how silly is Willy?'

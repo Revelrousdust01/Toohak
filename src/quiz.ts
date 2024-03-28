@@ -1,6 +1,6 @@
 import { getData, setData } from './dataStore';
-import type { ErrorObject, Quiz, createQuizReturn, QuizArray } from './interfaces';
-import { isError, findQuiz, validQuizName, validQuizId, validToken } from './helper';
+import type { ErrorObject, Quiz, createQuizReturn, QuizArray, QuestionBody, Question, Answer, createQuestionReturn } from './interfaces';
+import { isError, findQuiz, getColour, validQuestion, validQuizName, validQuizId, validToken } from './helper';
 
 /**
  * Given basic details about a new quiz, create one for the logged in user.
@@ -49,11 +49,12 @@ export function adminQuizCreate(token: string, name: string, description: string
 
   const newQuiz: Quiz = {
     quizId: quizId,
+    questionCounter: 1,
     description: description,
     name: name,
     timeCreated: Date.now(),
     timeLastEdited: Date.now(),
-    question: []
+    questions: []
   };
 
   data.users.find(user => user.userId === checkToken.userId).ownedQuizzes.push(quizId);
@@ -194,13 +195,13 @@ export function adminQuizNameUpdate(token: string, quizid: number, name: string)
 
   // 401 error
   if (isError(checkToken)) {
-    return { error: 'Token is empty or invalid' };
+    return { error: 'Token is empty or invalid.' };
   }
 
   // 400 error
   const checkQuizName = validQuizName(name);
   if (isError(checkQuizName)) {
-    return { error: 'Quiz name is not valid' };
+    return { error: 'Quiz name is not valid.' };
   }
 
   // 400 error
@@ -218,6 +219,58 @@ export function adminQuizNameUpdate(token: string, quizid: number, name: string)
   data.quizzes[quizIndex].name = name;
   setData(data);
   return { };
+}
+
+export function adminQuizQuestionCreate(token: string, quizid: number, questionBody: QuestionBody): createQuestionReturn | ErrorObject {
+  const data = getData();
+  const checkToken = validToken(token);
+
+  if (isError(checkToken)) {
+    return { error: 'Token is empty or invalid.' };
+  }
+
+  const checkQuizId = validQuizId(token, quizid, checkToken);
+
+  if (isError(checkQuizId)) {
+    return {
+      error: checkQuizId.error
+    };
+  }
+
+  const quiz = findQuiz(quizid);
+
+  if (quiz != null) {
+    const checkQuestion = validQuestion(questionBody, quiz as Quiz);
+    if (isError(checkQuestion)) {
+      return {
+        error: checkQuestion.error
+      };
+    }
+    const validQuiz = quiz as Quiz;
+    const newQuestion: Question = {
+      questionId: validQuiz.questionCounter,
+      answerCounter: questionBody.answers.length,
+      duration: questionBody.duration,
+      question: questionBody.question,
+      points: questionBody.points,
+      answers: []
+    };
+    validQuiz.questionCounter++;
+    for (const [index, answer] of questionBody.answers.entries()) {
+      const newAnswer: Answer = {
+        answerId: index,
+        answer: answer.answer,
+        colour: getColour(),
+        correct: answer.correct
+      };
+      newQuestion.answers.push(newAnswer);
+    }
+    (quiz as Quiz).questions.push(newQuestion);
+
+    setData(data);
+
+    return { questionId: newQuestion.questionId };
+  }
 }
 
 /**

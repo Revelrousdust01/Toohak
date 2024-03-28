@@ -5,7 +5,7 @@
 export interface Answer {
     answerId: number,
     answer: string,
-    color: string,
+    colour: string,
     correct: boolean
 }
 
@@ -18,12 +18,17 @@ export interface createTokenReturn {
     token: string
 }
 
+export interface createQuestionReturn{
+    questionId: number
+}
+
 export interface createQuizReturn {
     quizId: number
 }
 
 export interface Question {
     questionId: number,
+    answerCounter: number,
     duration: number,
     points: number
     question: string,
@@ -43,7 +48,8 @@ export interface Quiz {
     name: string,
     timeCreated: number,
     timeLastEdited: number,
-    question: Question[]
+    questionCounter: number,
+    questions: Question[]
 }
 
 export interface QuizArray {
@@ -76,7 +82,7 @@ export interface Trash {
     name: string,
     timeCreated: number,
     timeLastEdited: number,
-    question: Question[]
+    questions: Question[]
 }
 
 export interface User {
