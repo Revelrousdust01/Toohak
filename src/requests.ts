@@ -92,6 +92,12 @@ export const requestAdminQuizDescriptionUpdate = (token: string, quizid: number,
     { token: token, quizid: quizid, description: description });
 };
 
+export const requestAdminQuizInfo = (token: string, quizid: number): RequestHelperReturnType => {
+  return requestHelper('GET',
+    `/v1/admin/quiz/${quizid}`,
+    { token: token });
+};
+
 export const requestAdminQuizList = (token: string): RequestHelperReturnType => {
   return requestHelper('GET',
     '/v1/admin/quiz/list',
