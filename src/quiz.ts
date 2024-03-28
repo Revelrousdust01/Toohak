@@ -298,7 +298,7 @@ export function adminQuizQuestionCreate(token: string, quizid: number, questionB
   * @param {number} questionid - Relevant questionID
   *
   * @returns { { error: }  } - Returns object when conditions fail
-  * @returns { object } - returns an empty object question is moved.
+  * @returns { object } - returns an empty object when question is moved.
 */
 
 export function adminQuizQuestionMove(token: string, quizid: number, questionid: number, newPosition: number): object | ErrorObject {
