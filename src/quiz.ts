@@ -221,6 +221,16 @@ export function adminQuizNameUpdate(token: string, quizid: number, name: string)
   return { };
 }
 
+/**
+  * Create a new Quiz Question.
+  *
+  * @param {string} token - Token
+  * @param {number} quizid - Relevant quizID
+  * @param {QuestionBody} questionBody - Question
+  *
+  * @returns { { error: }  } - Returns object when conditions fail
+  * @returns { object } - returns an empty object question is updated.
+*/
 export function adminQuizQuestionCreate(token: string, quizid: number, questionBody: QuestionBody): createQuestionReturn | ErrorObject {
   const data = getData();
   const checkToken = validToken(token);
@@ -249,7 +259,6 @@ export function adminQuizQuestionCreate(token: string, quizid: number, questionB
     const validQuiz = quiz as Quiz;
     const newQuestion: Question = {
       questionId: validQuiz.questionCounter,
-      answerCounter: questionBody.answers.length,
       duration: questionBody.duration,
       question: questionBody.question,
       points: questionBody.points,
@@ -273,6 +282,70 @@ export function adminQuizQuestionCreate(token: string, quizid: number, questionB
     setData(data);
 
     return { questionId: newQuestion.questionId };
+  }
+}
+
+/**
+  * Update Quiz Question.
+  *
+  * @param {string} token - Token
+  * @param {number} quizid - Relevant quizID
+  * @param {number} questionid - Relevant questionID
+  * @param {QuestionBody} questionBody - Question
+  *
+  * @returns { { error: }  } - Returns object when conditions fail
+  * @returns { object } - returns an empty object question is updated.
+*/
+export function adminQuizQuestionUpdate(token: string, quizid: number, questionid: number, questionBody: QuestionBody): object | ErrorObject {
+  const data = getData();
+  const checkToken = validToken(token);
+
+  if (isError(checkToken)) {
+    return { error: 'Token is empty or invalid.' };
+  }
+
+  const checkQuizId = validQuizId(token, quizid, checkToken);
+
+  if (isError(checkQuizId)) {
+    return {
+      error: checkQuizId.error
+    };
+  }
+
+  const quiz = findQuiz(quizid);
+
+  if (quiz != null) {
+    const checkQuestion = validQuestion(questionBody, quiz as Quiz);
+    if (isError(checkQuestion)) {
+      return {
+        error: checkQuestion.error
+      };
+    }
+    const validQuiz = quiz as Quiz;
+
+    for (const question of validQuiz.questions) {
+      if (question.questionId === questionid) {
+        question.question = questionBody.question;
+        question.duration = questionBody.duration;
+        question.points = questionBody.points;
+        question.answers = [];
+        for (const [index, answer] of questionBody.answers.entries()) {
+          const newAnswer: Answer = {
+            answerId: index,
+            answer: answer.answer,
+            colour: getColour(),
+            correct: answer.correct
+          };
+          question.answers.push(newAnswer);
+        }
+      }
+    }
+
+    validQuiz.timeLastEdited = Date.now();
+
+    setData(data);
+
+    return { };
   }
 }
 
