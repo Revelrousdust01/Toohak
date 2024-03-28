@@ -28,7 +28,7 @@ const requestHelper = (
     // PUT/POST
     json = payload;
   }
-  const res = request(method, SERVER_URL + path, { qs, json, timeout: 100 });
+  const res = request(method, SERVER_URL + path, { qs, json, timeout: 1000 });
   const bodyString = res.body.toString();
   let bodyObject: RequestHelperReturnType;
   try {
@@ -114,6 +114,12 @@ export const requestAdminQuizQuestionCreate = (token: string, quizid: number, qu
   return requestHelper('POST',
     `/v1/admin/quiz/${quizid}/question`,
     { token: token, questionBody: questionBody });
+};
+
+export const requestAdminQuizQuestionDelete = (token: string, quizid: number, questionid: number): RequestHelperReturnType => {
+  return requestHelper('DELETE',
+    `/v1/admin/quiz/${quizid}/question/${questionid}`,
+    { token: token });
 };
 
 export const requestAdminQuizQuestionUpdate = (token: string, quizid: number, questionid: number, questionBody: QuestionBody): RequestHelperReturnType => {
