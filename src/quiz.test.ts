@@ -4,7 +4,8 @@ import {
   requestAdminQuizList, requestAdminQuizNameUpdate, requestAdminQuizRemove,
   requestAdminQuizQuestionCreate, requestAdminQuizQuestionDelete,
   requestAdminQuizQuestionMove, requestAdminQuizQuestionUpdate,
-  requestAdminQuizTransfer, requestAdminQuizTrashEmpty, requestClear
+  requestAdminQuizTransfer, requestAdminQuizTrashEmpty, requestClear,
+  requestAdminQuizInfo
 } from './requests';
 import { ErrorObject, QuestionBody } from './interfaces';
 
