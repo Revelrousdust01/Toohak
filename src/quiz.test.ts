@@ -454,8 +454,11 @@ describe('Test adminQuizQuestionCreate', () => {
     expect(response.statusCode).toStrictEqual(200);
   });
 
-  test('Invalid question string length', () => {
-    const invalidQuestion = { ...question, question: 'A' };
+  test.each([
+    {questionString: 'A',},
+    {questionString:'A'.repeat(55)},
+  ])("Invalid question string length '$questionString'", ({questionString}) => {
+    const invalidQuestion = { ...question, question: questionString };
     const user = requestAdminAuthRegister(email, password, lastName, firstName);
     const newQuiz = requestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
     const response = requestAdminQuizQuestionCreate(user.jsonBody.token as string, newQuiz.jsonBody.quizId as number, invalidQuestion);
@@ -493,8 +496,8 @@ describe('Test adminQuizQuestionCreate', () => {
   });
 
   test('The sum of the question durations in the quiz exceeds 3 minutes', () => {
-    const question1 = { ...question, duration: 2 };
-    const question2 = { ...question, duration: 10 };
+    const question1 = { ...question, duration: 150 };
+    const question2 = { ...question, duration: 151 };
     const user = requestAdminAuthRegister(email, password, lastName, firstName);
     const newQuiz = requestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
     requestAdminQuizQuestionCreate(user.jsonBody.token as string, newQuiz.jsonBody.quizId as number, question1);
@@ -515,8 +518,11 @@ describe('Test adminQuizQuestionCreate', () => {
     expect(response.jsonBody).toStrictEqual(ERROR);
   });
 
-  test('Length of any answer is shorter than 1 character long, or longer than 30 characters long', () => {
-    const invalidQuestion = { ...question, answers: [{ answer: '', correct: true }] };
+  test.each([
+    {questionString: 'A',},
+    {questionString:'A'.repeat(55)},
+  ])("Length of any answer is shorter than 1 character long, or longer than 30 characters long $'questionString'", ({questionString}) => {
+    const invalidQuestion = { ...question, answers: [{ answer: questionString, correct: true }] };
     const user = requestAdminAuthRegister(email, password, lastName, firstName);
     const newQuiz = requestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
     const response = requestAdminQuizQuestionCreate(user.jsonBody.token as string, newQuiz.jsonBody.quizId as number, invalidQuestion);
