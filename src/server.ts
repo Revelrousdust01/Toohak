@@ -4,7 +4,7 @@ import {
 } from './auth';
 import {
   adminQuizCreate, adminQuizDescriptionUpdate, adminQuizEmptyTrash,
-  adminQuizList, adminQuizNameUpdate, adminQuizQuestionCreate, adminQuizRemove, \
+  adminQuizList, adminQuizNameUpdate, adminQuizQuestionCreate, adminQuizRemove,
   adminQuizTransfer, adminQuizViewTrash
 } from './quiz';
 import { clear } from './other';

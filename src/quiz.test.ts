@@ -1,7 +1,7 @@
 import {
-  requestAdminAuthLogin, requestAdminAuthRegister, requestAdminQuizCreate, 
-  requestAdminQuizDescriptionUpdate, requestAdminQuizList, requestAdminQuizNameUpdate, 
-  requestAdminQuizRemove, requestAdminQuizQuestionCreate, requestAdminQuizTransfer, 
+  requestAdminAuthLogin, requestAdminAuthRegister, requestAdminQuizCreate,
+  requestAdminQuizDescriptionUpdate, requestAdminQuizList, requestAdminQuizNameUpdate,
+  requestAdminQuizRemove, requestAdminQuizQuestionCreate, requestAdminQuizTransfer,
   requestAdminQuizTrashEmpty, requestClear, requestAdminQuizViewTrash,
 } from './requests';
 import { ErrorObject, QuestionBody } from './interfaces';
