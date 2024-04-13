@@ -3,6 +3,8 @@ import {
   requestAdminUserDetails, requestAdminUserDetailsUpdate, requestAdminUserPasswordUpdate,
   requestClear
 } from './requests';
+import HTTPError from 'http-errors';
+import request, { HttpVerb } from 'sync-request-curl';
 import { ErrorObject } from './interfaces';
 
 // Clear before each test
@@ -63,9 +65,7 @@ describe('adminAuthLogout', () => {
     { invalidToken: 'abc' },
   ])("Invalid Token: '$invalidToken", ({ invalidToken }) => {
     requestAdminAuthLogin(email, password);
-    const responseLogout = requestAdminAuthLogout(invalidToken);
-    expect(responseLogout.jsonBody).toStrictEqual(ERROR);
-    expect(responseLogout.statusCode).toStrictEqual(401);
+    expect(() => requestAdminAuthLogout(invalidToken)).toThrow(HTTPError[401]);
   });
 });
 
