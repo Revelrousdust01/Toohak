@@ -1,6 +1,6 @@
 import { port, url } from './config.json';
 import request, { HttpVerb } from 'sync-request-curl';
-import type { RequestHelperReturnType, QuestionBody, Payload } from './interfaces';
+import type { RequestHelperReturnType, QuestionBody, Payload, OldRequestHelperReturnType } from './interfaces';
 import { IncomingHttpHeaders } from 'http';
 import HTTPError from 'http-errors';
 
@@ -12,7 +12,7 @@ const requestHelper = (
   path: string,
   payload: Payload,
   headers: IncomingHttpHeaders = {}
-): any => {
+): RequestHelperReturnType => {
   let qs = {};
   let json = {};
   if (['GET', 'DELETE'].includes(method.toUpperCase())) {
@@ -25,19 +25,21 @@ const requestHelper = (
   const url = SERVER_URL + path;
   const res = request(method, url, { qs, json, headers, timeout: TIMEOUT_MS });
 
-  let responseBody: any;
+  let responseBody: unknown;
   try {
     responseBody = JSON.parse(res.body.toString());
-  } catch (err: any) {
+  } catch (err: unknown) {
     if (res.statusCode === 200) {
       throw HTTPError(500,
         `Non-jsonifiable body despite code 200: '${res.body}'.\nCheck that you are not doing res.json(undefined) instead of res.json({}), e.g. in '/clear'`
       );
     }
-    responseBody = { error: `Failed to parse JSON: '${err.message}'` };
+    if (err instanceof Error) {
+      responseBody = { error: `Failed to parse JSON: '${err.message}'` };
+    }
   }
 
-  const errorMessage = `[${res.statusCode}] ` + responseBody?.error || responseBody || 'No message specified!';
+  const errorMessage = `[${res.statusCode}] ` + (responseBody as RequestHelperReturnType)?.error || responseBody || 'No message specified!';
 
   // NOTE: the error is rethrown in the test below. This is useful becasuse the
   // test suite will halt (stop) if there's an error, rather than carry on and
@@ -58,7 +60,6 @@ const requestHelper = (
   return responseBody;
 };
 
-
 /**
    * Sends a request to the given route and return its results
    *
@@ -74,7 +75,7 @@ const oldRequestHelper = (
   method: HttpVerb,
   path: string,
   payload: object = {}
-): RequestHelperReturnType => {
+): OldRequestHelperReturnType => {
   let qs = {};
   let json = {};
   if (['GET', 'DELETE'].includes(method)) {
@@ -85,7 +86,7 @@ const oldRequestHelper = (
   }
   const res = request(method, SERVER_URL + path, { qs, json, timeout: 1000 });
   const bodyString = res.body.toString();
-  let bodyObject: RequestHelperReturnType;
+  let bodyObject: OldRequestHelperReturnType;
   try {
     // Return if valid JSON, in our own custom format
     bodyObject = {
@@ -123,126 +124,126 @@ export const v1RequestAdminAuthLogin = (email: string, password: string): Reques
     { email: email, password: password });
 };
 
-export const requestAdminAuthLogout = (token: string): RequestHelperReturnType => {
+export const requestAdminAuthLogout = (token: string): OldRequestHelperReturnType => {
   return oldRequestHelper('POST',
     '/v1/admin/auth/logout',
     { token: token });
 };
 
-export const requestAdminAuthRegister = (email: string, password: string, firstName: string, lastName: string): RequestHelperReturnType => {
+export const requestAdminAuthRegister = (email: string, password: string, firstName: string, lastName: string): OldRequestHelperReturnType => {
   return oldRequestHelper('POST',
     '/v1/admin/auth/register',
     { email: email, password: password, nameFirst: firstName, nameLast: lastName });
 };
 
-export const requestAdminQuizCreate = (token: string, name:string, description: string): RequestHelperReturnType => {
+export const requestAdminQuizCreate = (token: string, name:string, description: string): OldRequestHelperReturnType => {
   return oldRequestHelper('POST',
     '/v1/admin/quiz',
     { token: token, name: name, description: description });
 };
 
-export const requestAdminQuizDescriptionUpdate = (token: string, quizid: number, description: string): RequestHelperReturnType => {
+export const requestAdminQuizDescriptionUpdate = (token: string, quizid: number, description: string): OldRequestHelperReturnType => {
   return oldRequestHelper('PUT',
     `/v1/admin/quiz/${quizid}/description`,
     { token: token, quizid: quizid, description: description });
 };
 
-export const requestAdminQuizInfo = (token: string, quizid: number): RequestHelperReturnType => {
+export const requestAdminQuizInfo = (token: string, quizid: number): OldRequestHelperReturnType => {
   return oldRequestHelper('GET',
     `/v1/admin/quiz/${quizid}`,
     { token: token });
 };
 
-export const requestAdminQuizList = (token: string): RequestHelperReturnType => {
+export const requestAdminQuizList = (token: string): OldRequestHelperReturnType => {
   return oldRequestHelper('GET',
     '/v1/admin/quiz/list',
     { token: token });
 };
 
-export const requestAdminQuizNameUpdate = (token: string, quizid: number, newName: string): RequestHelperReturnType => {
+export const requestAdminQuizNameUpdate = (token: string, quizid: number, newName: string): OldRequestHelperReturnType => {
   return oldRequestHelper('PUT',
     `/v1/admin/quiz/${quizid}/name`,
     { token: token, name: newName });
 };
 
-export const requestAdminQuizRemove = (token: string, quizid: number): RequestHelperReturnType => {
+export const requestAdminQuizRemove = (token: string, quizid: number): OldRequestHelperReturnType => {
   return oldRequestHelper('DELETE',
     `/v1/admin/quiz/${quizid}`,
     { token: token });
 };
 
-export const requestAdminQuizQuestionCreate = (token: string, quizid: number, questionBody: QuestionBody): RequestHelperReturnType => {
+export const requestAdminQuizQuestionCreate = (token: string, quizid: number, questionBody: QuestionBody): OldRequestHelperReturnType => {
   return oldRequestHelper('POST',
     `/v1/admin/quiz/${quizid}/question`,
     { token: token, questionBody: questionBody });
 };
 
-export const requestAdminQuizQuestionDuplicate = (token: string, quizid: number, questionid: number): RequestHelperReturnType => {
+export const requestAdminQuizQuestionDuplicate = (token: string, quizid: number, questionid: number): OldRequestHelperReturnType => {
   return oldRequestHelper('POST',
     `/v1/admin/quiz/${quizid}/question/${questionid}/duplicate`,
     { token: token });
 };
 
-export const requestAdminQuizQuestionDelete = (token: string, quizid: number, questionid: number): RequestHelperReturnType => {
+export const requestAdminQuizQuestionDelete = (token: string, quizid: number, questionid: number): OldRequestHelperReturnType => {
   return oldRequestHelper('DELETE',
     `/v1/admin/quiz/${quizid}/question/${questionid}`,
     { token: token });
 };
 
-export const requestAdminQuizQuestionUpdate = (token: string, quizid: number, questionid: number, questionBody: QuestionBody): RequestHelperReturnType => {
+export const requestAdminQuizQuestionUpdate = (token: string, quizid: number, questionid: number, questionBody: QuestionBody): OldRequestHelperReturnType => {
   return oldRequestHelper('PUT',
     `/v1/admin/quiz/${quizid}/question/${questionid}`,
     { token: token, questionBody: questionBody });
 };
 
-export const requestAdminQuizQuestionMove = (token: string, quizid: number, questionid: number, newPosition: number): RequestHelperReturnType => {
+export const requestAdminQuizQuestionMove = (token: string, quizid: number, questionid: number, newPosition: number): OldRequestHelperReturnType => {
   return oldRequestHelper('PUT',
     `/v1/admin/quiz/${quizid}/question/${questionid}/move`,
     { token: token, newPosition: newPosition });
 };
 
-export const requestAdminQuizTransfer = (token: string, quizid: number, userEmail: string): RequestHelperReturnType => {
+export const requestAdminQuizTransfer = (token: string, quizid: number, userEmail: string): OldRequestHelperReturnType => {
   return oldRequestHelper('POST',
     `/v1/admin/quiz/${quizid}/transfer`,
     { token: token, userEmail: userEmail });
 };
 
-export const requestAdminQuizTrashEmpty = (token: string, quizids: number[]): RequestHelperReturnType => {
+export const requestAdminQuizTrashEmpty = (token: string, quizids: number[]): OldRequestHelperReturnType => {
   return oldRequestHelper('DELETE',
     '/v1/admin/quiz/trash/empty',
     { token: token, quizIds: quizids });
 };
 
-export const requestAdminUserDetails = (token: string): RequestHelperReturnType => {
+export const requestAdminUserDetails = (token: string): OldRequestHelperReturnType => {
   return oldRequestHelper('GET',
     '/v1/admin/user/details',
     { token: token });
 };
 
-export const requestAdminUserDetailsUpdate = (token: string, email: string, firstName: string, lastName: string): RequestHelperReturnType => {
+export const requestAdminUserDetailsUpdate = (token: string, email: string, firstName: string, lastName: string): OldRequestHelperReturnType => {
   return oldRequestHelper('PUT',
     '/v1/admin/user/details',
     { token: token, email: email, nameFirst: firstName, nameLast: lastName });
 };
 
-export const requestAdminUserPasswordUpdate = (token: string, oldPassword: string, newPassword: string): RequestHelperReturnType => {
+export const requestAdminUserPasswordUpdate = (token: string, oldPassword: string, newPassword: string): OldRequestHelperReturnType => {
   return oldRequestHelper('PUT',
     '/v1/admin/user/password',
     { token: token, oldPassword: oldPassword, newPassword: newPassword });
 };
 
-export const requestAdminQuizRestore = (token: string, quizid: number): RequestHelperReturnType => {
+export const requestAdminQuizRestore = (token: string, quizid: number): OldRequestHelperReturnType => {
   return oldRequestHelper('POST',
   `/v1/admin/quiz/${quizid}/restore`,
   { token: token });
 };
 
-export const requestAdminQuizViewTrash = (token: string): RequestHelperReturnType => {
+export const requestAdminQuizViewTrash = (token: string): OldRequestHelperReturnType => {
   return oldRequestHelper('GET',
     '/v1/admin/quiz/trash',
     { token: token });
 };
 
-export const requestClear = (): RequestHelperReturnType => {
+export const requestClear = (): OldRequestHelperReturnType => {
   return oldRequestHelper('DELETE', '/v1/clear');
 };

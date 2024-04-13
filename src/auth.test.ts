@@ -22,7 +22,7 @@ describe('adminAuthLogin', () => {
 
   test('Valid Details', () => {
     requestAdminAuthRegister(email, password, firstName, lastName);
-    expect(v1RequestAdminAuthLogin(email, password)).toStrictEqual({token: expect.any(String)});
+    expect(v1RequestAdminAuthLogin(email, password)).toStrictEqual({ token: expect.any(String) });
   });
 
   test('Email does not exist', () => {
