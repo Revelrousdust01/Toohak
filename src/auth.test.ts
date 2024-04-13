@@ -1,5 +1,5 @@
 import {
-  requestAdminAuthLogin, requestAdminAuthLogout, requestAdminAuthRegister,
+  requestAdminAuthLogin, v1RequestAdminAuthLogout, v2RequestAdminAuthLogout, requestAdminAuthRegister,
   requestAdminUserDetails, requestAdminUserDetailsUpdate, requestAdminUserPasswordUpdate,
   requestClear
 } from './requests';
@@ -44,7 +44,7 @@ describe('adminAuthLogin', () => {
 });
 
 // adminAuthLogout
-describe('adminAuthLogout', () => {
+describe.only('V1 - adminAuthLogout', () => {
   const firstName = 'Christian';
   const lastName = 'Politis';
   const email = 'cpolitis@student.unsw.edu.au';
@@ -53,7 +53,7 @@ describe('adminAuthLogout', () => {
   test('Valid Details', () => {
     requestAdminAuthRegister(email, password, firstName, lastName);
     const responseLogin = requestAdminAuthLogin(email, password);
-    const responseLogout = requestAdminAuthLogout(responseLogin.jsonBody?.token as string);
+    const responseLogout = v1RequestAdminAuthLogout(responseLogin.jsonBody?.token as string);
     expect(responseLogout.jsonBody).toStrictEqual({ });
     expect(responseLogout.statusCode).toStrictEqual(200);
   });
@@ -65,7 +65,32 @@ describe('adminAuthLogout', () => {
     { invalidToken: 'abc' },
   ])("Invalid Token: '$invalidToken", ({ invalidToken }) => {
     requestAdminAuthLogin(email, password);
-    expect(() => requestAdminAuthLogout(invalidToken)).toThrow(HTTPError[401]);
+    expect(() => v1RequestAdminAuthLogout(invalidToken)).toThrow(HTTPError[401]);
+  });
+});
+
+describe.only('V2 - adminAuthLogout', () => {
+  const firstName = 'Christian';
+  const lastName = 'Politis';
+  const email = 'cpolitis@student.unsw.edu.au';
+  const password = 'a1b2c3d4e5f6';
+
+  test('Valid Details', () => {
+    requestAdminAuthRegister(email, password, firstName, lastName);
+    const responseLogin = requestAdminAuthLogin(email, password);
+    const responseLogout = v2RequestAdminAuthLogout(responseLogin.jsonBody?.token as string);
+    expect(responseLogout.jsonBody).toStrictEqual({ });
+    expect(responseLogout.statusCode).toStrictEqual(200);
+  });
+
+  test.each([
+    { invalidToken: '' },
+    { invalidToken: '123' },
+    { invalidToken: 'b77d409a-10cd-4a47-8e94-b0cd0ab50aa1' },
+    { invalidToken: 'abc' },
+  ])("Invalid Token: '$invalidToken", ({ invalidToken }) => {
+    requestAdminAuthLogin(email, password);
+    expect(() => v2RequestAdminAuthLogout(invalidToken)).toThrow(HTTPError[401]);
   });
 });
 

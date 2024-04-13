@@ -1,8 +1,10 @@
 import { port, url } from './config.json';
 import request, { HttpVerb } from 'sync-request-curl';
-import type { RequestHelperReturnType, QuestionBody } from './interfaces';
-
+import type { RequestHelperReturnType, QuestionBody, Payload } from './interfaces';
+import { IncomingHttpHeaders } from 'http';
 const SERVER_URL = `${url}:${port}`;
+import HTTPError from 'http-errors';
+const TIMEOUT_MS = 10000;
 
 /**
    * Sends a request to the given route and return its results
@@ -18,49 +20,54 @@ const SERVER_URL = `${url}:${port}`;
 const requestHelper = (
   method: HttpVerb,
   path: string,
-  payload: object = {}
-): RequestHelperReturnType => {
+  payload: Payload,
+  headers: IncomingHttpHeaders = {}
+): any => {
   let qs = {};
   let json = {};
-  if (['GET', 'DELETE'].includes(method)) {
+  if (['GET', 'DELETE'].includes(method.toUpperCase())) {
     qs = payload;
   } else {
     // PUT/POST
     json = payload;
   }
-  const res = request(method, SERVER_URL + path, { qs, json, timeout: 1000 });
-  const bodyString = res.body.toString();
-  let bodyObject: RequestHelperReturnType;
+
+  const url = SERVER_URL + path;
+  const res = request(method, url, { qs, json, headers, timeout: TIMEOUT_MS });
+
+  let responseBody: any;
   try {
-    // Return if valid JSON, in our own custom format
-    bodyObject = {
-      jsonBody: JSON.parse(bodyString),
-      statusCode: res.statusCode,
-    };
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      bodyObject = {
-        error: `\
-  Server responded with ${res.statusCode}, but body is not JSON!
-  
-  GIVEN:
-  ${bodyString}.
-  
-  REASON:
-  ${error.message}.
-  
-  HINT:
-  Did you res.json(undefined)?`,
-        statusCode: res.statusCode,
-      };
+    responseBody = JSON.parse(res.body.toString());
+  } catch (err: any) {
+    if (res.statusCode === 200) {
+      throw HTTPError(500,
+        `Non-jsonifiable body despite code 200: '${res.body}'.\nCheck that you are not doing res.json(undefined) instead of res.json({}), e.g. in '/clear'`
+      );
     }
+    responseBody = { error: `Failed to parse JSON: '${err.message}'` };
   }
-  if ('error' in bodyObject) {
-    // Return the error in a custom structure for testing later
-    return { statusCode: res.statusCode, error: bodyObject.error };
+
+  const errorMessage = `[${res.statusCode}] ` + responseBody?.error || responseBody || 'No message specified!';
+
+  // NOTE: the error is rethrown in the test below. This is useful becasuse the
+  // test suite will halt (stop) if there's an error, rather than carry on and
+  // potentially failing on a different expect statement without useful outputs
+  switch (res.statusCode) {
+    case 400: // BAD_REQUEST
+    case 401: // UNAUTHORIZED
+      throw HTTPError(res.statusCode, errorMessage);
+    case 404: // NOT_FOUND
+      throw HTTPError(res.statusCode, `Cannot find '${url}' [${method}]\nReason: ${errorMessage}\n\nHint: Check that your server.ts have the correct path AND method`);
+    case 500: // INTERNAL_SERVER_ERROR
+      throw HTTPError(res.statusCode, errorMessage + '\n\nHint: Your server crashed. Check the server log!\n');
+    default:
+      if (res.statusCode !== 200) {
+        throw HTTPError(res.statusCode, errorMessage + `\n\nSorry, no idea! Look up the status code ${res.statusCode} online!\n`);
+      }
   }
-  return bodyObject;
+  return responseBody;
 };
+
 
 export const requestAdminAuthLogin = (email: string, password: string): RequestHelperReturnType => {
   return requestHelper('POST',
@@ -68,10 +75,16 @@ export const requestAdminAuthLogin = (email: string, password: string): RequestH
     { email: email, password: password });
 };
 
-export const requestAdminAuthLogout = (token: string): RequestHelperReturnType => {
+export const v1RequestAdminAuthLogout = (token: string): RequestHelperReturnType => {
   return requestHelper('POST',
     '/v1/admin/auth/logout',
     { token: token });
+};
+
+export const v2RequestAdminAuthLogout = (token: string): RequestHelperReturnType => {
+  return requestHelper('POST',
+    '/v1/admin/auth/logout',
+    { }, {token});
 };
 
 export const requestAdminAuthRegister = (email: string, password: string, firstName: string, lastName: string): RequestHelperReturnType => {
@@ -189,5 +202,5 @@ export const requestAdminQuizViewTrash = (token: string): RequestHelperReturnTyp
 };
 
 export const requestClear = (): RequestHelperReturnType => {
-  return requestHelper('DELETE', '/v1/clear');
+  return requestHelper('DELETE', '/v1/clear', {});
 };
