@@ -1,5 +1,5 @@
 import { getData } from './dataStore';
-import type { ErrorObject, User, Quiz, QuestionBody } from './interfaces';
+import type { ErrorObject, User, Quiz, QuestionBody, DataStore } from './interfaces';
 import validator from 'validator';
 
 // /**
@@ -11,8 +11,7 @@ import validator from 'validator';
 //   * @returns { } - Returns empty object if quiz is not found
 // */
 
-export function findQuiz(quizid: number): object | Quiz {
-  const data = getData();
+export function findQuiz(quizid: number, data: DataStore): object | Quiz {
   const quiz = data.quizzes.find(quiz => quiz.quizId === quizid);
   if (!quiz) {
     return { };
