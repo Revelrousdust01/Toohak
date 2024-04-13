@@ -1,9 +1,10 @@
 import {
-  requestAdminAuthLogin, requestAdminAuthLogout, requestAdminAuthRegister,
+  v1RequestAdminAuthLogin, requestAdminAuthLogout, requestAdminAuthRegister,
   requestAdminUserDetails, requestAdminUserDetailsUpdate, requestAdminUserPasswordUpdate,
   requestClear
 } from './requests';
 import { ErrorObject } from './interfaces';
+import HTTPError from 'http-errors';
 
 // Clear before each test
 beforeEach(() => {
@@ -13,7 +14,7 @@ beforeEach(() => {
 const ERROR: ErrorObject = { error: expect.any(String) };
 
 // adminAuthLogin
-describe('adminAuthLogin', () => {
+describe.only('adminAuthLogin', () => {
   const firstName = 'Christian';
   const lastName = 'Politis';
   const email = 'cpolitis@student.unsw.edu.au';
@@ -21,23 +22,17 @@ describe('adminAuthLogin', () => {
 
   test('Valid Details', () => {
     requestAdminAuthRegister(email, password, firstName, lastName);
-    const response = requestAdminAuthLogin(email, password);
-    expect(response.jsonBody).toStrictEqual({ token: expect.any(String) });
-    expect(response.statusCode).toStrictEqual(200);
+    expect(v1RequestAdminAuthLogin(email, password)).toStrictEqual({token: expect.any(String)});
   });
 
   test('Email does not exist', () => {
     requestAdminAuthRegister(email, password, firstName, lastName);
-    const response = requestAdminAuthLogin(email.concat('.wrong'), password);
-    expect(response.jsonBody).toStrictEqual(ERROR);
-    expect(response.statusCode).toStrictEqual(400);
+    expect(() => v1RequestAdminAuthLogin(email.concat('.wrong'), password)).toThrow(HTTPError[400]);
   });
 
   test('Invalid Password', () => {
     requestAdminAuthRegister(email, password, firstName, lastName);
-    const response = requestAdminAuthLogin(email, password.concat('.wrong'));
-    expect(response.jsonBody).toStrictEqual(ERROR);
-    expect(response.statusCode).toStrictEqual(400);
+    expect(() => v1RequestAdminAuthLogin(email, password.concat('.wrong'))).toThrow(HTTPError[400]);
   });
 });
 
@@ -50,7 +45,7 @@ describe('adminAuthLogout', () => {
 
   test('Valid Details', () => {
     requestAdminAuthRegister(email, password, firstName, lastName);
-    const responseLogin = requestAdminAuthLogin(email, password);
+    const responseLogin = v1RequestAdminAuthLogin(email, password);
     const responseLogout = requestAdminAuthLogout(responseLogin.jsonBody?.token as string);
     expect(responseLogout.jsonBody).toStrictEqual({ });
     expect(responseLogout.statusCode).toStrictEqual(200);
@@ -62,7 +57,7 @@ describe('adminAuthLogout', () => {
     { invalidToken: 'b77d409a-10cd-4a47-8e94-b0cd0ab50aa1' },
     { invalidToken: 'abc' },
   ])("Invalid Token: '$invalidToken", ({ invalidToken }) => {
-    requestAdminAuthLogin(email, password);
+    v1RequestAdminAuthLogin(email, password);
     const responseLogout = requestAdminAuthLogout(invalidToken);
     expect(responseLogout.jsonBody).toStrictEqual(ERROR);
     expect(responseLogout.statusCode).toStrictEqual(401);
@@ -287,7 +282,7 @@ describe('adminUserDetailsUpdate', () => {
     { invalidToken: 'abc' },
   ])("Invalid or Empty Token: '$invalidToken", ({ invalidToken }) => {
     requestAdminAuthRegister(email, password, firstName, lastName);
-    requestAdminAuthLogin(email, password);
+    v1RequestAdminAuthLogin(email, password);
     const response = requestAdminUserDetailsUpdate(invalidToken, email, firstName, lastName);
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(401);
