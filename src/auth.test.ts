@@ -14,7 +14,7 @@ beforeEach(() => {
 const ERROR: ErrorObject = { error: expect.any(String) };
 
 // adminAuthLogin
-describe.only('adminAuthLogin', () => {
+describe('adminAuthLogin', () => {
   const firstName = 'Christian';
   const lastName = 'Politis';
   const email = 'cpolitis@student.unsw.edu.au';
@@ -44,9 +44,8 @@ describe('adminAuthLogout', () => {
   const password = 'a1b2c3d4e5f6';
 
   test('Valid Details', () => {
-    requestAdminAuthRegister(email, password, firstName, lastName);
-    const responseLogin = v1RequestAdminAuthLogin(email, password);
-    const responseLogout = requestAdminAuthLogout(responseLogin.jsonBody?.token as string);
+    const register = requestAdminAuthRegister(email, password, firstName, lastName);
+    const responseLogout = requestAdminAuthLogout(register.jsonBody?.token as string);
     expect(responseLogout.jsonBody).toStrictEqual({ });
     expect(responseLogout.statusCode).toStrictEqual(200);
   });
@@ -57,7 +56,7 @@ describe('adminAuthLogout', () => {
     { invalidToken: 'b77d409a-10cd-4a47-8e94-b0cd0ab50aa1' },
     { invalidToken: 'abc' },
   ])("Invalid Token: '$invalidToken", ({ invalidToken }) => {
-    v1RequestAdminAuthLogin(email, password);
+    requestAdminAuthRegister(email, password, firstName, lastName);
     const responseLogout = requestAdminAuthLogout(invalidToken);
     expect(responseLogout.jsonBody).toStrictEqual(ERROR);
     expect(responseLogout.statusCode).toStrictEqual(401);
