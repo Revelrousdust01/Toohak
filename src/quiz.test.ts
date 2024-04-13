@@ -1,5 +1,5 @@
 import {
-  requestAdminAuthLogin, requestAdminAuthRegister, requestAdminQuizCreate,
+  requestAdminAuthRegister, requestAdminQuizCreate,
   requestAdminQuizViewTrash, requestAdminQuizRestore, requestAdminQuizDescriptionUpdate,
   requestAdminQuizList, requestAdminQuizNameUpdate, requestAdminQuizRemove,
   requestAdminQuizQuestionCreate, requestAdminQuizQuestionMove, requestAdminQuizQuestionUpdate,
@@ -76,10 +76,9 @@ describe('Test adminQuizCreate', () => {
   });
 
   test('Name is already used by the current logged in user for another quiz', () => {
-    requestAdminAuthRegister(email, password, lastName, firstName);
-    const login = requestAdminAuthLogin(email, password);
-    requestAdminQuizCreate(login.jsonBody.token as string, quizName, quizDescription);
-    const newQuiz = requestAdminQuizCreate(login.jsonBody.token as string, quizName, quizDescription);
+    const register = requestAdminAuthRegister(email, password, lastName, firstName);
+    requestAdminQuizCreate(register.jsonBody.token as string, quizName, quizDescription);
+    const newQuiz = requestAdminQuizCreate(register.jsonBody.token as string, quizName, quizDescription);
     expect(newQuiz.jsonBody).toStrictEqual(ERROR);
     expect(newQuiz.statusCode).toStrictEqual(400);
   });
