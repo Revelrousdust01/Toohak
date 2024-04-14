@@ -1,6 +1,6 @@
 import {
   v1RequestAdminAuthLogout, v2RequestAdminAuthLogout, v1RequestAdminAuthRegister, v1RequestAdminAuthLogin,
-  requestAdminUserDetails, requestAdminUserDetailsUpdate, requestAdminUserPasswordUpdate,
+  v1RequestAdminUserDetails, v2RequestAdminUserDetails, requestAdminUserDetailsUpdate, requestAdminUserPasswordUpdate,
   requestClear
 } from './requests';
 import { ErrorObject } from './interfaces';
@@ -171,7 +171,7 @@ describe('adminAuthRegister', () => {
 });
 
 // adminUserDetails
-describe('adminUserDetails', () => {
+describe('V1 - adminUserDetails', () => {
   const firstName = 'Christian';
   const lastName = 'Politis';
   const email = 'cpolitis@student.unsw.edu.au';
@@ -179,8 +179,7 @@ describe('adminUserDetails', () => {
 
   test('Valid Details', () => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
-    const response = requestAdminUserDetails(user.token as string);
-    expect(response.jsonBody).toMatchObject({
+    expect(v1RequestAdminUserDetails(user.token as string)).toMatchObject({
       user: {
         userId: expect.any(Number),
         name: expect.any(String),
@@ -198,9 +197,37 @@ describe('adminUserDetails', () => {
     { invalidToken: 'abc' },
   ])("Invalid or Empty Token: '$invalidToken", ({ invalidToken }) => {
     v1RequestAdminAuthRegister(email, password, firstName, lastName);
-    const response = requestAdminUserDetails(invalidToken);
-    expect(response.jsonBody).toStrictEqual(ERROR);
-    expect(response.statusCode).toStrictEqual(401);
+    expect(() => v1RequestAdminUserDetails(invalidToken)).toThrow(HTTPError[401]);
+  });
+});
+
+describe('V2 - adminUserDetails', () => {
+  const firstName = 'Christian';
+  const lastName = 'Politis';
+  const email = 'cpolitis@student.unsw.edu.au';
+  const password = 'a1b2c3d4e5f6';
+
+  test('Valid Details', () => {
+    const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
+    expect(v2RequestAdminUserDetails(user.token as string)).toMatchObject({
+      user: {
+        userId: expect.any(Number),
+        name: expect.any(String),
+        email: expect.any(String),
+        numSuccessfulLogins: expect.any(Number),
+        numFailedPasswordsSinceLastLogin: expect.any(Number),
+      }
+    });
+  });
+
+  test.each([
+    { invalidToken: '' },
+    { invalidToken: '123' },
+    { invalidToken: 'b77d409a-10cd-4a47-8e94-b0cd0ab50aa1' },
+    { invalidToken: 'abc' },
+  ])("Invalid or Empty Token: '$invalidToken", ({ invalidToken }) => {
+    v1RequestAdminAuthRegister(email, password, firstName, lastName);
+    expect(() => v2RequestAdminUserDetails(invalidToken)).toThrow(HTTPError[401]);
   });
 });
 

@@ -189,14 +189,13 @@ export function validQuizId(token: string, quizid: number, user: User): ErrorObj
   *
   * @param {string} token - Token of session
   *
-  * @returns { { error: }  } - Returns object with error when token is invalid
   * @returns { User } - Returns the user within the correct session when the token is valid
 */
 
-export function validToken(token: string): User | ErrorObject {
+export function validToken(token: string): User {
   const data = getData();
   const session = data.userSessions.find(session => session.sessionId === token);
-  if (!session) { return { error: 'Token is empty or invalid.' }; }
+  if (!session) { throw httpError(401, 'Token is empty or invalid.'); }
 
   return data.users.find(user => user.userId === session.userId);
 }
