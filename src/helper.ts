@@ -42,6 +42,7 @@ export function isError(object: unknown): object is ErrorObject {
 */
 export function validEmail(email: string): object {
   const data = getData();
+  console.log(!validator.isEmail(email));
   if (data.users.find(user => user.email === email)) { throw httpError(400, 'Email address is already used by another user.'); } else if (!validator.isEmail(email)) { throw httpError(400, 'Please enter a valid email.'); }
 
   return { };
