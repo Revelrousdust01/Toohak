@@ -1,6 +1,7 @@
 import { getData } from './dataStore';
 import type { ErrorObject, User, Quiz, QuestionBody, DataStore } from './interfaces';
 import validator from 'validator';
+import httpError from 'http-errors';
 
 // /**
 //   * Return the quiz, given the quizId
@@ -39,10 +40,10 @@ export function isError(object: unknown): object is ErrorObject {
   *
   * @returns { } - Returns empty object when name is valid
 */
-export function validEmail(email: string): object | ErrorObject {
+export function validEmail(email: string): object {
   const data = getData();
-
-  if (data.users.find(user => user.email === email)) { return { error: 'Email address is already used by another user.' }; } else if (!validator.isEmail(email)) { return { error: 'Please enter a valid email.' }; }
+  console.log(!validator.isEmail(email));
+  if (data.users.find(user => user.email === email)) { throw httpError(400, 'Email address is already used by another user.'); } else if (!validator.isEmail(email)) { throw httpError(400, 'Please enter a valid email.'); }
 
   return { };
 }
@@ -58,10 +59,10 @@ export function validEmail(email: string): object | ErrorObject {
   * @returns { { error: }  } - Returns object with error when name is invalid
   * @returns { } - Returns empty object when name is valid
 */
-export function validName(name: string, isFirst: boolean): object | ErrorObject {
+export function validName(name: string, isFirst: boolean): object {
   const characterRegex = /^[A-Za-z\s'-]+$/;
 
-  if (!characterRegex.test(name)) { return { error: (isFirst ? 'First' : 'Last').concat(' name contains characters other than lowercase letters, uppercase letters, spaces, hyphens, or apostrophes.') }; } else if (name.length < 2 || name.length > 20) { return { error: (isFirst ? 'First' : 'Last').concat(' name must not be less than 2 characters or more than 20 characters.') }; }
+  if (!characterRegex.test(name)) { throw httpError(400, (isFirst ? 'First' : 'Last').concat(' name contains characters other than lowercase letters, uppercase letters, spaces, hyphens, or apostrophes.')); } else if (name.length < 2 || name.length > 20) { throw httpError(400, (isFirst ? 'First' : 'Last').concat(' name must not be less than 2 characters or more than 20 characters.')); }
 
   return { };
 }
@@ -76,10 +77,10 @@ export function validName(name: string, isFirst: boolean): object | ErrorObject 
   * @returns { { error: }  } - Returns object with error when password is invalid
   * @returns { } - Returns empty object when name is valid
 */
-export function validPassword(password: string): object | ErrorObject {
+export function validPassword(password: string): object {
   const digitsAndLetters = /^(?=.*[0-9])(?=.*[a-zA-Z]).+$/;
 
-  if (password.length < 8) { return { error: 'Password must contain at least 8 characters.' }; } else if (!digitsAndLetters.test(password)) { return { error: 'Password must contain at least letter and one number.' }; }
+  if (password.length < 8) { throw httpError(400, 'Password must contain at least 8 characters.'); } else if (!digitsAndLetters.test(password)) { throw httpError(400, 'Password must contain at least letter and one number.'); }
 
   return { };
 }
@@ -147,6 +148,19 @@ export function validQuestion(questionBody: QuestionBody, quiz: Quiz): object | 
   return {
 
   };
+}
+
+/**
+  * Hashes password
+  *
+  * @param {string} password - Password to be hashed.
+  *
+  * @returns { string } - Returns hashed string.
+*/
+
+export function setHash(password: string): string {
+  const crypto = require('crypto');
+  return crypto.createHash('sha256').update(password).digest('hex');
 }
 
 /**

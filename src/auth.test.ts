@@ -11,6 +11,10 @@ beforeEach(() => {
   requestClear();
 });
 
+afterAll(() => {
+  requestClear();
+});
+
 const ERROR: ErrorObject = { error: expect.any(String) };
 
 // adminAuthLogin
@@ -88,7 +92,7 @@ describe('adminAuthRegister', () => {
     { badEmail: '[cpolitis@student.unsw.edu.au]' },
     { badEmail: 'cpolitis' }
   ])("Email does not satisfy validator: '$badEmail'", ({ badEmail }) => {
-    expect(() => v1RequestAdminAuthRegister(email, password, firstName, lastName)).toThrow(HTTPError[400]);
+    expect(() => v1RequestAdminAuthRegister(badEmail, password, firstName, lastName)).toThrow(HTTPError[400]);
   });
 
   test.each([
