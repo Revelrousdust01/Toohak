@@ -118,7 +118,7 @@ export function adminQuizInfo(token: string, quizid: number): object | ErrorObje
     };
   }
 
-  const checkQuizId = validQuizId(token, quizid, checkToken);
+  const checkQuizId = validQuizId(quizid, checkToken);
 
   if (isError(checkQuizId)) {
     return {
@@ -277,7 +277,7 @@ export function adminQuizQuestionCreate(token: string, quizid: number, questionB
     };
   }
 
-  const checkQuizId = validQuizId(token, quizid, checkToken);
+  const checkQuizId = validQuizId(quizid, checkToken);
 
   if (isError(checkQuizId)) {
     return {
@@ -484,7 +484,7 @@ export function adminQuizQuestionUpdate(token: string, quizid: number, questioni
     return { error: 'Token is empty or invalid.' };
   }
 
-  const checkQuizId = validQuizId(token, quizid, checkToken);
+  const checkQuizId = validQuizId(quizid, checkToken);
 
   if (isError(checkQuizId)) {
     return {
@@ -561,7 +561,7 @@ export function adminQuizRemove(token: string, quizid: number): object | ErrorOb
     };
   }
 
-  const checkQuizId = validQuizId(token, quizid, checkToken);
+  const checkQuizId = validQuizId(quizid, checkToken);
 
   if (isError(checkQuizId)) {
     return {
@@ -587,8 +587,6 @@ export function adminQuizRemove(token: string, quizid: number): object | ErrorOb
  * @param {number} quizid - relevant quizID
  * @param {string} userEmail - Email of user to be transferred
  *
- * @returns {ErrorObject} - returns error object based on following conditions:
- *
  * userEmail is not a real user
  * userEmail is the current logged in user
  * Quiz ID refers to a quiz that has a name that is already used by the target user
@@ -598,22 +596,16 @@ export function adminQuizRemove(token: string, quizid: number): object | ErrorOb
  * @returns {object} - returns an empty object when a quiz is transferred
  */
 
-export function adminQuizTransfer(token: string, quizid: number, userEmail: string): object | ErrorObject {
+export function adminQuizTransfer(token: string, quizid: number, userEmail: string): object {
   const data = getData();
   const user = data.users.find(users => users.email === userEmail);
   const checkToken = validToken(token);
 
-  if (isError(checkToken)) {
-    return {
-      error: checkToken.error
-    };
-  }
-
   if (!user) {
-    return { error: 'userEmail is not a real user.' };
+    throw httpError(400, 'userEmail is not a real user.');
   }
 
-  if (userEmail === checkToken.email) { return { error: 'userEmail is the current logged in user' }; }
+  if (userEmail === checkToken.email) { throw httpError(400, 'userEmail is the current logged in user'); }
 
   const tokenQuiz = findQuiz(checkToken.userId, data);
 
@@ -622,18 +614,12 @@ export function adminQuizTransfer(token: string, quizid: number, userEmail: stri
     const userQuiz = findQuiz(ownedQuiz, data);
     if (tokenQuiz != null && userQuiz != null) {
       if ((tokenQuiz as Quiz).name === (userQuiz as Quiz).name) {
-        return { error: 'Quiz ID refers to a quiz that has a name that is already used by the target user.' };
+        throw httpError(400, 'Quiz ID refers to a quiz that has a name that is already used by the target user.');
       }
     }
   }
 
-  const checkQuizId = validQuizId(token, quizid, checkToken);
-
-  if (isError(checkQuizId)) {
-    return {
-      error: checkQuizId.error
-    };
-  }
+  validQuizId(quizid, checkToken);
 
   user.ownedQuizzes.push(quizid);
 

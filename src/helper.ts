@@ -172,13 +172,13 @@ export function setHash(password: string): string {
   * @returns { } - Returns empty object if quizid is valid
 */
 
-export function validQuizId(token: string, quizid: number, user: User): ErrorObject | object {
+export function validQuizId(quizid: number, user: User): object {
   const data = getData();
   const quizIndex = data.quizzes.findIndex(quizzes => quizzes.quizId === quizid);
 
-  if (quizIndex === -1) { return { error: 'Quiz ID does not refer to a valid quiz.' }; }
+  if (quizIndex === -1) { throw httpError(403, 'Quiz ID does not refer to a valid quiz.'); }
 
-  if (!user.ownedQuizzes.includes(quizid)) { return { error: 'Quiz ID does not refer to a quiz that this user owns.' }; }
+  if (!user.ownedQuizzes.includes(quizid)) { throw httpError(403, 'Quiz ID does not refer to a quiz that this user owns.'); }
 
   return { };
 }

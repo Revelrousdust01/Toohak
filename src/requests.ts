@@ -223,7 +223,7 @@ export const v1requestAdminQuizTransfer = (token: string, quizid: number, userEm
 export const v2requestAdminQuizTransfer = (token: string, quizid: number, userEmail: string) => {
   return requestHelper('POST',
     `/v2/admin/quiz/${quizid}/transfer`,
-    { userEmail: userEmail }, {token});
+    { userEmail: userEmail }, { token });
 };
 
 export const requestAdminQuizTrashEmpty = (token: string, quizids: number[]) => {
