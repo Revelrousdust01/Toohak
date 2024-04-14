@@ -413,8 +413,6 @@ export function adminQuizQuestionDelete(token: string, quizid: number, questioni
 
   data.quizzes[quizIndex].timeLastEdited = Date.now();
 
-  console.log(data);
-
   setData(data);
 
   return {};

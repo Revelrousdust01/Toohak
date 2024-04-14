@@ -118,11 +118,6 @@ export interface OldRequestHelperReturnType {
     error?: string;
 }
 
-export interface RequestHelperReturnType {
-    jsonBody?: Record<string, string | number>;
-    error?: string;
-}
-
 export interface Payload {
     [key: string]: unknown;
 }

@@ -1,1 +1,1 @@
-{"users":[],"quizzes":[],"trash":[],"userSessions":[],"quizCounter":1}
+{"users":[{"userId":1,"email":"shuang@student.unsw.edu.au","nameFirst":"Samuel","nameLast":"Huang","numFailedPasswordsSinceLastLogin":0,"numSuccessfulLogins":1,"oldPasswords":[],"ownedQuizzes":[],"password":"a1b2c3d4qwerty"}],"quizzes":[],"trash":[],"userSessions":[{"userId":1,"sessionId":"d82bdf50-2a3c-f8b6-9ac7-3af2c5da4582"}],"quizCounter":1}
