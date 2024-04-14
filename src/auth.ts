@@ -140,11 +140,6 @@ export function adminAuthRegister(email: string, password: string, nameFirst: st
 
 export function adminUserDetails(token: string): ReturnUser | ErrorObject {
   const checkToken = validToken(token);
-  if (isError(checkToken)) {
-    return {
-      error: checkToken.error
-    };
-  }
 
   return {
     user: {

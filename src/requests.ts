@@ -220,10 +220,16 @@ export const requestAdminQuizTrashEmpty = (token: string, quizids: number[]) => 
     { token: token, quizIds: quizids });
 };
 
-export const requestAdminUserDetails = (token: string) => {
-  return oldRequestHelper('GET',
+export const v1RequestAdminUserDetails = (token: string) => {
+  return requestHelper('GET',
     '/v1/admin/user/details',
     { token: token });
+};
+
+export const v2RequestAdminUserDetails = (token: string) => {
+  return requestHelper('GET',
+    '/v2/admin/user/details',
+    { }, { token });
 };
 
 export const requestAdminUserDetailsUpdate = (token: string, email: string, firstName: string, lastName: string) => {
