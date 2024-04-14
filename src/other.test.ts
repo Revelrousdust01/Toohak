@@ -1,8 +1,12 @@
 import {
-  v1RequestAdminAuthRegister, requestAdminQuizCreate, requestAdminQuizRemove, requestClear
+  v1RequestAdminAuthRegister, v1RequestAdminQuizCreate, requestAdminQuizRemove, requestClear
 } from './requests';
 
 beforeEach(() => {
+  requestClear();
+});
+
+afterAll(() => {
   requestClear();
 });
 
@@ -27,14 +31,14 @@ describe.skip('Iteration 2: Test "clear" function', () => {
 
   test('Resets quizzes list to empty', () => {
     const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    requestAdminQuizCreate(user.token as string, quizName, quizDescription);
+    v1RequestAdminQuizCreate(user.token as string, quizName, quizDescription);
     const response = requestClear();
     expect(response.jsonBody).toStrictEqual({});
   });
 
   test('Resets trash list to empty', () => {
     const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const newQuiz = requestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
+    const newQuiz = v1RequestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
     requestAdminQuizRemove(user.jsonBody.token as string, newQuiz.jsonBody.quizId as number);
     const response = requestClear();
     expect(response.jsonBody).toStrictEqual({});
@@ -42,14 +46,14 @@ describe.skip('Iteration 2: Test "clear" function', () => {
 
   test('Resets quiz counter to 1', () => {
     const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    requestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
+    v1RequestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
     const response = requestClear();
     expect(response.jsonBody).toStrictEqual({});
   });
 
   test('Resets user sessions list to empty', () => {
     const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    requestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
+    v1RequestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
     const response = requestClear();
     expect(response.jsonBody).toStrictEqual({});
   });

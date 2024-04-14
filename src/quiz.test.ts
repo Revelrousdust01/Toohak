@@ -13,6 +13,10 @@ beforeEach(() => {
   requestClear();
 });
 
+afterAll(() => {
+  requestClear();
+});
+
 const ERROR: ErrorObject = { error: expect.any(String) };
 
 // adminQuizCreate
@@ -57,17 +61,17 @@ describe('V1 - Test adminQuizCreate', () => {
     { shortQuizName: '12' },
   ])("Quiz name is less than 3 characters: '$shortQuizName'", ({ shortQuizName }) => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    expect(() => v1RequestAdminQuizCreate(registered.jsonBody.token as string, shortQuizName, quizDescription)).toThrow(HTTPError[400]);
+    expect(() => v1RequestAdminQuizCreate(registered.token as string, shortQuizName, quizDescription)).toThrow(HTTPError[400]);
   });
 
   test('Quiz name is greater than 30 characters', () => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    expect(() => v1RequestAdminQuizCreate(registered.jsonBody.token as string, 'a'.repeat(31), quizDescription)).toThrow(HTTPError[400]);
+    expect(() => v1RequestAdminQuizCreate(registered.token as string, 'a'.repeat(31), quizDescription)).toThrow(HTTPError[400]);
   });
 
   test('Name is already used by the current logged in user for another quiz', () => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription)
+    v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
     expect(() => v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription)).toThrow(HTTPError[400]);
   });
 
@@ -118,17 +122,17 @@ describe('V2 - Test adminQuizCreate', () => {
     { shortQuizName: '12' },
   ])("Quiz name is less than 3 characters: '$shortQuizName'", ({ shortQuizName }) => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    expect(() => v2RequestAdminQuizCreate(registered.jsonBody.token as string, shortQuizName, quizDescription)).toThrow(HTTPError[400]);
+    expect(() => v2RequestAdminQuizCreate(registered.token as string, shortQuizName, quizDescription)).toThrow(HTTPError[400]);
   });
 
   test('Quiz name is greater than 30 characters', () => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    expect(() => v2RequestAdminQuizCreate(registered.jsonBody.token as string, 'a'.repeat(31), quizDescription)).toThrow(HTTPError[400]);
+    expect(() => v2RequestAdminQuizCreate(registered.token as string, 'a'.repeat(31), quizDescription)).toThrow(HTTPError[400]);
   });
 
   test('Name is already used by the current logged in user for another quiz', () => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription)
+    v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
     expect(() => v2RequestAdminQuizCreate(register.token as string, quizName, quizDescription)).toThrow(HTTPError[400]);
   });
 
