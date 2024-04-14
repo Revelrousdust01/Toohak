@@ -50,9 +50,7 @@ describe.only('V1 - adminAuthLogout', () => {
 
   test('Valid Details', () => {
     const register = v1RequestAdminAuthRegister(email, password, firstName, lastName);
-    const responseLogout = v1RequestAdminAuthLogout(register.token as string);
-    expect(responseLogout.jsonBody).toStrictEqual({ });
-    expect(responseLogout.statusCode).toStrictEqual(200);
+    expect(v1RequestAdminAuthLogout(register.token as string)).toStrictEqual({ });
   });
 
   test.each([
@@ -62,9 +60,29 @@ describe.only('V1 - adminAuthLogout', () => {
     { invalidToken: 'abc' },
   ])("Invalid Token: '$invalidToken", ({ invalidToken }) => {
     v1RequestAdminAuthRegister(email, password, firstName, lastName);
-    const responseLogout = v1RequestAdminAuthLogout(invalidToken);
-    expect(responseLogout.jsonBody).toStrictEqual(ERROR);
-    expect(responseLogout.statusCode).toStrictEqual(401);
+    expect(() => v1RequestAdminAuthLogout(invalidToken)).toThrow(HTTPError[401]);
+  });
+});
+
+describe.only('V2 - adminAuthLogout', () => {
+  const firstName = 'Christian';
+  const lastName = 'Politis';
+  const email = 'cpolitis@student.unsw.edu.au';
+  const password = 'a1b2c3d4e5f6';
+
+  test('Valid Details', () => {
+    const register = v1RequestAdminAuthRegister(email, password, firstName, lastName);
+    expect(v2RequestAdminAuthLogout(register.token as string)).toStrictEqual({ });
+  });
+
+  test.each([
+    { invalidToken: '' },
+    { invalidToken: '123' },
+    { invalidToken: 'b77d409a-10cd-4a47-8e94-b0cd0ab50aa1' },
+    { invalidToken: 'abc' },
+  ])("Invalid Token: '$invalidToken", ({ invalidToken }) => {
+    v1RequestAdminAuthRegister(email, password, firstName, lastName);
+    expect(() => v2RequestAdminAuthLogout(invalidToken)).toThrow(HTTPError[401]);
   });
 });
 
