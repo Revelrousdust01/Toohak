@@ -3,14 +3,14 @@ import type { ErrorObject, User, Quiz, QuestionBody, DataStore } from './interfa
 import validator from 'validator';
 import httpError from 'http-errors';
 
-// /**
-//   * Return the quiz, given the quizId
-//   *
-//   * @param {number} quizId - relevent quizId
-//   *
-//   * @returns { Quiz } - Returns the quiz if quiz is found
-//   * @returns { } - Returns empty object if quiz is not found
-// */
+/**
+  * Return the quiz, given the quizId
+  *
+  * @param {number} quizId - relevent quizId
+  *
+  * @returns { Quiz } - Returns the quiz if quiz is found
+  * @returns { } - Returns empty object if quiz is not found
+*/
 
 export function findQuiz(quizid: number, data: DataStore): object | Quiz {
   const quiz = data.quizzes.find(quiz => quiz.quizId === quizid);
@@ -213,7 +213,7 @@ export function validToken(token: string): User {
 export function validQuizName(name: string): object | ErrorObject {
   const characterRegex = /^[a-zA-Z0-9 ]+$/;
 
-  if (!characterRegex.test(name)) { return { error: ' Name contains characters other than lowercase letters, uppercase letters, numbers or spaces.' }; } else if (name.length < 3 || name.length > 30) { return { error: ' Name must not be less than 3 characters or more than 30 characters.' }; }
+  if (!characterRegex.test(name)) { throw httpError(400, 'Name contains characters other than lowercase letters, uppercase letters, numbers or spaces.'); } else if (name.length < 3 || name.length > 30) { throw httpError(400, ' Name must not be less than 3 characters or more than 30 characters.'); }
 
   return { };
 }

@@ -1,7 +1,7 @@
 import { getData, setData } from './dataStore';
 import type { ErrorObject, Quiz, createQuizReturn, QuizArray, QuestionBody, Question, duplicateReturn, Answer, createQuestionReturn } from './interfaces';
 import { isError, findQuiz, getColour, validQuestion, validQuizName, validQuizId, validToken } from './helper';
-
+import httpError from 'http-errors';
 /**
  * Given basic details about a new quiz, create one for the logged in user.
  *
@@ -24,11 +24,6 @@ export function adminQuizCreate(token: string, name: string, description: string
   const data = getData();
 
   const checkToken = validToken(token);
-  if (isError(checkToken)) {
-    return {
-      error: checkToken.error
-    };
-  }
 
   const checkQuizName = validQuizName(name);
   if (isError(checkQuizName)) {
@@ -37,12 +32,12 @@ export function adminQuizCreate(token: string, name: string, description: string
     };
   }
 
-  if (description.length > 100) { return { error: 'Description must be less than 100 charactes.' }; }
+  if (description.length > 100) { throw httpError(400, 'Description must be less than 100 charactes.'); }
 
   const existingQuiz = data.quizzes.find(quiz => quiz.name === name);
 
   if (existingQuiz) {
-    if (checkToken.ownedQuizzes.find(quiz => quiz === existingQuiz.quizId)) { return { error: 'Name is already used by the current logged in user for another quiz.' }; }
+    if (checkToken.ownedQuizzes.find(quiz => quiz === existingQuiz.quizId)) { throw httpError(400, 'Name is already used by the current logged in user for another quiz.'); }
   }
 
   const quizId = data.quizCounter++;
