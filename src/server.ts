@@ -64,20 +64,6 @@ app.post('/v1/admin/auth/logout', (req: Request, res: Response) => {
   res.json(response);
 });
 
-app.post('/v1/admin/auth/logout', (req: Request, res: Response) => {
-  const { token } = req.body;
-  const response = adminAuthLogout(token);
-
-  res.json(response);
-});
-
-app.post('/v2/admin/auth/logout', (req: Request, res: Response) => {
-  const token = req.headers.token as string;
-  const response = adminAuthLogout(token);
-
-  res.json(response);
-});
-
 app.post('/v1/admin/auth/register', (req: Request, res: Response) => {
   const { email, password, nameFirst, nameLast } = req.body;
   const response = adminAuthRegister(email, password, nameFirst, nameLast);

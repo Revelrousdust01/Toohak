@@ -124,16 +124,10 @@ export const v1RequestAdminAuthLogin = (email: string, password: string) => {
     { email: email, password: password });
 };
 
-export const v1RequestAdminAuthLogout = (token: string) => {
-  return requestHelper('POST',
+export const requestAdminAuthLogout = (token: string) => {
+  return oldRequestHelper('POST',
     '/v1/admin/auth/logout',
     { token: token });
-};
-
-export const v2RequestAdminAuthLogout = (token: string) => {
-  return requestHelper('POST',
-    '/v2/admin/auth/logout',
-    { }, { token });
 };
 
 export const v1RequestAdminAuthRegister = (email: string, password: string, firstName: string, lastName: string) => {
