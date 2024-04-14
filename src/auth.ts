@@ -1,7 +1,8 @@
 import { Guid } from 'guid-typescript';
 import { getData, setData } from './dataStore';
 import type { createTokenReturn, ErrorObject, ReturnUser, User, UserSessions } from './interfaces';
-import { isError, validEmail, validName, validPassword, validToken } from './helper';
+import { isError, setHash, validEmail, validName, validPassword, validToken } from './helper';
+import httpError from 'http-errors';
 
 /**
   * Given a registered user's email and password returns their authUserId value.
@@ -21,11 +22,11 @@ export function adminAuthLogin(email: string, password: string): createTokenRetu
   const data = getData();
   const user = data.users.find(users => users.email === email);
   if (!user) {
-    return { error: 'No account found with the provided email address.' };
-  } else if (user.password !== password) {
+    throw httpError(400, 'No account found with the provided email address.');
+  } else if (user.password !== setHash(password)) {
     user.numFailedPasswordsSinceLastLogin++;
     setData(data);
-    return { error: 'Incorrect password.' };
+    throw httpError(400, 'Incorrect password.');
   } else {
     user.numSuccessfulLogins++;
     user.numFailedPasswordsSinceLastLogin = 0;
@@ -93,34 +94,14 @@ export function adminAuthLogout(token: string): object | ErrorObject {
   * @returns {adminAuthRegisterReturn} - Returns token value when account is registered
 */
 
-export function adminAuthRegister(email: string, password: string, nameFirst: string, nameLast: string): createTokenReturn | ErrorObject {
-  const checkEmail = validEmail(email);
-  if (isError(checkEmail)) {
-    return {
-      error: checkEmail.error
-    };
-  }
+export function adminAuthRegister(email: string, password: string, nameFirst: string, nameLast: string): createTokenReturn {
+  validEmail(email);
 
-  const checkPassword = validPassword(password);
-  if (isError(checkPassword)) {
-    return {
-      error: checkPassword.error
-    };
-  }
+  validPassword(password);
 
-  const checkNameFirst = validName(nameFirst, true);
-  if (isError(checkNameFirst)) {
-    return {
-      error: checkNameFirst.error
-    };
-  }
+  validName(nameFirst, true);
 
-  const checkNameLast = validName(nameLast, false);
-  if (isError(checkNameLast)) {
-    return {
-      error: checkNameLast.error
-    };
-  }
+  validName(nameLast, false);
 
   const data = getData();
 
@@ -133,7 +114,7 @@ export function adminAuthRegister(email: string, password: string, nameFirst: st
     numSuccessfulLogins: 1,
     oldPasswords: [],
     ownedQuizzes: [],
-    password: password,
+    password: setHash(password),
   };
 
   data.users.push(newUser);
@@ -265,7 +246,7 @@ export function adminUserPasswordUpdate(token: string, oldPassword: string, newP
     };
   }
 
-  if (!(checkToken.password === oldPassword)) {
+  if (!(checkToken.password === setHash(oldPassword))) {
     return {
       error: 'Old Password is not the correct old password'
     };

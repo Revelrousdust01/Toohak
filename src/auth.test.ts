@@ -1,14 +1,18 @@
 import {
-  requestAdminAuthLogin, v1RequestAdminAuthLogout, v2RequestAdminAuthLogout, requestAdminAuthRegister,
+  v1RequestAdminAuthLogout, v2RequestAdminAuthLogout, v1RequestAdminAuthRegister, v1RequestAdminAuthLogin,
   requestAdminUserDetails, requestAdminUserDetailsUpdate, requestAdminUserPasswordUpdate,
   requestClear
 } from './requests';
-import HTTPError from 'http-errors';
 import request, { HttpVerb } from 'sync-request-curl';
 import { ErrorObject } from './interfaces';
+import HTTPError from 'http-errors';
 
 // Clear before each test
 beforeEach(() => {
+  requestClear();
+});
+
+afterAll(() => {
   requestClear();
 });
 
@@ -22,24 +26,18 @@ describe('adminAuthLogin', () => {
   const password = 'a1b2c3d4e5f6';
 
   test('Valid Details', () => {
-    requestAdminAuthRegister(email, password, firstName, lastName);
-    const response = requestAdminAuthLogin(email, password);
-    expect(response.jsonBody).toStrictEqual({ token: expect.any(String) });
-    expect(response.statusCode).toStrictEqual(200);
+    v1RequestAdminAuthRegister(email, password, firstName, lastName);
+    expect(v1RequestAdminAuthLogin(email, password)).toStrictEqual({ token: expect.any(String) });
   });
 
   test('Email does not exist', () => {
-    requestAdminAuthRegister(email, password, firstName, lastName);
-    const response = requestAdminAuthLogin(email.concat('.wrong'), password);
-    expect(response.jsonBody).toStrictEqual(ERROR);
-    expect(response.statusCode).toStrictEqual(400);
+    v1RequestAdminAuthRegister(email, password, firstName, lastName);
+    expect(() => v1RequestAdminAuthLogin(email.concat('.wrong'), password)).toThrow(HTTPError[400]);
   });
 
   test('Invalid Password', () => {
-    requestAdminAuthRegister(email, password, firstName, lastName);
-    const response = requestAdminAuthLogin(email, password.concat('.wrong'));
-    expect(response.jsonBody).toStrictEqual(ERROR);
-    expect(response.statusCode).toStrictEqual(400);
+    v1RequestAdminAuthRegister(email, password, firstName, lastName);
+    expect(() => v1RequestAdminAuthLogin(email, password.concat('.wrong'))).toThrow(HTTPError[400]);
   });
 });
 
@@ -51,9 +49,8 @@ describe.only('V1 - adminAuthLogout', () => {
   const password = 'a1b2c3d4e5f6';
 
   test('Valid Details', () => {
-    requestAdminAuthRegister(email, password, firstName, lastName);
-    const responseLogin = requestAdminAuthLogin(email, password);
-    const responseLogout = v1RequestAdminAuthLogout(responseLogin.jsonBody?.token as string);
+    const register = v1RequestAdminAuthRegister(email, password, firstName, lastName);
+    const responseLogout = v1RequestAdminAuthLogout(register.token as string);
     expect(responseLogout.jsonBody).toStrictEqual({ });
     expect(responseLogout.statusCode).toStrictEqual(200);
   });
@@ -64,33 +61,10 @@ describe.only('V1 - adminAuthLogout', () => {
     { invalidToken: 'b77d409a-10cd-4a47-8e94-b0cd0ab50aa1' },
     { invalidToken: 'abc' },
   ])("Invalid Token: '$invalidToken", ({ invalidToken }) => {
-    requestAdminAuthLogin(email, password);
-    expect(() => v1RequestAdminAuthLogout(invalidToken)).toThrow(HTTPError[401]);
-  });
-});
-
-describe.only('V2 - adminAuthLogout', () => {
-  const firstName = 'Christian';
-  const lastName = 'Politis';
-  const email = 'cpolitis@student.unsw.edu.au';
-  const password = 'a1b2c3d4e5f6';
-
-  test('Valid Details', () => {
-    requestAdminAuthRegister(email, password, firstName, lastName);
-    const responseLogin = requestAdminAuthLogin(email, password);
-    const responseLogout = v2RequestAdminAuthLogout(responseLogin.jsonBody?.token as string);
-    expect(responseLogout.jsonBody).toStrictEqual({ });
-    expect(responseLogout.statusCode).toStrictEqual(200);
-  });
-
-  test.each([
-    { invalidToken: '' },
-    { invalidToken: '123' },
-    { invalidToken: 'b77d409a-10cd-4a47-8e94-b0cd0ab50aa1' },
-    { invalidToken: 'abc' },
-  ])("Invalid Token: '$invalidToken", ({ invalidToken }) => {
-    requestAdminAuthLogin(email, password);
-    expect(() => v2RequestAdminAuthLogout(invalidToken)).toThrow(HTTPError[401]);
+    v1RequestAdminAuthRegister(email, password, firstName, lastName);
+    const responseLogout = v1RequestAdminAuthLogout(invalidToken);
+    expect(responseLogout.jsonBody).toStrictEqual(ERROR);
+    expect(responseLogout.statusCode).toStrictEqual(401);
   });
 });
 
@@ -102,16 +76,12 @@ describe('adminAuthRegister', () => {
   const password = 'a1b2c3d4e5f6';
 
   test('Valid Details', () => {
-    const response = requestAdminAuthRegister(email, password, firstName, lastName);
-    expect(response.jsonBody).toStrictEqual({ token: expect.any(String) });
-    expect(response.statusCode).toStrictEqual(200);
+    expect(v1RequestAdminAuthRegister(email, password, firstName, lastName)).toStrictEqual({ token: expect.any(String) });
   });
 
   test('Email address is used by another user', () => {
-    requestAdminAuthRegister(email, password, firstName, lastName);
-    const response = requestAdminAuthRegister(email, password, firstName, lastName);
-    expect(response.jsonBody).toStrictEqual(ERROR);
-    expect(response.statusCode).toStrictEqual(400);
+    v1RequestAdminAuthRegister(email, password, firstName, lastName);
+    expect(() => v1RequestAdminAuthRegister(email, password, firstName, lastName)).toThrow(HTTPError[400]);
   });
 
   test.each([
@@ -123,9 +93,7 @@ describe('adminAuthRegister', () => {
     { badEmail: '[cpolitis@student.unsw.edu.au]' },
     { badEmail: 'cpolitis' }
   ])("Email does not satisfy validator: '$badEmail'", ({ badEmail }) => {
-    const response = requestAdminAuthRegister(badEmail, password, firstName, lastName);
-    expect(response.jsonBody).toStrictEqual(ERROR);
-    expect(response.statusCode).toStrictEqual(400);
+    expect(() => v1RequestAdminAuthRegister(badEmail, password, firstName, lastName)).toThrow(HTTPError[400]);
   });
 
   test.each([
@@ -137,18 +105,14 @@ describe('adminAuthRegister', () => {
     { character: '*' },
     { character: '/' }
   ])("NameFirst contains unwanted Characters: '$character'", ({ character }) => {
-    const response = requestAdminAuthRegister(email, password, firstName.concat(character), lastName);
-    expect(response.jsonBody).toStrictEqual(ERROR);
-    expect(response.statusCode).toStrictEqual(400);
+    expect(() => v1RequestAdminAuthRegister(email, password, firstName.concat(character), lastName)).toThrow(HTTPError[400]);
   });
 
   test.each([
     { badFirstName: 'a' },
     { badFirstName: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' }
   ])("NameFirst is less than 2 characters or more than 20 characers: '$badFirstName'", ({ badFirstName }) => {
-    const response = requestAdminAuthRegister(email, password, badFirstName, lastName);
-    expect(response.jsonBody).toStrictEqual(ERROR);
-    expect(response.statusCode).toStrictEqual(400);
+    expect(() => v1RequestAdminAuthRegister(email, password, badFirstName, lastName)).toThrow(HTTPError[400]);
   });
 
   test.each([
@@ -160,18 +124,14 @@ describe('adminAuthRegister', () => {
     { character: '*' },
     { character: '/' }
   ])("NameLast contains unwanted Characters: '$character'", ({ character }) => {
-    const response = requestAdminAuthRegister(email, password, firstName, lastName.concat(character));
-    expect(response.jsonBody).toStrictEqual(ERROR);
-    expect(response.statusCode).toStrictEqual(400);
+    expect(() => v1RequestAdminAuthRegister(email, password, firstName, lastName.concat(character))).toThrow(HTTPError[400]);
   });
 
   test.each([
     { badLastName: 'a' },
     { badLastName: 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa' }
   ])("NameLast is less than 2 characters or more than 20 characers: '$badLastName'", ({ badLastName }) => {
-    const response = requestAdminAuthRegister(email, password, firstName, badLastName);
-    expect(response.jsonBody).toStrictEqual(ERROR);
-    expect(response.statusCode).toStrictEqual(400);
+    expect(() => v1RequestAdminAuthRegister(email, password, firstName, badLastName)).toThrow(HTTPError[400]);
   });
 
   test.each([
@@ -182,18 +142,14 @@ describe('adminAuthRegister', () => {
     { badPassword: 'A12345' },
     { badPassword: 'A123456' }
   ])("Password is less than 8 characters: '$badPassword'", ({ badPassword }) => {
-    const response = requestAdminAuthRegister(email, badPassword, firstName, lastName);
-    expect(response.jsonBody).toStrictEqual(ERROR);
-    expect(response.statusCode).toStrictEqual(400);
+    expect(() => v1RequestAdminAuthRegister(email, badPassword, firstName, lastName)).toThrow(HTTPError[400]);
   });
 
   test.each([
     { badPassword: 'AAAAAAAAAAAAAAAAAAAA' },
     { badPassword: '11111111111111111111' },
   ])("Password does not contain at least one number and at least one letter: '$badPassword'", ({ badPassword }) => {
-    const response = requestAdminAuthRegister(email, badPassword, firstName, lastName);
-    expect(response.jsonBody).toStrictEqual(ERROR);
-    expect(response.statusCode).toStrictEqual(400);
+    expect(() => v1RequestAdminAuthRegister(email, badPassword, firstName, lastName)).toThrow(HTTPError[400]);
   });
 });
 
@@ -205,8 +161,8 @@ describe('adminUserDetails', () => {
   const password = 'a1b2c3d4e5f6';
 
   test('Valid Details', () => {
-    const user = requestAdminAuthRegister(email, password, firstName, lastName);
-    const response = requestAdminUserDetails(user.jsonBody?.token as string);
+    const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
+    const response = requestAdminUserDetails(user.token as string);
     expect(response.jsonBody).toMatchObject({
       user: {
         userId: expect.any(Number),
@@ -216,7 +172,6 @@ describe('adminUserDetails', () => {
         numFailedPasswordsSinceLastLogin: expect.any(Number),
       }
     });
-    expect(user.statusCode).toStrictEqual(200);
   });
 
   test.each([
@@ -225,7 +180,7 @@ describe('adminUserDetails', () => {
     { invalidToken: 'b77d409a-10cd-4a47-8e94-b0cd0ab50aa1' },
     { invalidToken: 'abc' },
   ])("Invalid or Empty Token: '$invalidToken", ({ invalidToken }) => {
-    requestAdminAuthRegister(email, password, firstName, lastName);
+    v1RequestAdminAuthRegister(email, password, firstName, lastName);
     const response = requestAdminUserDetails(invalidToken);
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(401);
@@ -240,18 +195,18 @@ describe('adminUserDetailsUpdate', () => {
   const password = 'a1b2c3d4e5f6';
 
   test('Valid Details', () => {
-    const user = requestAdminAuthRegister(email, password, firstName, lastName);
-    const response = requestAdminUserDetailsUpdate(user.jsonBody.token as string,
+    const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
+    const response = requestAdminUserDetailsUpdate(user.token as string,
       'shuangupdated@student.unsw.edu.au', 'UpdateSamuel', 'UpdateHuang');
     expect(response.jsonBody).toStrictEqual({ });
     expect(response.statusCode).toStrictEqual(200);
   });
 
   test('Email is currently used by another user', () => {
-    const user = requestAdminAuthRegister(email, password, firstName, lastName);
-    requestAdminAuthRegister('cpolitis@student.unsw.edu.au', 'a1b2c3d4e5f6',
+    const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
+    v1RequestAdminAuthRegister('cpolitis@student.unsw.edu.au', 'a1b2c3d4e5f6',
       'Christian', 'Politis');
-    const response = requestAdminUserDetailsUpdate(user.jsonBody.token as string,
+    const response = requestAdminUserDetailsUpdate(user.token as string,
       'cpolitis@student.unsw.edu.au', firstName, lastName);
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(400);
@@ -266,8 +221,8 @@ describe('adminUserDetailsUpdate', () => {
     { badEmail: '[shuang@student.unsw.edu.au]' },
     { badEmail: 'shuang' }
   ])("Email does not satisfy validator: '$badEmail'", ({ badEmail }) => {
-    const user = requestAdminAuthRegister(email, password, firstName, lastName);
-    const response = requestAdminUserDetailsUpdate(user.jsonBody.token as string,
+    const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
+    const response = requestAdminUserDetailsUpdate(user.token as string,
       badEmail, firstName, lastName);
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(400);
@@ -282,8 +237,8 @@ describe('adminUserDetailsUpdate', () => {
     { character: '*' },
     { character: '/' }
   ])("NameFirst contains unwanted Characters: '$character'", ({ character }) => {
-    const user = requestAdminAuthRegister(email, password, firstName, lastName);
-    const response = requestAdminUserDetailsUpdate(user.jsonBody.token as string, email,
+    const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
+    const response = requestAdminUserDetailsUpdate(user.token as string, email,
       firstName.concat(character), lastName);
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(400);
@@ -298,8 +253,8 @@ describe('adminUserDetailsUpdate', () => {
     { character: '*' },
     { character: '/' }
   ])("NameLast contains unwanted Characters: '$character'", ({ character }) => {
-    const user = requestAdminAuthRegister(email, password, firstName, lastName);
-    const response = requestAdminUserDetailsUpdate(user.jsonBody.token as string, email,
+    const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
+    const response = requestAdminUserDetailsUpdate(user.token as string, email,
       firstName, lastName.concat(character));
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(400);
@@ -311,8 +266,8 @@ describe('adminUserDetailsUpdate', () => {
     { invalidToken: 'b77d409a-10cd-4a47-8e94-b0cd0ab50aa1' },
     { invalidToken: 'abc' },
   ])("Invalid or Empty Token: '$invalidToken", ({ invalidToken }) => {
-    requestAdminAuthRegister(email, password, firstName, lastName);
-    requestAdminAuthLogin(email, password);
+    v1RequestAdminAuthRegister(email, password, firstName, lastName);
+    v1RequestAdminAuthLogin(email, password);
     const response = requestAdminUserDetailsUpdate(invalidToken, email, firstName, lastName);
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(401);
@@ -328,34 +283,34 @@ describe('adminUserPasswordUpdate', () => {
   const newPassword = 'newa1b2c3d4qwerty';
 
   test('Valid Details', () => {
-    const user = requestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    const response = requestAdminUserPasswordUpdate(user.jsonBody.token as string,
+    const user = v1RequestAdminAuthRegister(email, oldPassword, firstName, lastName);
+    const response = requestAdminUserPasswordUpdate(user.token as string,
       oldPassword, newPassword);
     expect(response.jsonBody).toStrictEqual({ });
     expect(response.statusCode).toStrictEqual(200);
   });
 
   test('Old Password is not the correct old password', () => {
-    const user = requestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    const response = requestAdminUserPasswordUpdate(user.jsonBody.token as string,
+    const user = v1RequestAdminAuthRegister(email, oldPassword, firstName, lastName);
+    const response = requestAdminUserPasswordUpdate(user.token as string,
       'thisisthewrongpassword', newPassword);
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(400);
   });
 
   test('Old Password and New Password match exactly', () => {
-    const user = requestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    const response = requestAdminUserPasswordUpdate(user.jsonBody.token as string,
+    const user = v1RequestAdminAuthRegister(email, oldPassword, firstName, lastName);
+    const response = requestAdminUserPasswordUpdate(user.token as string,
       oldPassword, oldPassword);
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(400);
   });
 
   test('New Password has already been used by this user', () => {
-    const user = requestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    requestAdminUserPasswordUpdate(user.jsonBody.token as string,
+    const user = v1RequestAdminAuthRegister(email, oldPassword, firstName, lastName);
+    requestAdminUserPasswordUpdate(user.token as string,
       oldPassword, newPassword);
-    const response = requestAdminUserPasswordUpdate(user.jsonBody.token as string,
+    const response = requestAdminUserPasswordUpdate(user.token as string,
       newPassword, oldPassword);
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(400);
@@ -369,8 +324,8 @@ describe('adminUserPasswordUpdate', () => {
     { badPassword: 'A12345' },
     { badPassword: 'A123456' }
   ])("Password is less than 8 characters: '$badPassword'", ({ badPassword }) => {
-    const user = requestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    const response = requestAdminUserPasswordUpdate(user.jsonBody.token as string,
+    const user = v1RequestAdminAuthRegister(email, oldPassword, firstName, lastName);
+    const response = requestAdminUserPasswordUpdate(user.token as string,
       oldPassword, badPassword);
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(400);
@@ -380,8 +335,8 @@ describe('adminUserPasswordUpdate', () => {
     { badPassword: 'AAAAAAAAAAAAAAAAAAAA' },
     { badPassword: '11111111111111111111' },
   ])("Password does not contain at least one number and at least one letter: '$badPassword'", ({ badPassword }) => {
-    const user = requestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    const response = requestAdminUserPasswordUpdate(user.jsonBody.token as string,
+    const user = v1RequestAdminAuthRegister(email, oldPassword, firstName, lastName);
+    const response = requestAdminUserPasswordUpdate(user.token as string,
       newPassword, badPassword);
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(400);
@@ -393,7 +348,7 @@ describe('adminUserPasswordUpdate', () => {
     { invalidToken: 'b77d409a-10cd-4a47-8e94-b0cd0ab50aa1' },
     { invalidToken: 'abc' },
   ])("Invalid or Empty Token: '$invalidToken", ({ invalidToken }) => {
-    requestAdminAuthRegister(email, oldPassword, firstName, lastName);
+    v1RequestAdminAuthRegister(email, oldPassword, firstName, lastName);
     const response = requestAdminUserPasswordUpdate(invalidToken, oldPassword, newPassword);
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(401);

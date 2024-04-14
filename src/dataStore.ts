@@ -1,25 +1,6 @@
 // YOU SHOULD MODIFY THIS OBJECT BELOW ONLY
+import fs from 'fs';
 import type { DataStore } from './interfaces';
-
-let data: DataStore = {
-  /**
-   * We want data to store users and quizzes each within their own array.
-   * Each one should contain their own specific data as reflected in data.md.
-   */
-  trash: [
-
-  ],
-  users: [
-
-  ],
-  userSessions: [
-
-  ],
-  quizzes: [
-
-  ],
-  quizCounter: 1
-};
 
 // YOU SHOULD MODIFY THIS OBJECT ABOVE ONLY
 
@@ -40,13 +21,15 @@ Example usage
 */
 
 // Use get() to access the data
-function getData() {
-  return data;
+function getData(): DataStore {
+  const data = fs.readFileSync('./database.json');
+  return JSON.parse(data.toString());
 }
 
 // Use set(newData) to pass in the entire data object, with modifications made
 function setData(newData: DataStore) {
-  data = newData;
+  const jsonstr = JSON.stringify(newData);
+  fs.writeFileSync('./database.json', jsonstr);
 }
 
 export { getData, setData };

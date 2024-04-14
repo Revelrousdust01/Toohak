@@ -113,6 +113,8 @@ export function adminQuizDescriptionUpdate(token: string, quizid: number, descri
  */
 
 export function adminQuizInfo(token: string, quizid: number): object | ErrorObject {
+  const data = getData();
+
   const checkToken = validToken(token);
 
   if (isError(checkToken)) {
@@ -129,7 +131,7 @@ export function adminQuizInfo(token: string, quizid: number): object | ErrorObje
     };
   }
 
-  const quiz = findQuiz(quizid);
+  const quiz = findQuiz(quizid, data);
   const validQuiz = quiz as Quiz;
 
   const questionsWithAnswers = validQuiz.questions.map(question => {
@@ -191,7 +193,7 @@ export function adminQuizList(token: string): ErrorObject | QuizArray {
 
   if (quizInTrash.length === 0) {
     for (const ownedQuiz of ownedQuizzes) {
-      const quizFind = findQuiz(ownedQuiz);
+      const quizFind = findQuiz(ownedQuiz, data);
       const quiz = {
         quizId: ownedQuiz,
         name: (quizFind as Quiz).name
@@ -202,7 +204,7 @@ export function adminQuizList(token: string): ErrorObject | QuizArray {
     for (const ownedQuiz of ownedQuizzes) {
       for (const trashedQuiz of quizInTrash) {
         if (ownedQuiz !== trashedQuiz.quizId) {
-          const quizFind = findQuiz(ownedQuiz);
+          const quizFind = findQuiz(ownedQuiz, data);
           const quiz = {
             quizId: ownedQuiz,
             name: (quizFind as Quiz).name
@@ -288,7 +290,7 @@ export function adminQuizQuestionCreate(token: string, quizid: number, questionB
     };
   }
 
-  const quiz = findQuiz(quizid);
+  const quiz = findQuiz(quizid, data);
 
   if (quiz != null) {
     const checkQuestion = validQuestion(questionBody, quiz as Quiz);
@@ -321,13 +323,11 @@ export function adminQuizQuestionCreate(token: string, quizid: number, questionB
     validQuiz.questions.push(newQuestion);
 
     setData(data);
-
     return { questionId: newQuestion.questionId };
   }
 }
 
 /**
-<<<<<<< HEAD
  * A particular question gets duplicated to immediately after where the source question is
  *
  * @param {string} token - Token
@@ -413,8 +413,6 @@ export function adminQuizQuestionDelete(token: string, quizid: number, questioni
 
   data.quizzes[quizIndex].timeLastEdited = Date.now();
 
-  console.log(data);
-
   setData(data);
 
   return {};
@@ -499,7 +497,7 @@ export function adminQuizQuestionUpdate(token: string, quizid: number, questioni
     };
   }
 
-  const quiz = findQuiz(quizid);
+  const quiz = findQuiz(quizid, data);
 
   if (quiz != null) {
     const checkQuestion = validQuestion(questionBody, quiz as Quiz);
@@ -622,11 +620,11 @@ export function adminQuizTransfer(token: string, quizid: number, userEmail: stri
 
   if (userEmail === checkToken.email) { return { error: 'userEmail is the current logged in user' }; }
 
-  const tokenQuiz = findQuiz(checkToken.userId);
+  const tokenQuiz = findQuiz(checkToken.userId, data);
 
   for (const quiz in user.ownedQuizzes) {
     const ownedQuiz = user.ownedQuizzes[quiz];
-    const userQuiz = findQuiz(ownedQuiz);
+    const userQuiz = findQuiz(ownedQuiz, data);
     if (tokenQuiz != null && userQuiz != null) {
       if ((tokenQuiz as Quiz).name === (userQuiz as Quiz).name) {
         return { error: 'Quiz ID refers to a quiz that has a name that is already used by the target user.' };
