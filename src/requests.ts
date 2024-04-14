@@ -142,10 +142,16 @@ export const v1RequestAdminAuthRegister = (email: string, password: string, firs
     { email: email, password: password, nameFirst: firstName, nameLast: lastName });
 };
 
-export const requestAdminQuizCreate = (token: string, name:string, description: string) => {
-  return oldRequestHelper('POST',
+export const v1RequestAdminQuizCreate = (token: string, name:string, description: string) => {
+  return requestHelper('POST',
     '/v1/admin/quiz',
     { token: token, name: name, description: description });
+};
+
+export const v2RequestAdminQuizCreate = (token: string, name:string, description: string) => {
+  return requestHelper('POST',
+    '/v2/admin/quiz',
+    { name: name, description: description }, { token });
 };
 
 export const requestAdminQuizDescriptionUpdate = (token: string, quizid: number, description: string) => {
