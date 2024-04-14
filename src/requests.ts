@@ -118,7 +118,6 @@ const oldRequestHelper = (
   return bodyObject;
 };
 
-
 export const v1RequestAdminAuthLogin = (email: string, password: string) => {
   return requestHelper('POST',
     '/v1/admin/auth/login',
@@ -133,7 +132,7 @@ export const v1RequestAdminAuthLogout = (token: string) => {
 
 export const v2RequestAdminAuthLogout = (token: string) => {
   return requestHelper('POST',
-    '/v1/admin/auth/logout',
+    '/v2/admin/auth/logout',
     { }, { token });
 };
 

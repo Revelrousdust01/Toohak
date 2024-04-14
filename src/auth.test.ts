@@ -3,7 +3,6 @@ import {
   requestAdminUserDetails, requestAdminUserDetailsUpdate, requestAdminUserPasswordUpdate,
   requestClear
 } from './requests';
-import request, { HttpVerb } from 'sync-request-curl';
 import { ErrorObject } from './interfaces';
 import HTTPError from 'http-errors';
 
@@ -42,7 +41,7 @@ describe('adminAuthLogin', () => {
 });
 
 // adminAuthLogout
-describe.only('V1 - adminAuthLogout', () => {
+describe('V1 - adminAuthLogout', () => {
   const firstName = 'Christian';
   const lastName = 'Politis';
   const email = 'cpolitis@student.unsw.edu.au';
@@ -64,7 +63,7 @@ describe.only('V1 - adminAuthLogout', () => {
   });
 });
 
-describe.only('V2 - adminAuthLogout', () => {
+describe('V2 - adminAuthLogout', () => {
   const firstName = 'Christian';
   const lastName = 'Politis';
   const email = 'cpolitis@student.unsw.edu.au';
