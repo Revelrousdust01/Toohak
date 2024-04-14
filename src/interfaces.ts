@@ -45,10 +45,6 @@ export interface QuestionBody {
     question: string
 }
 
-export interface Payload {
-    [key: string]: any;
-}
-
 export interface Quiz {
     quizId: number,
     description: string,
