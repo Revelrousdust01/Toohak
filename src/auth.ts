@@ -2,6 +2,7 @@ import { Guid } from 'guid-typescript';
 import { getData, setData } from './dataStore';
 import type { createTokenReturn, ErrorObject, ReturnUser, User, UserSessions } from './interfaces';
 import { isError, validEmail, validName, validPassword, validToken } from './helper';
+import httpError from 'http-errors';
 
 /**
   * Given a registered user's email and password returns their authUserId value.
@@ -21,11 +22,11 @@ export function adminAuthLogin(email: string, password: string): createTokenRetu
   const data = getData();
   const user = data.users.find(users => users.email === email);
   if (!user) {
-    return { error: 'No account found with the provided email address.' };
+    throw httpError(400, 'No account found with the provided email address.');
   } else if (user.password !== password) {
     user.numFailedPasswordsSinceLastLogin++;
     setData(data);
-    return { error: 'Incorrect password.' };
+    throw httpError(400, 'Incorrect password.');
   } else {
     user.numSuccessfulLogins++;
     user.numFailedPasswordsSinceLastLogin = 0;
