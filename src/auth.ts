@@ -64,7 +64,7 @@ export function adminAuthLogout(token: string): object | ErrorObject {
   if (index > -1) {
     data.userSessions.splice(index, 1);
   } else {
-    return { error: 'Token is empty or invalid.' };
+    throw httpError(401, 'Token is empty or invalid.');
   }
 
   setData(data);
