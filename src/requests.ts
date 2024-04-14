@@ -228,7 +228,7 @@ export const v1RequestAdminUserDetails = (token: string) => {
 
 export const v2RequestAdminUserDetails = (token: string) => {
   return requestHelper('GET',
-    '/v1/admin/user/details',
+    '/v2/admin/user/details',
     { }, { token });
 };
 
