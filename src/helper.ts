@@ -245,9 +245,9 @@ export function setupAnswers(newQuestion: Question, questionBody: QuestionBody):
   *
   * @param {QuestionBody} questionBody - Body Passed in
   *
-  * @returns { Question } - Returns Question with modifications.
+  * @returns { object } - Returns object if passes validation.
 */
-export function checkThumbnail(questionBody: QuestionBody): object {
+export function validateThumbnail(questionBody: QuestionBody): object {
   const fileExtensionRegex = /\.(jpg|jpeg|png)$/i;
   switch (true) {
     case questionBody.thumbnailUrl === '':

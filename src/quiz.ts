@@ -1,6 +1,6 @@
 import { getData, setData } from './dataStore';
 import type { ErrorObject, Quiz, createQuizReturn, QuizArray, QuestionBody, Question, duplicateReturn, Answer, createQuestionReturn } from './interfaces';
-import { isError, findQuiz, getColour, validQuestion, validQuizName, validQuizId, validToken, setupAnswers, checkThumbnail } from './helper';
+import { isError, findQuiz, getColour, validQuestion, validQuizName, validQuizId, validToken, setupAnswers, validateThumbnail } from './helper';
 import httpError from 'http-errors';
 /**
  * Given basic details about a new quiz, create one for the logged in user.
@@ -293,7 +293,7 @@ export function adminQuizQuestionCreate(token: string, quizid: number, questionB
       setData(data);
       return { questionId: newQuestion.questionId };
     } else {
-      checkThumbnail(questionBody);
+      validateThumbnail(questionBody);
 
       let newQuestion: Question = {
         questionId: validQuiz.questionCounter,
