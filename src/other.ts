@@ -16,7 +16,7 @@ export function clear(): object {
   currentState.userSessions = [];
   currentState.trash = [];
   currentState.quizCounter = 1;
-
+  currentState.sessions = [];
   setData(currentState);
 
   return {};

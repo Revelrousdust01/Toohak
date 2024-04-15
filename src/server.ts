@@ -6,7 +6,8 @@ import {
   adminQuizQuestionUpdate, adminQuizCreate, adminQuizDescriptionUpdate, adminQuizEmptyTrash,
   adminQuizList, adminQuizNameUpdate, adminQuizQuestionCreate, adminQuizQuestionDelete,
   adminQuizQuestionMove, adminQuizRemove, adminQuizTransfer, adminQuizViewTrash,
-  adminQuizRestore, adminQuizQuestionDuplicate, adminQuizInfo
+  adminQuizRestore, adminQuizQuestionDuplicate, adminQuizInfo,
+  adminQuizSession
 } from './quiz';
 import { clear } from './other';
 import express, { json, Request, Response } from 'express';
@@ -334,6 +335,14 @@ app.delete('/v1/admin/quiz/:quizid', (req: Request, res: Response) => {
       return res.status(403).json(response);
     }
   }
+  res.json(response);
+});
+
+app.post('/v1/admin/quiz/:quizid/session/start', (req: Request, res: Response) => {
+  const { autoStartNum } = req.body;
+  const token = req.headers.token as string;
+  const response = adminQuizSession(token, parseInt(req.params.quizid), autoStartNum);
+
   res.json(response);
 });
 

@@ -228,7 +228,7 @@ describe.skip('Test adminQuizRemove', () => {
   ])("Invalid Token: '$invalidToken", ({ invalidToken }) => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quizId = v1RequestAdminQuizCreate(registered.jsonBody.token as string, quizName, quizDescription);
-    const response = requestAdminQuizRemove(invalidToken, quizId.jsonBody.quizid as number);
+    const response = requestAdminQuizRemove(invalidToken, quizId.jsonBody.quizId as number);
     expect(response.jsonBody).toStrictEqual(ERROR);
     expect(response.statusCode).toStrictEqual(401);
   });
@@ -1644,9 +1644,9 @@ describe('V1 - Test adminQuizSession', () => {
 
   test('Valid inputs', () => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const quiz = v1RequestAdminQuizCreate(register.jsonBody.token as string, quizName, quizDescription);
-    requestAdminQuizQuestionCreate(register.token as string, quiz.quizId as number, question);
-    expect(v1RequestAdminQuizSession(register.token, quiz.quizid, autoStartNum)).toMatchObject({ sessionId: expect.any(Number) });
+    const quiz = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(register.token as string, quiz.quizId as number, question);
+    expect(v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum)).toMatchObject({ sessionId: expect.any(Number) });
   });
 
   test.each([
@@ -1656,47 +1656,47 @@ describe('V1 - Test adminQuizSession', () => {
     { invalidToken: 'abc' },
   ])("Invalid or Empty Token: '$invalidToken", ({ invalidToken }) => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const quiz = v1RequestAdminQuizCreate(register.jsonBody.token as string, quizName, quizDescription);
-    requestAdminQuizQuestionCreate(register.token as string, quiz.quizId as number, question);
-    expect(() => v1RequestAdminQuizSession(invalidToken, quiz.quizid, autoStartNum)).toThrow(HTTPError[401]);
+    const quiz = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(register.token as string, quiz.quizId as number, question);
+    expect(() => v1RequestAdminQuizSession(invalidToken, quiz.quizId, autoStartNum)).toThrow(HTTPError[401]);
   });
 
   test('QuizId does not refer to a quiz that this user owns', () => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const newQuiz = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
-    requestAdminQuizQuestionCreate(register.token as string, newQuiz.quizId as number, question);
+    v1RequestAdminQuizQuestionCreate(register.token as string, newQuiz.quizId as number, question);
     const user2 = v1RequestAdminAuthRegister('bob.smith@gmail.com', 'a1234567', 'Smith', 'Bob');
     expect(() => v1RequestAdminQuizSession(user2.token as string, newQuiz.quizId, autoStartNum)).toThrow(HTTPError[403]);
   });
 
   test('AutoStartNum is a number greater than 50', () => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const quiz = v1RequestAdminQuizCreate(register.jsonBody.token as string, quizName, quizDescription);
-    requestAdminQuizQuestionCreate(register.token as string, quiz.quizId as number, question);
-    expect(() => v1RequestAdminQuizSession(register.token, quiz.quizid, 51)).toThrow(HTTPError[400]);
+    const quiz = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(register.token as string, quiz.quizId as number, question);
+    expect(() => v1RequestAdminQuizSession(register.token, quiz.quizId, 51)).toThrow(HTTPError[400]);
   });
 
   test('A maximum of 10 sessions that are not in END state currently exist for this quiz', () => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const quiz = v1RequestAdminQuizCreate(register.jsonBody.token as string, quizName, quizDescription);
-    requestAdminQuizQuestionCreate(register.token as string, quiz.quizId as number, question);
-    for(let i = 0; i < 9; i++){
-      v1RequestAdminQuizSession(register.token, quiz.quizid, autoStartNum);
+    const quiz = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(register.token as string, quiz.quizId as number, question);
+    for (let i = 0; i < 10; i++) {
+      v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum);
     }
-    expect(() => v1RequestAdminQuizSession(register.token, quiz.quizid, autoStartNum)).toThrow(HTTPError[400]);
+    expect(() => v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum)).toThrow(HTTPError[400]);
   });
 
   test('The quiz does not have any questions in it', () => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const quiz = v1RequestAdminQuizCreate(register.jsonBody.token as string, quizName, quizDescription);
-    expect(() => v1RequestAdminQuizSession(register.token, quiz.quizid, autoStartNum)).toThrow(HTTPError[400]);
+    const quiz = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
+    expect(() => v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum)).toThrow(HTTPError[400]);
   });
 
   test('The quiz is in trash', () => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const quiz = v1RequestAdminQuizCreate(register.jsonBody.token as string, quizName, quizDescription);
-    requestAdminQuizQuestionCreate(register.token as string, quiz.quizId as number, question);
-    expect(() => v1RequestAdminQuizSession(register.token, quiz.quizid, 51)).toThrow(HTTPError[400]);
+    const quiz = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(register.token as string, quiz.quizId as number, question);
+    requestAdminQuizRemove(register.token as string, quiz.quizId as number);
+    expect(() => v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum)).toThrow(HTTPError[400]);
   });
-
 });
