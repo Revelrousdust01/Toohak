@@ -1,5 +1,5 @@
 import { getData } from './dataStore';
-import type { ErrorObject, User, Quiz, QuestionBody, DataStore } from './interfaces';
+import type { ErrorObject, User, Quiz, QuestionBody, DataStore, Question, Answer } from './interfaces';
 import validator from 'validator';
 import httpError from 'http-errors';
 
@@ -114,24 +114,24 @@ export function getColour(): string {
 */
 export function validQuestion(questionBody: QuestionBody, quiz: Quiz): object | ErrorObject {
   if (questionBody.question.length < 5 || questionBody.question.length > 50) {
-    return { error: 'Question string is less than 5 characters in length or greater than 50 characters in length.' };
+    throw httpError(400, 'Question string is less than 5 characters in length or greater than 50 characters in length.');
   } else if (questionBody.answers.length > 6 || questionBody.answers.length < 2) {
-    return { error: 'The question has more than 6 answers or less than 2 answers.' };
-  } else if (questionBody.duration < 0) {
-    return { error: 'The question duration is not a positive number.' };
+    throw httpError(400, 'The question has more than 6 answers or less than 2 answers.');
+  } else if (questionBody.duration < 1) {
+    throw httpError(400, 'The question duration is not a positive number.');
   }
   let counter = 0;
   for (const question of quiz.questions) {
     counter = question.duration++;
   }
   if (counter + questionBody.duration > 180) {
-    return { error: 'The sum of the question durations in the quiz exceeds 3 minutes.' };
+    throw httpError(400, 'The sum of the question durations in the quiz exceeds 3 minutes.');
   } else if (questionBody.points < 1 || questionBody.points > 10) {
-    return { error: 'The points awarded for the question are less than 1 or greater than 10.' };
+    throw httpError(400, 'The points awarded for the question are less than 1 or greater than 10.');
   }
   for (const questionAnswer of questionBody.answers) {
     if (questionAnswer.answer.length < 1 || questionAnswer.answer.length > 30) {
-      return { error: 'The length of answer is shorter than 1 character long, or longer than 30 characters long.' };
+      throw httpError(400, 'The length of answer is shorter than 1 character long, or longer than 30 characters long.');
     }
   }
   const hasDuplicateNames = questionBody.answers.some((item, index) => {
@@ -139,10 +139,10 @@ export function validQuestion(questionBody: QuestionBody, quiz: Quiz): object | 
     return firstIndex !== index;
   });
   if (hasDuplicateNames) {
-    return { error: 'Duplicate of answers exist in same question.' };
+    throw httpError(400, 'Duplicate of answers exist in same question.');
   }
   if (!questionBody.answers.find(answer => answer.correct === true)) {
-    return { error: 'There are no correct answers.' };
+    throw httpError(400, 'There are no correct answers.');
   }
   return {
 
@@ -172,13 +172,13 @@ export function setHash(password: string): string {
   * @returns { } - Returns empty object if quizid is valid
 */
 
-export function validQuizId(token: string, quizid: number, user: User): ErrorObject | object {
+export function validQuizId(quizid: number, user: User): ErrorObject | object {
   const data = getData();
   const quizIndex = data.quizzes.findIndex(quizzes => quizzes.quizId === quizid);
 
-  if (quizIndex === -1) { return { error: 'Quiz ID does not refer to a valid quiz.' }; }
+  if (quizIndex === -1) { throw httpError(403, 'Quiz ID does not refer to a valid quiz.'); }
 
-  if (!user.ownedQuizzes.includes(quizid)) { return { error: 'Quiz ID does not refer to a quiz that this user owns.' }; }
+  if (!user.ownedQuizzes.includes(quizid)) { throw httpError(403, 'Quiz ID does not refer to a quiz that this user owns.'); }
 
   return { };
 }
@@ -216,4 +216,47 @@ export function validQuizName(name: string): object | ErrorObject {
   if (!characterRegex.test(name)) { throw httpError(400, 'Name contains characters other than lowercase letters, uppercase letters, numbers or spaces.'); } else if (name.length < 3 || name.length > 30) { throw httpError(400, ' Name must not be less than 3 characters or more than 30 characters.'); }
 
   return { };
+}
+
+/**
+  * Setup Answers for Questions
+  *
+  * @param {Question} newQuestion - New Question
+  * @param {QuestionBody} questionBody - Body Passed in
+  *
+  * @returns { Question } - Returns Question with modifications.
+*/
+export function setupAnswers(newQuestion: Question, questionBody: QuestionBody): Question {
+  for (const [index, answer] of questionBody.answers.entries()) {
+    const newAnswer: Answer = {
+      answerId: index,
+      answer: answer.answer,
+      colour: getColour(),
+      correct: answer.correct
+    };
+    newQuestion.answers.push(newAnswer);
+  }
+
+  return newQuestion;
+}
+
+/**
+  * Checks Thumnail follows standards
+  *
+  * @param {QuestionBody} questionBody - Body Passed in
+  *
+  * @returns { object } - Returns object if passes validation.
+*/
+export function validateThumbnail(questionBody: QuestionBody): object {
+  const fileExtensionRegex = /\.(jpg|jpeg|png)$/i;
+  switch (true) {
+    case questionBody.thumbnailUrl === '':
+      throw httpError(400, 'The thumbnailUrl is an empty string.');
+    case !questionBody.thumbnailUrl.startsWith('http://') && !questionBody.thumbnailUrl.startsWith('https://'):
+      throw httpError(400, "The thumbnailUrl does not begin with 'http://' or 'https://'.");
+    case !fileExtensionRegex.test(questionBody.thumbnailUrl):
+      throw httpError(400, 'The thumbnailUrl does not end with one of the following filetypes (case insensitive): jpg, jpeg, png.');
+    default:
+      return { };
+  }
 }
