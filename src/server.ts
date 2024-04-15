@@ -300,7 +300,7 @@ app.delete('/v1/admin/quiz/:quizid/question/:questionid', (req: Request, res: Re
 
 app.post('/v1/admin/quiz/:quizid/transfer', (req: Request, res: Response) => {
   const { token, userEmail } = req.body;
-  const response = adminQuizTransfer(token, parseInt(req.params.quizid), userEmail);
+  const response = adminQuizTransfer(token, parseInt(req.params.quizid), userEmail, 1);
 
   res.json(response);
 });
@@ -309,7 +309,7 @@ app.post('/v2/admin/quiz/:quizid/transfer', (req: Request, res: Response) => {
   const { userEmail } = req.body;
   const token = req.headers.token as string;
 
-  const response = adminQuizTransfer(token, parseInt(req.params.quizid), userEmail);
+  const response = adminQuizTransfer(token, parseInt(req.params.quizid), userEmail, 2);
 
   res.json(response);
 });

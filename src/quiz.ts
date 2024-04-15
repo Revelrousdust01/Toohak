@@ -684,6 +684,10 @@ export function adminQuizTransfer(token: string, quizid: number, userEmail: stri
 
   validQuizId(quizid, checkToken, data);
 
+  if (data.sessions.find(sessions => sessions.state !== State.END && sessions.metadata.quizId === quizid)) {
+    throw httpError(400, 'All sessions assosciated to the quiz must not be active to transfer.');
+  }
+
   user.ownedQuizzes.push(quizid);
 
   const ownedQuizIndex = checkToken.ownedQuizzes.indexOf(quizid);

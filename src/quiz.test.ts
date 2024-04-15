@@ -1482,6 +1482,22 @@ describe('V2 - Test adminQuizTransfer', () => {
   const password = 'str0ngpassword';
   const quizName = 'New Quiz';
   const quizDescription = 'This is a new quiz';
+  const autoStartNum = 3;
+  const question: QuestionBody = {
+    question: 'Who is the Monarch of England?',
+    duration: 1,
+    points: 5,
+    answers: [
+      {
+        answer: 'Prince Charles',
+        correct: true
+      },
+      {
+        answer: 'Prince Charless',
+        correct: false
+      }
+    ]
+  };
 
   test('Valid inputs', () => {
     v1RequestAdminAuthRegister('bob.smith@gmail.com', 'a1234567', 'Smith', 'Bob');
@@ -1539,6 +1555,15 @@ describe('V2 - Test adminQuizTransfer', () => {
     const registered2 = v1RequestAdminAuthRegister('john.wick@gmail.com', '1234567a', 'Wick', 'John');
     expect(() => v2requestAdminQuizTransfer(registered2.token as string,
         newQuiz1.quizId as number, 'bob.smith@gmail.com')).toThrow(HTTPError[403]);
+  });
+
+  test('Any session for this quiz is not in END state', () => {
+    const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    v1RequestAdminAuthRegister('bob.smith@gmail.com', 'a1234567', 'Smith', 'Bob');
+    const quiz = v2RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(registered.token as string, quiz.quizId as number, question);
+    v1RequestAdminQuizSession(registered.token, quiz.quizId, autoStartNum);
+    expect(() => v2requestAdminQuizTransfer(registered.token as string, quiz.quizId as number, 'bob.smith@gmail.com')).toThrow(HTTPError[400]);
   });
 });
 
