@@ -220,10 +220,16 @@ export const requestAdminQuizQuestionMove = (token: string, quizid: number, ques
     { token: token, newPosition: newPosition });
 };
 
-export const requestAdminQuizTransfer = (token: string, quizid: number, userEmail: string) => {
-  return oldRequestHelper('POST',
+export const v1RequestAdminQuizTransfer = (token: string, quizid: number, userEmail: string) => {
+  return requestHelper('POST',
     `/v1/admin/quiz/${quizid}/transfer`,
     { token: token, userEmail: userEmail });
+};
+
+export const v2RequestAdminQuizTransfer = (token: string, quizid: number, userEmail: string) => {
+  return requestHelper('POST',
+    `/v2/admin/quiz/${quizid}/transfer`,
+    { userEmail: userEmail }, { token });
 };
 
 export const requestAdminQuizTrashEmpty = (token: string, quizids: number[]) => {
