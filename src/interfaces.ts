@@ -36,6 +36,7 @@ export interface Question {
     points: number
     question: string,
     answers: Answer[],
+    thumbnail?: string
 }
 
 export interface QuestionBody {
@@ -43,6 +44,7 @@ export interface QuestionBody {
     duration: number,
     points: number
     question: string
+    thumbnail?: string
 }
 
 export interface Quiz {

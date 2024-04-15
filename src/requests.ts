@@ -184,10 +184,16 @@ export const requestAdminQuizRemove = (token: string, quizid: number) => {
     { token: token });
 };
 
-export const requestAdminQuizQuestionCreate = (token: string, quizid: number, questionBody: QuestionBody) => {
-  return oldRequestHelper('POST',
+export const v1RequestAdminQuizQuestionCreate = (token: string, quizid: number, questionBody: QuestionBody) => {
+  return requestHelper('POST',
     `/v1/admin/quiz/${quizid}/question`,
     { token: token, questionBody: questionBody });
+};
+
+export const v2RequestAdminQuizQuestionCreate = (token: string, quizid: number, questionBody: QuestionBody) => {
+  return requestHelper('POST',
+    `/v2/admin/quiz/${quizid}/question`,
+    {questionBody: questionBody }, {token});
 };
 
 export const requestAdminQuizQuestionDuplicate = (token: string, quizid: number, questionid: number) => {
