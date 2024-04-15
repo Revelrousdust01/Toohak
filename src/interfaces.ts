@@ -36,7 +36,7 @@ export interface Question {
     points: number
     question: string,
     answers: Answer[],
-    thumbnail?: string
+    thumbnailUrl?: string
 }
 
 export interface QuestionBody {
@@ -44,7 +44,7 @@ export interface QuestionBody {
     duration: number,
     points: number
     question: string
-    thumbnail?: string
+    thumbnailUrl?: string
 }
 
 export interface Quiz {

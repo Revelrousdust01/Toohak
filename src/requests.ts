@@ -193,7 +193,7 @@ export const v1RequestAdminQuizQuestionCreate = (token: string, quizid: number, 
 export const v2RequestAdminQuizQuestionCreate = (token: string, quizid: number, questionBody: QuestionBody) => {
   return requestHelper('POST',
     `/v2/admin/quiz/${quizid}/question`,
-    {questionBody: questionBody }, {token});
+    { questionBody: questionBody }, { token });
 };
 
 export const requestAdminQuizQuestionDuplicate = (token: string, quizid: number, questionid: number) => {
