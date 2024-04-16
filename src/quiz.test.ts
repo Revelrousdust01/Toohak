@@ -1,9 +1,10 @@
 import {
   v1RequestAdminAuthRegister, v1RequestAdminQuizCreate, v2RequestAdminQuizCreate,
-  requestAdminQuizViewTrash, requestAdminQuizRestore, requestAdminQuizDescriptionUpdate, requestAdminQuizNameUpdate, requestAdminQuizRemove,
   v1RequestAdminQuizQuestionCreate, v2RequestAdminQuizQuestionCreate, requestAdminQuizQuestionMove, v1RequestAdminQuizQuestionUpdate, v2RequestAdminQuizQuestionUpdate,
   v1RequestAdminQuizTransfer, v2RequestAdminQuizTransfer, v1RequestAdminQuizTrashEmpty, v2RequestAdminQuizTrashEmpty, requestAdminQuizQuestionDuplicate,
-  v1RequestAdminQuizList, v2RequestAdminQuizList, requestAdminQuizInfo, requestAdminQuizQuestionDelete, requestClear, v1RequestAdminQuizSession, v1RequestAdminQuizThumbnailUpdate
+  v1RequestAdminQuizList, v2RequestAdminQuizList, requestAdminQuizInfo, requestAdminQuizQuestionDelete, requestClear, v1RequestAdminQuizSession, v1RequestAdminQuizThumbnailUpdate,
+  requestAdminQuizRestore, requestAdminQuizDescriptionUpdate, requestAdminQuizRemove, v1RequestAdminQuizNameUpdate, v2RequestAdminQuizNameUpdate,
+  requestAdminQuizViewTrash,
 } from './requests';
 import { ErrorObject, QuestionBody } from './interfaces';
 import HTTPError from 'http-errors';
@@ -484,7 +485,7 @@ describe('V2 - Test adminQuizList', () => {
 });
 
 // adminQuizNameUpdate
-describe.skip('Test adminQuizNameUpdate', () => {
+describe('V1 - Test adminQuizNameUpdate', () => {
   const firstName = 'Leon';
   const lastName = 'Sun';
   const email = 'leonsun@gmail.com';
@@ -495,10 +496,8 @@ describe.skip('Test adminQuizNameUpdate', () => {
 
   test('Working input, 0 errors expected', () => {
     const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const newQuiz = v1RequestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
-    const response = requestAdminQuizNameUpdate(user.jsonBody.token as string, newQuiz.jsonBody.quizId as number, newQuizName);
-    expect(response.jsonBody).toStrictEqual({});
-    expect(response.statusCode).toStrictEqual(200);
+    const newQuiz = v1RequestAdminQuizCreate(user.token, quizName, quizDescription);
+    expect(v1RequestAdminQuizNameUpdate(user.token, newQuiz.quizId, newQuizName)).toStrictEqual({});
   });
 
   test.each([
@@ -508,10 +507,8 @@ describe.skip('Test adminQuizNameUpdate', () => {
     { invalidToken: 'abc' },
   ])("Invalid Token: '$invalidToken", ({ invalidToken }) => {
     const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const newQuiz = v1RequestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
-    const response = requestAdminQuizNameUpdate(invalidToken, newQuiz.jsonBody.quizId as number, newQuizName);
-    expect(response.jsonBody).toStrictEqual(ERROR);
-    expect(response.statusCode).toStrictEqual(401);
+    const newQuiz = v1RequestAdminQuizCreate(user.token, quizName, quizDescription);
+    expect(() => v1RequestAdminQuizNameUpdate(invalidToken, newQuiz.quizId, newQuizName)).toThrow(HTTPError[401]);
   });
 
   test.each([
@@ -520,19 +517,15 @@ describe.skip('Test adminQuizNameUpdate', () => {
     { invalidQuizId: 150 },
   ])('QuizId does not refer to valid quiz: $invalidQuizId', ({ invalidQuizId }) => {
     const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    v1RequestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
-    const response = requestAdminQuizNameUpdate(user.jsonBody.token as string, invalidQuizId as number, newQuizName);
-    expect(response.jsonBody).toStrictEqual(ERROR);
-    expect(response.statusCode).toStrictEqual(403);
+    v1RequestAdminQuizCreate(user.token, quizName, quizDescription);
+    expect(() => v1RequestAdminQuizNameUpdate(user.token, invalidQuizId, newQuizName)).toThrow(HTTPError[403]);
   });
 
   test('QuizId does not refer to a quiz that this user owns', () => {
     const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const newQuiz = v1RequestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
+    const newQuiz = v1RequestAdminQuizCreate(user.token, quizName, quizDescription);
     const user2 = v1RequestAdminAuthRegister('bob.smith@gmail.com', 'a1234567', 'Smith', 'Bob');
-    const response = requestAdminQuizNameUpdate(user2.jsonBody.token as string, newQuiz.jsonBody.quizId as number, newQuizName);
-    expect(response.jsonBody).toStrictEqual(ERROR);
-    expect(response.statusCode).toStrictEqual(403);
+    expect(() => v1RequestAdminQuizNameUpdate(user2.token, newQuiz.quizId, newQuizName)).toThrow(HTTPError[403]);
   });
 
   test.each([
@@ -545,11 +538,9 @@ describe.skip('Test adminQuizNameUpdate', () => {
     { invalidCharacter: '/' }
   ])("Quiz name contains invalid character(s): $invalidCharacter'", ({ invalidCharacter }) => {
     const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const newQuiz = v1RequestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
+    const newQuiz = v1RequestAdminQuizCreate(user.token, quizName, quizDescription);
     const invalidQuizName = quizName + invalidCharacter;
-    const response = requestAdminQuizNameUpdate(user.jsonBody.token as string, newQuiz.jsonBody.quizId as number, invalidQuizName);
-    expect(response.jsonBody).toStrictEqual(ERROR);
-    expect(response.statusCode).toStrictEqual(400);
+    expect(() => v1RequestAdminQuizNameUpdate(user.token, newQuiz.quizId, invalidQuizName)).toThrow(HTTPError[400]);
   });
 
   test.each([
@@ -557,27 +548,102 @@ describe.skip('Test adminQuizNameUpdate', () => {
     { shortQuizName: '12' },
   ])("Quiz name is less than 3 characters: $shortQuizName'", ({ shortQuizName }) => {
     const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const newQuiz = v1RequestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
-    const response = requestAdminQuizNameUpdate(user.jsonBody.token as string, newQuiz.jsonBody.quizId as number, shortQuizName);
-    expect(response.jsonBody).toStrictEqual(ERROR);
-    expect(response.statusCode).toStrictEqual(400);
+    const newQuiz = v1RequestAdminQuizCreate(user.token, quizName, quizDescription);
+    expect(() => v1RequestAdminQuizNameUpdate(user.token, newQuiz.quizId, shortQuizName)).toThrow(HTTPError[400]);
   });
 
   test('Quiz name is greater than 30 characters', () => {
     const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const newQuiz = v1RequestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
-    const response = requestAdminQuizNameUpdate(user.jsonBody.token as string, newQuiz.jsonBody.quizId as number, 'A'.repeat(31));
-    expect(response.jsonBody).toStrictEqual(ERROR);
-    expect(response.statusCode).toStrictEqual(400);
+    const newQuiz = v1RequestAdminQuizCreate(user.token, quizName, quizDescription);
+    expect(() => v1RequestAdminQuizNameUpdate(user.token, newQuiz.quizId, 'A'.repeat(31))).toThrow(HTTPError[400]);
   });
 
   test('Name is already used by the current logged in user for another quiz', () => {
     const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    v1RequestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
-    const newQuiz2 = v1RequestAdminQuizCreate(user.jsonBody.token as string, 'Quiz 2', 'This is the second test quiz');
-    const response = requestAdminQuizNameUpdate(user.jsonBody.token as string, newQuiz2.jsonBody.quizId as number, quizName);
-    expect(response.jsonBody).toStrictEqual(ERROR);
-    expect(response.statusCode).toStrictEqual(400);
+    v1RequestAdminQuizCreate(user.token, quizName, quizDescription);
+    const newQuiz2 = v1RequestAdminQuizCreate(user.token, 'Quiz 2', 'This is the second test quiz');
+    expect(() => v1RequestAdminQuizNameUpdate(user.token, newQuiz2.quizId, quizName)).toThrow(HTTPError[400]);
+  });
+});
+
+describe('V2 - Test adminQuizNameUpdate', () => {
+  const firstName = 'Leon';
+  const lastName = 'Sun';
+  const email = 'leonsun@gmail.com';
+  const password = 'qwer88888888';
+  const quizName = 'Quiz 1 Name';
+  const quizDescription = 'This is the first new quiz';
+  const newQuizName = 'New Quiz 1 Name';
+
+  test('Working input, 0 errors expected', () => {
+    const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const newQuiz = v1RequestAdminQuizCreate(user.token, quizName, quizDescription);
+    expect(v2RequestAdminQuizNameUpdate(user.token, newQuiz.quizId, newQuizName)).toStrictEqual({});
+  });
+
+  test.each([
+    { invalidToken: '' },
+    { invalidToken: '123' },
+    { invalidToken: 'b77d409a-10cd-4a47-8e94-b0cd0ab50aa1' },
+    { invalidToken: 'abc' },
+  ])("Invalid Token: '$invalidToken", ({ invalidToken }) => {
+    const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const newQuiz = v1RequestAdminQuizCreate(user.token, quizName, quizDescription);
+    expect(() => v2RequestAdminQuizNameUpdate(invalidToken, newQuiz.quizId, newQuizName)).toThrow(HTTPError[401]);
+  });
+
+  test.each([
+    { invalidQuizId: null },
+    { invalidQuizId: 0 },
+    { invalidQuizId: 150 },
+  ])('QuizId does not refer to valid quiz: $invalidQuizId', ({ invalidQuizId }) => {
+    const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    v1RequestAdminQuizCreate(user.token, quizName, quizDescription);
+    expect(() => v2RequestAdminQuizNameUpdate(user.token, invalidQuizId, newQuizName)).toThrow(HTTPError[403]);
+  });
+
+  test('QuizId does not refer to a quiz that this user owns', () => {
+    const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const newQuiz = v1RequestAdminQuizCreate(user.token, quizName, quizDescription);
+    const user2 = v1RequestAdminAuthRegister('bob.smith@gmail.com', 'a1234567', 'Smith', 'Bob');
+    expect(() => v2RequestAdminQuizNameUpdate(user2.token, newQuiz.quizId, newQuizName)).toThrow(HTTPError[403]);
+  });
+
+  test.each([
+    { invalidCharacter: '`' },
+    { invalidCharacter: '~' },
+    { invalidCharacter: '+' },
+    { invalidCharacter: '_' },
+    { invalidCharacter: '=' },
+    { invalidCharacter: '*' },
+    { invalidCharacter: '/' }
+  ])("Quiz name contains invalid character(s): $invalidCharacter'", ({ invalidCharacter }) => {
+    const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const newQuiz = v1RequestAdminQuizCreate(user.token, quizName, quizDescription);
+    const invalidQuizName = quizName + invalidCharacter;
+    expect(() => v2RequestAdminQuizNameUpdate(user.token, newQuiz.quizId, invalidQuizName)).toThrow(HTTPError[400]);
+  });
+
+  test.each([
+    { shortQuizName: '1' },
+    { shortQuizName: '12' },
+  ])("Quiz name is less than 3 characters: $shortQuizName'", ({ shortQuizName }) => {
+    const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const newQuiz = v1RequestAdminQuizCreate(user.token, quizName, quizDescription);
+    expect(() => v2RequestAdminQuizNameUpdate(user.token, newQuiz.quizId, shortQuizName)).toThrow(HTTPError[400]);
+  });
+
+  test('Quiz name is greater than 30 characters', () => {
+    const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const newQuiz = v1RequestAdminQuizCreate(user.token, quizName, quizDescription);
+    expect(() => v2RequestAdminQuizNameUpdate(user.token, newQuiz.quizId, 'A'.repeat(31))).toThrow(HTTPError[400]);
+  });
+
+  test('Name is already used by the current logged in user for another quiz', () => {
+    const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    v1RequestAdminQuizCreate(user.token, quizName, quizDescription);
+    const newQuiz2 = v1RequestAdminQuizCreate(user.token, 'Quiz 2', 'This is the second test quiz');
+    expect(() => v2RequestAdminQuizNameUpdate(user.token, newQuiz2.quizId, quizName)).toThrow(HTTPError[400]);
   });
 });
 

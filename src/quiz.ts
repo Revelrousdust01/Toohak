@@ -217,33 +217,18 @@ export function adminQuizList(token: string): ErrorObject | QuizArray {
 
 export function adminQuizNameUpdate(token: string, quizid: number, name: string): ErrorObject | object {
   const data = getData();
-  const quizIndex = data.quizzes.findIndex(quizzes => quizzes.quizId === quizid);
   const checkToken = validToken(token);
 
-  // 401 error
-  if (isError(checkToken)) {
-    return { error: 'Token is empty or invalid.' };
-  }
+  validQuizId(quizid, checkToken, data);
+  validQuizName(name);
 
-  // 400 error
-  const checkQuizName = validQuizName(name);
-  if (isError(checkQuizName)) {
-    return { error: 'Quiz name is not valid.' };
-  }
-
-  // 400 error
   const existingQuiz = data.quizzes.find(quiz => quiz.name === name);
   if (existingQuiz) {
-    if (checkToken.ownedQuizzes.find(quiz => quiz === existingQuiz.quizId)) { return { error: 'Name is already used by the current logged in user for another quiz.' }; }
+    if (checkToken.ownedQuizzes.find(quiz => quiz === existingQuiz.quizId)) {
+      throw httpError(400, 'Name is already used by the current logged in user for another quiz.');
+    }
   }
-
-  // 403 error
-  if (quizIndex === -1) { return { error: 'Quiz ID does not refer to a valid quiz.' }; }
-
-  // 403 error
-  if (!checkToken.ownedQuizzes.includes(quizid)) { return { error: 'Quiz ID does not refer to a quiz that this user owns.' }; }
-
-  data.quizzes[quizIndex].name = name;
+  data.quizzes.find(quiz => quiz.quizId === quizid).name = name;
   setData(data);
   return { };
 }
