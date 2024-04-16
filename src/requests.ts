@@ -154,10 +154,16 @@ export const v2RequestAdminQuizCreate = (token: string, name:string, description
     { name: name, description: description }, { token });
 };
 
-export const requestAdminQuizDescriptionUpdate = (token: string, quizid: number, description: string) => {
-  return oldRequestHelper('PUT',
+export const v1RequestAdminQuizDescriptionUpdate = (token: string, quizid: number, description: string) => {
+  return requestHelper('PUT',
     `/v1/admin/quiz/${quizid}/description`,
-    { token: token, quizid: quizid, description: description });
+    { token: token, description: description });
+};
+
+export const v2RequestAdminQuizDescriptionUpdate = (token: string, quizid: number, newDescription: string) => {
+  return requestHelper('PUT',
+    `/v2/admin/quiz/${quizid}/description`,
+    { description: newDescription }, { token });
 };
 
 export const v1RequestAdminQuizInfo = (token: string, quizid: number) => {
