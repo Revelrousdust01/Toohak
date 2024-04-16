@@ -246,14 +246,14 @@ export function setupAnswers(newQuestion: Question, questionBody: QuestionBody):
   *
   * @returns { object } - Returns object if passes validation.
 */
-export function validateThumbnail(questionBody: QuestionBody): object {
+export function validateThumbnail(thumbnailUrl: string): object {
   const fileExtensionRegex = /\.(jpg|jpeg|png)$/i;
   switch (true) {
-    case questionBody.thumbnailUrl === '':
+    case thumbnailUrl === '':
       throw httpError(400, 'The thumbnailUrl is an empty string.');
-    case !questionBody.thumbnailUrl.startsWith('http://') && !questionBody.thumbnailUrl.startsWith('https://'):
+    case !thumbnailUrl.startsWith('http://') && !thumbnailUrl.startsWith('https://'):
       throw httpError(400, "The thumbnailUrl does not begin with 'http://' or 'https://'.");
-    case !fileExtensionRegex.test(questionBody.thumbnailUrl):
+    case !fileExtensionRegex.test(thumbnailUrl):
       throw httpError(400, 'The thumbnailUrl does not end with one of the following filetypes (case insensitive): jpg, jpeg, png.');
     default:
       return { };
