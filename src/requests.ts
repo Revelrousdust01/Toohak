@@ -178,11 +178,17 @@ export const requestAdminQuizNameUpdate = (token: string, quizid: number, newNam
     { token: token, name: newName });
 };
 
-export const requestAdminQuizRemove = (token: string, quizid: number) => {
-  return oldRequestHelper('DELETE',
+export const v1RequestAdminQuizRemove = (token: string, quizid: number) => {
+  return requestHelper('DELETE',
     `/v1/admin/quiz/${quizid}`,
     { token: token });
 };
+
+// export const v2requestAdminQuizRemove = (token: string, quizid: number) => {
+//   return oldRequestHelper('DELETE',
+//     `/v1/admin/quiz/${quizid}`,
+//     { token: token });
+// };
 
 export const v1RequestAdminQuizQuestionCreate = (token: string, quizid: number, questionBody: QuestionBody) => {
   return requestHelper('POST',
