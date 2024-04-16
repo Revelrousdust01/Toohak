@@ -166,10 +166,16 @@ export const v2RequestAdminQuizDescriptionUpdate = (token: string, quizid: numbe
     { description: newDescription }, { token });
 };
 
-export const requestAdminQuizInfo = (token: string, quizid: number) => {
-  return oldRequestHelper('GET',
+export const v1RequestAdminQuizInfo = (token: string, quizid: number) => {
+  return requestHelper('GET',
     `/v1/admin/quiz/${quizid}`,
     { token: token });
+};
+
+export const v2RequestAdminQuizInfo = (token: string, quizid: number) => {
+  return requestHelper('GET',
+    `/v2/admin/quiz/${quizid}`,
+    { }, { token });
 };
 
 export const v1RequestAdminQuizList = (token: string) => {
