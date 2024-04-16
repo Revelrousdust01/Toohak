@@ -36,6 +36,7 @@ export interface Question {
     points: number
     question: string,
     answers: Answer[],
+    thumbnailUrl?: string
 }
 
 export interface QuestionBody {
@@ -43,12 +44,15 @@ export interface QuestionBody {
     duration: number,
     points: number
     question: string
+    thumbnailUrl?: string
 }
 
 export interface Quiz {
     quizId: number,
     description: string,
+    duration: number;
     name: string,
+    thumbnailUrl?: string,
     timeCreated: number,
     timeLastEdited: number,
     questionCounter: number,
@@ -106,6 +110,7 @@ export interface DataStore {
     userSessions: UserSessions[]
     quizCounter: number;
     quizzes: Quiz[]
+    sessions: Session[];
 }
 
 export interface ErrorObject {
@@ -120,4 +125,76 @@ export interface OldRequestHelperReturnType {
 
 export interface Payload {
     [key: string]: unknown;
+}
+
+interface Attempt {
+    playerId: number;
+    playerName: string;
+    answers: number[];
+    points: number;
+    timeTaken: number;
+}
+
+export interface QuizQuestionSession {
+    questionId:number;
+    question: string;
+    duration: number;
+    points: number;
+    answers: Answer[];
+    thumbnail: string;
+    averageAnswerTime: number;
+    percentCorrect: number;
+    attempts: Attempt[];
+}
+
+export interface QuizSession {
+    quizId: number;
+    name: string;
+    timeCreated: number;
+    timeLastEdited: number;
+    description: string;
+    numQuestions: number;
+    questions: QuizQuestionSession[];
+    duration: number;
+    thumbnail: string;
+}
+
+export enum State {
+    LOBBY = 'LOBBY',
+    QUESTION_COUNTDOWN = 'QUESTION_COUNTDOWN',
+    QUESTION_OPEN = 'QUESTION_OPEN',
+    QUESTION_CLOSE = 'QUESTION_CLOSE',
+    ANSWER_SHOW = 'ANSWER_SHOW',
+    FINAL_RESULTS = 'FINAL_RESULTS',
+    END = 'END'
+  }
+
+export interface Message {
+    playerId: number;
+    messageBody: string;
+    playerName: string;
+    timeSent: number;
+}
+
+export interface Player {
+    playerId: number;
+    playerName: string;
+    playerScore: number;
+}
+
+export interface Session {
+    metadata: QuizSession;
+    quizSessionId: number;
+    state: State;
+    autoStartNum: number;
+    atQuestion: number;
+    messages: Message[];
+    players: Player[];
+}
+
+export enum Action {
+    END = 'END',
+    GO_TO_FINAL_RESULTS = 'GO_TO_FINAL_RESULTS',
+    GO_TO_ANSWER = 'GO_TO_ANSWER',
+    NEXT_QUESTION = 'NEXT_QUESTION'
 }
