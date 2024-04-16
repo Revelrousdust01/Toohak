@@ -240,7 +240,7 @@ export const v1RequestAdminQuizTrashEmpty = (token: string, quizids: number[]) =
 
 export const v2RequestAdminQuizTrashEmpty = (token: string, quizids: number[]) => {
   return requestHelper('DELETE',
-    '/v1/admin/quiz/trash/empty',
+    '/v2/admin/quiz/trash/empty',
     { quizIds: quizids }, { token });
 };
 
