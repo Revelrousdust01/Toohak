@@ -175,7 +175,6 @@ export function setHash(password: string): string {
 export function validQuizId(quizid: number, user: User, data: DataStore): ErrorObject | object {
   const quizIndex = data.quizzes.findIndex(quizzes => quizzes.quizId === quizid);
   const trashedQuizIndex = data.trash.findIndex(quizzes => quizzes.quizId === quizid);
-
   if (quizIndex === -1 && trashedQuizIndex === -1) { throw httpError(403, 'Quiz ID does not refer to a valid quiz.'); }
 
   if (!user.ownedQuizzes.includes(quizid)) { throw httpError(403, 'Quiz ID does not refer to a quiz that this user owns.'); }
@@ -259,4 +258,33 @@ export function validateThumbnail(thumbnailUrl: string): object {
     default:
       return { };
   }
+}
+
+/**
+  * Updates the question values
+  *
+  * @param {Question} question - Question to be modified
+  * @param {QuestionBody} questionBody - Body Passed in
+  * @param {number} version - Version of endpoint
+  *
+  * @returns { object } - Returns object if passes validation.
+*/
+export function updateQuestion(question: Question, questionBody: QuestionBody, version: number): object {
+  question.question = questionBody.question;
+  question.duration = questionBody.duration;
+  question.points = questionBody.points;
+  question.answers = [];
+  for (const [index, answer] of questionBody.answers.entries()) {
+    const newAnswer: Answer = {
+      answerId: index,
+      answer: answer.answer,
+      colour: getColour(),
+      correct: answer.correct
+    };
+    question.answers.push(newAnswer);
+  }
+  if (version === 2) {
+    question.thumbnailUrl = questionBody.thumbnailUrl;
+  }
+  return { };
 }

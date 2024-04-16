@@ -178,10 +178,16 @@ export const v2RequestAdminQuizList = (token: string) => {
     { }, { token });
 };
 
-export const requestAdminQuizNameUpdate = (token: string, quizid: number, newName: string) => {
-  return oldRequestHelper('PUT',
+export const v1RequestAdminQuizNameUpdate = (token: string, quizid: number, newName: string) => {
+  return requestHelper('PUT',
     `/v1/admin/quiz/${quizid}/name`,
     { token: token, name: newName });
+};
+
+export const v2RequestAdminQuizNameUpdate = (token: string, quizid: number, newName: string) => {
+  return requestHelper('PUT',
+    `/v2/admin/quiz/${quizid}/name`,
+    { name: newName }, { token });
 };
 
 export const requestAdminQuizRemove = (token: string, quizid: number) => {
@@ -214,10 +220,16 @@ export const requestAdminQuizQuestionDelete = (token: string, quizid: number, qu
     { token: token });
 };
 
-export const requestAdminQuizQuestionUpdate = (token: string, quizid: number, questionid: number, questionBody: QuestionBody) => {
-  return oldRequestHelper('PUT',
+export const v1RequestAdminQuizQuestionUpdate = (token: string, quizid: number, questionid: number, questionBody: QuestionBody) => {
+  return requestHelper('PUT',
     `/v1/admin/quiz/${quizid}/question/${questionid}`,
     { token: token, questionBody: questionBody });
+};
+
+export const v2RequestAdminQuizQuestionUpdate = (token: string, quizid: number, questionid: number, questionBody: QuestionBody) => {
+  return requestHelper('PUT',
+    `/v2/admin/quiz/${quizid}/question/${questionid}`,
+    { questionBody: questionBody }, { token });
 };
 
 export const requestAdminQuizQuestionMove = (token: string, quizid: number, questionid: number, newPosition: number) => {
@@ -238,10 +250,16 @@ export const v2RequestAdminQuizTransfer = (token: string, quizid: number, userEm
     { userEmail: userEmail }, { token });
 };
 
-export const requestAdminQuizTrashEmpty = (token: string, quizids: number[]) => {
-  return oldRequestHelper('DELETE',
+export const v1RequestAdminQuizTrashEmpty = (token: string, quizids: number[]) => {
+  return requestHelper('DELETE',
     '/v1/admin/quiz/trash/empty',
     { token: token, quizIds: quizids });
+};
+
+export const v2RequestAdminQuizTrashEmpty = (token: string, quizids: number[]) => {
+  return requestHelper('DELETE',
+    '/v2/admin/quiz/trash/empty',
+    { quizIds: quizids }, { token });
 };
 
 export const v1RequestAdminUserDetails = (token: string) => {
