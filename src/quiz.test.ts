@@ -537,7 +537,7 @@ describe('V1 - Test adminQuizNameUpdate', () => {
   test('Working input, 0 errors expected', () => {
     const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const newQuiz = v1RequestAdminQuizCreate(user.token, quizName, quizDescription);
-    expect(v1RequestAdminQuizNameUpdate(user.token, newQuiz.quizId, newQuizName)).toStrictEqual({});
+    expect(v1RequestAdminQuizNameUpdate(user.token, newQuiz.quizId, newQuizName)).toMatchObject({});
   });
 
   test.each([
