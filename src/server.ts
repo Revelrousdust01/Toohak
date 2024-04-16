@@ -121,9 +121,13 @@ app.delete('/v2/admin/quiz/trash/empty', (req: Request, res: Response) => {
 app.get('/v1/admin/quiz/list', (req: Request, res: Response) => {
   const response = adminQuizList(req.query.token as string);
 
-  if ('error' in response) {
-    return res.status(401).json(response);
-  }
+  res.json(response);
+});
+
+app.get('/v2/admin/quiz/list', (req: Request, res: Response) => {
+  const token = req.headers.token as string;
+  const response = adminQuizList(token);
+
   res.json(response);
 });
 
