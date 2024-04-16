@@ -257,15 +257,15 @@ export const v2RequestAdminUserDetails = (token: string) => {
 };
 
 export const v1RequestAdminUserDetailsUpdate = (token: string, email: string, firstName: string, lastName: string) => {
-  return oldRequestHelper('PUT',
+  return requestHelper('PUT',
     '/v1/admin/user/details',
     { token: token, email: email, nameFirst: firstName, nameLast: lastName });
 };
 
 export const v2RequestAdminUserDetailsUpdate = (token: string, email: string, firstName: string, lastName: string) => {
-    return requestHelper('PUT',
-      '/v2/admin/user/details',
-      { email: email, nameFirst: firstName, nameLast: lastName }, { token });
+  return requestHelper('PUT',
+    '/v2/admin/user/details',
+    { email: email, nameFirst: firstName, nameLast: lastName }, { token });
 };
 
 export const requestAdminUserPasswordUpdate = (token: string, oldPassword: string, newPassword: string) => {

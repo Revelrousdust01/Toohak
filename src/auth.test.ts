@@ -1,6 +1,6 @@
 import {
   v1RequestAdminAuthLogout, v2RequestAdminAuthLogout, v1RequestAdminAuthRegister, v1RequestAdminAuthLogin,
-  v1RequestAdminUserDetails, v2RequestAdminUserDetails, v1RequestAdminUserDetailsUpdate, v2RequestAdminUserDetailsUpdate, 
+  v1RequestAdminUserDetails, v2RequestAdminUserDetails, v1RequestAdminUserDetailsUpdate, v2RequestAdminUserDetailsUpdate,
   requestAdminUserPasswordUpdate, requestClear
 } from './requests';
 import { ErrorObject } from './interfaces';
@@ -237,18 +237,18 @@ describe('V1 - adminUserDetailsUpdate', () => {
   const lastName = 'Huang';
   const email = 'shuang@student.unsw.edu.au';
   const password = 'a1b2c3d4e5f6';
-  
+
   test('Valid Details', () => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
     expect(v1RequestAdminUserDetailsUpdate(user.token as string,
       'shuangupdated@student.unsw.edu.au', 'UpdateSamuel', 'UpdateHuang')).toStrictEqual({ });
   });
-  
+
   test('Email is currently used by another user', () => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
     v1RequestAdminAuthRegister('cpolitis@student.unsw.edu.au', 'a1b2c3d4e5f6',
       'Christian', 'Politis');
-    expect(v1RequestAdminUserDetailsUpdate(user.token as string,
+    expect(() => v1RequestAdminUserDetailsUpdate(user.token as string,
       'cpolitis@student.unsw.edu.au', firstName, lastName)).toThrow(HTTPError[400]);
   });
 
@@ -262,7 +262,7 @@ describe('V1 - adminUserDetailsUpdate', () => {
     { badEmail: 'shuang' }
   ])("Email does not satisfy validator: '$badEmail'", ({ badEmail }) => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
-    expect(() => v1RequestAdminUserDetailsUpdate(user.token as string, 
+    expect(() => v1RequestAdminUserDetailsUpdate(user.token as string,
       badEmail, firstName, lastName)).toThrow(HTTPError[400]);
   });
 
@@ -310,18 +310,18 @@ describe('V2 - adminUserDetailsUpdate', () => {
   const lastName = 'Huang';
   const email = 'shuang@student.unsw.edu.au';
   const password = 'a1b2c3d4e5f6';
-  
+
   test('Valid Details', () => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
     expect(v2RequestAdminUserDetailsUpdate(user.token as string,
       'shuangupdated@student.unsw.edu.au', 'UpdateSamuel', 'UpdateHuang')).toStrictEqual({ });
   });
-  
+
   test('Email is currently used by another user', () => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
     v1RequestAdminAuthRegister('cpolitis@student.unsw.edu.au', 'a1b2c3d4e5f6',
       'Christian', 'Politis');
-    expect(v2RequestAdminUserDetailsUpdate(user.token as string,
+    expect(() => v1RequestAdminUserDetailsUpdate(user.token as string,
       'cpolitis@student.unsw.edu.au', firstName, lastName)).toThrow(HTTPError[400]);
   });
 
@@ -335,7 +335,7 @@ describe('V2 - adminUserDetailsUpdate', () => {
     { badEmail: 'shuang' }
   ])("Email does not satisfy validator: '$badEmail'", ({ badEmail }) => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
-    expect(() => v2RequestAdminUserDetailsUpdate(user.token as string, 
+    expect(() => v2RequestAdminUserDetailsUpdate(user.token as string,
       badEmail, firstName, lastName)).toThrow(HTTPError[400]);
   });
 
