@@ -172,11 +172,6 @@ export function adminQuizList(token: string): ErrorObject | QuizArray {
   const data = getData();
 
   const checkToken = validToken(token);
-  if (isError(checkToken)) {
-    return {
-      error: checkToken.error
-    };
-  }
 
   const ownedQuizzes = checkToken.ownedQuizzes;
   const quizInTrash = data.trash;

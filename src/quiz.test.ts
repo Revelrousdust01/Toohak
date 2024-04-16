@@ -1,7 +1,7 @@
 import {
   v1RequestAdminAuthRegister, v1RequestAdminQuizCreate, v2RequestAdminQuizCreate,
   requestAdminQuizViewTrash, requestAdminQuizRestore, requestAdminQuizDescriptionUpdate,
-  requestAdminQuizList, requestAdminQuizNameUpdate, requestAdminQuizRemove,
+  v1RequestAdminQuizList, v2RequestAdminQuizList, requestAdminQuizNameUpdate, requestAdminQuizRemove,
   v1RequestAdminQuizQuestionCreate, v2RequestAdminQuizQuestionCreate, requestAdminQuizQuestionMove, requestAdminQuizQuestionUpdate,
   v1RequestAdminQuizTransfer, v2RequestAdminQuizTransfer, requestAdminQuizTrashEmpty, requestAdminQuizQuestionDuplicate,
   requestAdminQuizInfo, requestAdminQuizQuestionDelete, requestClear, v1RequestAdminQuizSession, v1RequestAdminQuizThumbnailUpdate
@@ -352,7 +352,7 @@ describe.skip('Test adminQuizInfo', () => {
 });
 
 // adminQuizList
-describe.skip('adminQuizList', () => {
+describe('V1 - Test adminQuizList', () => {
   const firstName = 'Samuel';
   const lastName = 'Huang';
   const email = 'shuang@student.unsw.edu.au';
@@ -362,56 +362,50 @@ describe.skip('adminQuizList', () => {
 
   test('One quiz in quizlist', () => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const quizId = v1RequestAdminQuizCreate(register.jsonBody.token as string, quizName, quizDescription);
-    const response = requestAdminQuizList(register.jsonBody.token as string);
-    expect(response.jsonBody).toMatchObject({
+    const quizId = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
+    expect(v1RequestAdminQuizList(register.token as string)).toMatchObject({
       quizzes: [
         {
-          quizId: quizId.jsonBody.quizId as number,
+          quizId: quizId.quizId as number,
           name: quizName
         }
       ]
     });
-    expect(response.statusCode).toStrictEqual(200);
   });
 
   test('Multiple quiz in quizlist', () => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const quizId = v1RequestAdminQuizCreate(register.jsonBody.token as string, quizName, quizDescription);
-    const quizId1 = v1RequestAdminQuizCreate(register.jsonBody.token as string, 'Age of Adeline',
+    const quizId = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
+    const quizId1 = v1RequestAdminQuizCreate(register.token as string, 'Age of Adeline',
       'Quiz about the movie trivia of Age of Adeline');
-    const response = requestAdminQuizList(register.jsonBody.token as string);
-    expect(response.jsonBody).toMatchObject({
+    expect(v1RequestAdminQuizList(register.token as string)).toMatchObject({
       quizzes: [
         {
-          quizId: quizId.jsonBody.quizId as number,
+          quizId: quizId.quizId as number,
           name: quizName
         },
         {
-          quizId: quizId1.jsonBody.quizId as number,
+          quizId: quizId1.quizId as number,
           name: 'Age of Adeline'
         }
       ]
     });
-    expect(response.statusCode).toStrictEqual(200);
   });
 
   test('Multiple quizzes with one quiz in trash', () => {
     const register = v1RequestAdminAuthRegister(email, password, firstName, lastName);
-    const quizId = v1RequestAdminQuizCreate(register.jsonBody.token as string, quizName, quizDescription);
-    const quizId1 = v1RequestAdminQuizCreate(register.jsonBody.token as string, 'Age of Adeline',
+    const quizId = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
+    const quizId1 = v1RequestAdminQuizCreate(register.token as string, 'Age of Adeline',
       'Quiz about the movie trivia of Age of Adeline');
-    requestAdminQuizRemove(register.jsonBody.token as string, quizId1.jsonBody.quizId as number);
-    const response = requestAdminQuizList(register.jsonBody.token as string);
-    expect(response.jsonBody).toMatchObject({
+    requestAdminQuizRemove(register.token as string, quizId1.quizId as number);
+    expect(v1RequestAdminQuizList(register.token as string)).toMatchObject({
       quizzes: [
         {
-          quizId: quizId.jsonBody.quizId as number,
+          quizId: quizId.quizId as number,
           name: quizName
         }
       ]
     });
-    expect(response.statusCode).toStrictEqual(200);
   });
 
   test.each([
@@ -420,9 +414,73 @@ describe.skip('adminQuizList', () => {
     { invalidToken: 'b77d409a-10cd-4a47-8e94-b0cd0ab50aa1' },
     { invalidToken: 'abc' },
   ])("Invalid Token: '$invalidToken", ({ invalidToken }) => {
-    const response = requestAdminQuizList(invalidToken);
-    expect(response.jsonBody).toStrictEqual(ERROR);
-    expect(response.statusCode).toStrictEqual(401);
+    expect(() => v1RequestAdminQuizList(invalidToken)).toThrow(HTTPError[401]);
+  });
+});
+
+describe('V2 - Test adminQuizList', () => {
+  const firstName = 'Samuel';
+  const lastName = 'Huang';
+  const email = 'shuang@student.unsw.edu.au';
+  const password = 'a1b2c3d4e5f6';
+  const quizName = 'How to train your dragon';
+  const quizDescription = 'Quiz about the movie trivia of How to Train your dragon';
+
+  test('One quiz in quizlist', () => {
+    const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = v2RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
+    expect(v2RequestAdminQuizList(register.token as string)).toMatchObject({
+      quizzes: [
+        {
+          quizId: quizId.quizId as number,
+          name: quizName
+        }
+      ]
+    });
+  });
+
+  test('Multiple quiz in quizlist', () => {
+    const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = v2RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
+    const quizId1 = v2RequestAdminQuizCreate(register.token as string, 'Age of Adeline',
+      'Quiz about the movie trivia of Age of Adeline');
+    expect(v2RequestAdminQuizList(register.token as string)).toMatchObject({
+      quizzes: [
+        {
+          quizId: quizId.quizId as number,
+          name: quizName
+        },
+        {
+          quizId: quizId1.quizId as number,
+          name: 'Age of Adeline'
+        }
+      ]
+    });
+  });
+
+  test('Multiple quizzes with one quiz in trash', () => {
+    const register = v1RequestAdminAuthRegister(email, password, firstName, lastName);
+    const quizId = v2RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
+    const quizId1 = v2RequestAdminQuizCreate(register.token as string, 'Age of Adeline',
+      'Quiz about the movie trivia of Age of Adeline');
+    requestAdminQuizRemove(register.token as string, quizId1.quizId as number);
+    expect(v2RequestAdminQuizList(register.token as string)).toMatchObject({
+      quizzes: [
+        {
+          quizId: quizId.quizId as number,
+          name: quizName
+        }
+      ]
+    });
+  });
+
+  test.each([
+    { invalidToken: '' },
+    { invalidToken: '123' },
+    { invalidToken: 'b77d409a-10cd-4a47-8e94-b0cd0ab50aa1' },
+    { invalidToken: 'abc' },
+  ])("Invalid Token: '$invalidToken", ({ invalidToken }) => {
+    expect(() => v2RequestAdminQuizList(invalidToken)).toThrow(HTTPError[401]);
   });
 });
 
@@ -1697,6 +1755,7 @@ describe.skip('Test adminQuizTrashEmpty', () => {
   });
 });
 
+// adminQuizSession
 describe('V1 - Test adminQuizSession', () => {
   const firstName = 'Christian';
   const lastName = 'Politis';
