@@ -7,7 +7,8 @@ import {
   adminQuizList, adminQuizNameUpdate, adminQuizQuestionCreate, adminQuizQuestionDelete,
   adminQuizQuestionMove, adminQuizRemove, adminQuizTransfer, adminQuizViewTrash,
   adminQuizRestore, adminQuizQuestionDuplicate, adminQuizInfo,
-  adminQuizSession
+  adminQuizSession,
+  adminQuizThumbnailUpdate
 } from './quiz';
 import { clear } from './other';
 import express, { json, Request, Response } from 'express';
@@ -170,6 +171,14 @@ app.put('/v1/admin/quiz/:quizid/name', (req: Request, res: Response) => {
   }
 
   return res.status(200).json({});
+});
+
+app.put('/v1/admin/quiz/:quizid/thumbnail', (req: Request, res: Response) => {
+  const { imgUrl } = req.body;
+  const token = req.headers.token as string;
+  const response = adminQuizThumbnailUpdate(token, parseInt(req.params.quizid), imgUrl);
+
+  res.json(response);
 });
 
 app.post('/v1/admin/quiz/:quizid/restore', (req: Request, res: Response) => {

@@ -294,7 +294,7 @@ export function adminQuizQuestionCreate(token: string, quizid: number, questionB
       setData(data);
       return { questionId: newQuestion.questionId };
     } else {
-      validateThumbnail(questionBody);
+      validateThumbnail(questionBody.thumbnailUrl);
 
       let newQuestion: Question = {
         questionId: validQuiz.questionCounter,
@@ -844,4 +844,19 @@ export function adminQuizViewTrash(token: string): ErrorObject | QuizArray {
   return {
     quizzes: foundTrash
   };
+}
+
+export function adminQuizThumbnailUpdate(token: string, quizid: number, imgUrl: string): object {
+  const data = getData();
+
+  const checkToken = validToken(token);
+  validQuizId(quizid, checkToken, data);
+  validateThumbnail(imgUrl);
+
+  const quiz = data.quizzes.find(quiz => quiz.quizId === quizid);
+
+  quiz.thumbnailUrl = imgUrl;
+  quiz.timeLastEdited = Date.now();
+
+  return { };
 }

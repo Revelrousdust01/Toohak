@@ -1787,12 +1787,12 @@ describe('V1 - Test adminQuizThumbnailUpdate', () => {
   const password = 'a1b2c3d4e5f6';
   const quizName = 'New Quiz';
   const quizDescription = 'This is a new quiz';
-  const thumbnailUrl = 'http://google.com/some/image/path.jpg'
+  const thumbnailUrl = 'http://google.com/some/image/path.jpg';
 
   test('Valid inputs', () => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quiz = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
-    expect(v1RequestAdminQuizThumbnailUpdate(registered.token, quiz.quizid, thumbnailUrl)).toMatchObject({ });
+    expect(v1RequestAdminQuizThumbnailUpdate(registered.token, quiz.quizId, thumbnailUrl)).toMatchObject({ });
   });
 
   test.each([
@@ -1807,7 +1807,7 @@ describe('V1 - Test adminQuizThumbnailUpdate', () => {
 
   test('QuizId does not refer to a quiz that this user owns', () => {
     const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const newQuiz = v1RequestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
+    const newQuiz = v1RequestAdminQuizCreate(user.token as string, quizName, quizDescription);
     const user2 = v1RequestAdminAuthRegister('bob.smith@gmail.com', 'a1234567', 'Smith', 'Bob');
     expect(() => v1RequestAdminQuizThumbnailUpdate(user2.token, newQuiz.quizId, thumbnailUrl)).toThrow(HTTPError[403]);
   });
@@ -1821,5 +1821,4 @@ describe('V1 - Test adminQuizThumbnailUpdate', () => {
     const newQuiz = v2RequestAdminQuizCreate(user.token as string, quizName, quizDescription);
     expect(() => v1RequestAdminQuizThumbnailUpdate(user.token, newQuiz.quizId, invalidUrl)).toThrow(HTTPError[400]);
   });
-
 });
