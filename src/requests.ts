@@ -184,6 +184,12 @@ export const v1RequestAdminQuizNameUpdate = (token: string, quizid: number, newN
     { token: token, name: newName });
 };
 
+export const v2RequestAdminQuizNameUpdate = (token: string, quizid: number, newName: string) => {
+  return requestHelper('PUT',
+    `/v2/admin/quiz/${quizid}/name`,
+    { name: newName }, { token });
+};
+
 export const requestAdminQuizRemove = (token: string, quizid: number) => {
   return oldRequestHelper('DELETE',
     `/v1/admin/quiz/${quizid}`,

@@ -166,6 +166,14 @@ app.put('/v1/admin/quiz/:quizid/name', (req: Request, res: Response) => {
   res.json(response);
 });
 
+app.put('/v2/admin/quiz/:quizid/name', (req: Request, res: Response) => {
+  const { name } = req.body;
+  const token = req.headers.token as string;
+  const response = adminQuizNameUpdate(token, parseInt(req.params.quizid), name);
+
+  res.json(response);
+});
+
 app.put('/v1/admin/quiz/:quizid/thumbnail', (req: Request, res: Response) => {
   const { imgUrl } = req.body;
   const token = req.headers.token as string;
