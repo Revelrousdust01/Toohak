@@ -220,10 +220,16 @@ export const requestAdminQuizQuestionDelete = (token: string, quizid: number, qu
     { token: token });
 };
 
-export const requestAdminQuizQuestionUpdate = (token: string, quizid: number, questionid: number, questionBody: QuestionBody) => {
-  return oldRequestHelper('PUT',
+export const v1RequestAdminQuizQuestionUpdate = (token: string, quizid: number, questionid: number, questionBody: QuestionBody) => {
+  return requestHelper('PUT',
     `/v1/admin/quiz/${quizid}/question/${questionid}`,
     { token: token, questionBody: questionBody });
+};
+
+export const v2RequestAdminQuizQuestionUpdate = (token: string, quizid: number, questionid: number, questionBody: QuestionBody) => {
+  return requestHelper('PUT',
+    `/v2/admin/quiz/${quizid}/question/${questionid}`,
+    { questionBody: questionBody }, { token });
 };
 
 export const requestAdminQuizQuestionMove = (token: string, quizid: number, questionid: number, newPosition: number) => {

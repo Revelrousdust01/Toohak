@@ -259,3 +259,32 @@ export function validateThumbnail(thumbnailUrl: string): object {
       return { };
   }
 }
+
+/**
+  * Updates the question values
+  *
+  * @param {Question} question - Question to be modified
+  * @param {QuestionBody} questionBody - Body Passed in
+  * @param {number} version - Version of endpoint
+  *
+  * @returns { object } - Returns object if passes validation.
+*/
+export function updateQuestion(question: Question, questionBody: QuestionBody, version: number): object {
+  question.question = questionBody.question;
+  question.duration = questionBody.duration;
+  question.points = questionBody.points;
+  question.answers = [];
+  for (const [index, answer] of questionBody.answers.entries()) {
+    const newAnswer: Answer = {
+      answerId: index,
+      answer: answer.answer,
+      colour: getColour(),
+      correct: answer.correct
+    };
+    question.answers.push(newAnswer);
+  }
+  if (version === 2) {
+    question.thumbnailUrl = questionBody.thumbnailUrl;
+  }
+  return { };
+}
