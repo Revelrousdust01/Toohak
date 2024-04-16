@@ -2,7 +2,7 @@ import {
   v1RequestAdminAuthRegister, v1RequestAdminQuizCreate, v2RequestAdminQuizCreate,
   v1RequestAdminQuizQuestionCreate, v2RequestAdminQuizQuestionCreate, requestAdminQuizQuestionMove, v1RequestAdminQuizQuestionUpdate, v2RequestAdminQuizQuestionUpdate,
   v1RequestAdminQuizTransfer, v2RequestAdminQuizTransfer, v1RequestAdminQuizTrashEmpty, v2RequestAdminQuizTrashEmpty, requestAdminQuizQuestionDuplicate,
-  v1RequestAdminQuizList, v2RequestAdminQuizList, requestAdminQuizInfo, requestAdminQuizQuestionDelete, requestClear, v1RequestAdminQuizSession, v1RequestAdminQuizThumbnailUpdate,
+  v1RequestAdminQuizList, v2RequestAdminQuizList, v1RequestAdminQuizInfo, v2RequestAdminQuizInfo, requestAdminQuizQuestionDelete, requestClear, v1RequestAdminQuizSession, v1RequestAdminQuizThumbnailUpdate,
   requestAdminQuizRestore, requestAdminQuizDescriptionUpdate, requestAdminQuizRemove, v1RequestAdminQuizNameUpdate, v2RequestAdminQuizNameUpdate,
   requestAdminQuizViewTrash,
 } from './requests';
@@ -255,7 +255,7 @@ describe.skip('Test adminQuizRemove', () => {
 });
 
 // adminQuizInfo
-describe.skip('Test adminQuizInfo', () => {
+describe('V1 - Test adminQuizInfo', () => {
   const firstName = 'Jeffery';
   const lastName = 'Zhang';
   const email = 'jeffery.zhang385@gmail.com';
@@ -280,11 +280,10 @@ describe.skip('Test adminQuizInfo', () => {
 
   test('Valid inputs', () => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const quizId = v1RequestAdminQuizCreate(registered.jsonBody.token as string, quizName, quizDescription);
-    const questionId = v1RequestAdminQuizQuestionCreate(registered.jsonBody.token as string, quizId.jsonBody.quizId as number, question);
-    const response = requestAdminQuizInfo(registered.jsonBody.token as string, quizId.jsonBody.quizId as number);
-    expect(response.jsonBody).toMatchObject({
-      quizId: quizId.jsonBody.quizId as number,
+    const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
+    const questionId = v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question);
+    expect(v1RequestAdminQuizInfo(registered.token as string, quizId.quizId as number)).toMatchObject({
+      quizId: quizId.quizId as number,
       name: quizName,
       timeCreated: expect.any(Number),
       timeLastEdited: expect.any(Number),
@@ -292,7 +291,7 @@ describe.skip('Test adminQuizInfo', () => {
       numQuestions: expect.any(Number),
       questions: [
         {
-          questionId: questionId.jsonBody.questionId as number,
+          questionId: questionId.questionId as number,
           question: 'Who is the Monarch of England?',
           duration: 1,
           points: 5,
@@ -314,7 +313,6 @@ describe.skip('Test adminQuizInfo', () => {
       ],
       duration: expect.any(Number),
     });
-    expect(response.statusCode).toStrictEqual(200);
   });
 
   test.each([
@@ -324,10 +322,8 @@ describe.skip('Test adminQuizInfo', () => {
     { invalidToken: 'abc' },
   ])("Invalid Token: '$invalidToken", ({ invalidToken }) => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const quizId = v1RequestAdminQuizCreate(registered.jsonBody.token as string, quizName, quizDescription);
-    const response = requestAdminQuizInfo(invalidToken, quizId.jsonBody.quizId as number);
-    expect(response.jsonBody).toStrictEqual(ERROR);
-    expect(response.statusCode).toStrictEqual(401);
+    const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
+    expect(v1RequestAdminQuizInfo(invalidToken, quizId.quizId as number)).toThrow(HTTPError[401]);
   });
 
   test.each([
@@ -336,21 +332,108 @@ describe.skip('Test adminQuizInfo', () => {
     { invalidQuizId: 150 },
   ])("QuizId does not refer to valid quiz: '$invalidQuizId", ({ invalidQuizId }) => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const response = requestAdminQuizInfo(registered.jsonBody.token as string, invalidQuizId);
-    expect(response.jsonBody).toStrictEqual(ERROR);
-    expect(response.statusCode).toStrictEqual(403);
+    expect(v1RequestAdminQuizInfo(registered.token as string, invalidQuizId)).toThrow(HTTPError[403]);
   });
 
   test('QuizId does not refer to a quiz that this user owns', () => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const newQuiz = v1RequestAdminQuizCreate(registered.jsonBody.token as string, quizName, quizDescription);
+    const newQuiz = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
     const registered1 = v1RequestAdminAuthRegister('bob.smith@gmail.com', 'a1234567', 'Smith', 'Bob');
-    const response = requestAdminQuizInfo(registered1.jsonBody.token as string, newQuiz.jsonBody.quizId as number);
-    expect(response.jsonBody).toStrictEqual(ERROR);
-    expect(response.statusCode).toStrictEqual(403);
+    expect(v1RequestAdminQuizInfo(registered1.token as string, newQuiz.jsonBody.quizId as number)).toThrow(HTTPError[403]);
   });
 });
 
+describe('V2 - Test adminQuizInfo', () => {
+  const firstName = 'Jeffery';
+  const lastName = 'Zhang';
+  const email = 'jeffery.zhang385@gmail.com';
+  const password = 'str0ngpassword';
+  const quizName = 'New Quiz';
+  const quizDescription = 'This is a new quiz';
+  const thumbnailUrl = 'http://google.com/some/image/path.jpg'
+  const question: QuestionBody = {
+    question: 'Who is the Monarch of England?',
+    duration: 1,
+    points: 5,
+    answers: [
+      {
+        answer: 'Prince Charles',
+        correct: true
+      },
+      {
+        answer: 'Prince Charless',
+        correct: false
+      }
+    ]
+  };
+
+  test('Valid inputs', () => {
+    const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
+    const questionId = v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question);
+    v1RequestAdminQuizThumbnailUpdate(registered.token, quizId.quizId, thumbnailUrl)
+    expect(v1RequestAdminQuizInfo(registered.token as string, quizId.quizId as number)).toMatchObject({
+      quizId: quizId.quizId as number,
+      name: quizName,
+      timeCreated: expect.any(Number),
+      timeLastEdited: expect.any(Number),
+      description: quizDescription,
+      numQuestions: expect.any(Number),
+      questions: [
+        {
+          questionId: questionId.questionId as number,
+          question: 'Who is the Monarch of England?',
+          duration: 1,
+          thumbnailUrl: 'http://google.com/some/image/path.jpg',
+          points: 5,
+          answers: [
+            {
+              answerId: expect.any(Number),
+              answer: 'Prince Charles',
+              colour: expect.any(String),
+              correct: true
+            },
+            {
+              answerId: expect.any(Number),
+              answer: 'Prince Charless',
+              colour: expect.any(String),
+              correct: false
+            }
+          ]
+        }
+      ],
+      duration: expect.any(Number),
+      thumbnailUrl: 'http://google.com/some/image/path.jpg',
+    });
+  });
+
+  test.each([
+    { invalidToken: '' },
+    { invalidToken: '123' },
+    { invalidToken: 'b77d409a-10cd-4a47-8e94-b0cd0ab50aa1' },
+    { invalidToken: 'abc' },
+  ])("Invalid Token: '$invalidToken", ({ invalidToken }) => {
+    const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = v2RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
+    expect(v2RequestAdminQuizInfo(invalidToken, quizId.quizId as number)).toThrow(HTTPError[401]);
+  });
+
+  test.each([
+    { invalidQuizId: null },
+    { invalidQuizId: 0 },
+    { invalidQuizId: 150 },
+  ])("QuizId does not refer to valid quiz: '$invalidQuizId", ({ invalidQuizId }) => {
+    const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    expect(v2RequestAdminQuizInfo(registered.token as string, invalidQuizId)).toThrow(HTTPError[403]);
+  });
+
+  test('QuizId does not refer to a quiz that this user owns', () => {
+    const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const newQuiz = v2RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
+    const registered1 = v1RequestAdminAuthRegister('bob.smith@gmail.com', 'a1234567', 'Smith', 'Bob');
+    expect(v2RequestAdminQuizInfo(registered1.token as string, newQuiz.jsonBody.quizId as number)).toThrow(HTTPError[403]);
+  });
+});
 // adminQuizList
 describe('V1 - Test adminQuizList', () => {
   const firstName = 'Samuel';

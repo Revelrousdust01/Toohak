@@ -168,7 +168,7 @@ export function adminQuizInfo(token: string, quizid: number): object | ErrorObje
  * @return {QuizArray} - returns an array of quizzes in the list;
  */
 
-export function adminQuizList(token: string): ErrorObject | QuizArray {
+export function adminQuizList(token: string): QuizArray {
   const data = getData();
 
   const checkToken = validToken(token);
