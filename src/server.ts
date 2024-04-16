@@ -7,7 +7,8 @@ import {
   adminQuizList, adminQuizNameUpdate, adminQuizQuestionCreate, adminQuizQuestionDelete,
   adminQuizQuestionMove, adminQuizRemove, adminQuizTransfer, adminQuizViewTrash,
   adminQuizRestore, adminQuizQuestionDuplicate, adminQuizInfo,
-  adminQuizSession
+  adminQuizSession,
+  adminQuizThumbnailUpdate
 } from './quiz';
 import { clear } from './other';
 import express, { json, Request, Response } from 'express';
@@ -59,16 +60,6 @@ app.post('/v1/admin/auth/logout', (req: Request, res: Response) => {
   const { token } = req.body;
   const response = adminAuthLogout(token);
 
-  if ('error' in response) {
-    return res.status(401).json(response);
-  }
-  res.json(response);
-});
-
-app.post('/v1/admin/auth/logout', (req: Request, res: Response) => {
-  const { token } = req.body;
-  const response = adminAuthLogout(token);
-
   res.json(response);
 });
 
@@ -111,75 +102,84 @@ app.get('/v1/admin/quiz/trash', (req: Request, res: Response) => {
 app.delete('/v1/admin/quiz/trash/empty', (req: Request, res: Response) => {
   const quizIds = req.query.quizIds as string[];
   const numberQuizIds = quizIds.map(id => parseInt(id));
-  const response = adminQuizEmptyTrash(req.query.token as string, numberQuizIds);
+  const token = req.query.token as string;
+  const response = adminQuizEmptyTrash(token, numberQuizIds);
 
-  if ('error' in response) {
-    if (response.error === 'One or more of the Quiz IDs is not currently in the trash.') {
-      return res.status(400).json(response);
-    } else if (response.error === 'Token is empty or invalid.') {
-      return res.status(401).json(response);
-    } else {
-      return res.status(403).json(response);
-    }
-  }
+  res.json(response);
+});
+
+app.delete('/v2/admin/quiz/trash/empty', (req: Request, res: Response) => {
+  const quizIds = req.query.quizIds as string[];
+  const numberQuizIds = quizIds.map(id => parseInt(id));
+  const token = req.headers.token as string;
+
+  const response = adminQuizEmptyTrash(token, numberQuizIds);
+
   res.json(response);
 });
 
 app.get('/v1/admin/quiz/list', (req: Request, res: Response) => {
   const response = adminQuizList(req.query.token as string);
 
-  if ('error' in response) {
-    return res.status(401).json(response);
-  }
+  res.json(response);
+});
+
+app.get('/v2/admin/quiz/list', (req: Request, res: Response) => {
+  const token = req.headers.token as string;
+  const response = adminQuizList(token);
+
   res.json(response);
 });
 
 app.get('/v1/admin/quiz/:quizid', (req: Request, res: Response) => {
   const response = adminQuizInfo(req.query.token as string, parseInt(req.params.quizid));
 
-  if ('error' in response) {
-    if (response.error === 'Token is empty or invalid.') {
-      return res.status(401).json(response);
-    } else if (response.error === 'Quiz ID does not refer to a valid quiz.' ||
-            response.error === 'Quiz ID does not refer to a quiz that this user owns.') {
-      return res.status(403).json(response);
-    }
-  }
+  res.json(response);
+});
+
+app.get('/v2/admin/quiz/:quizid', (req: Request, res: Response) => {
+  const token = req.headers.token as string;
+  const response = adminQuizInfo(token, parseInt(req.params.quizid));
+
   res.json(response);
 });
 
 app.put('/v1/admin/quiz/:quizid/description', (req: Request, res: Response) => {
   const { token, description } = req.body;
   const response = adminQuizDescriptionUpdate(token, parseInt(req.params.quizid), description);
-  if ('error' in response) {
-    if (response.error === 'Quiz ID does not refer to a valid quiz.' ||
-     response.error === 'Quiz ID does not refer to a quiz that this user owns.') {
-      return res.status(403).json(response);
-    } else if (response.error === 'Token is empty or invalid') {
-      return res.status(401).json(response);
-    } else {
-      return res.status(400).json(response);
-    }
-  }
-  return res.status(200).json({});
+
+  res.json(response);
+});
+
+app.put('/v2/admin/quiz/:quizid/description', (req: Request, res: Response) => {
+  const { description } = req.body;
+  const token = req.headers.token as string;
+  const response = adminQuizDescriptionUpdate(token, parseInt(req.params.quizid), description);
+
+  res.json(response);
 });
 
 app.put('/v1/admin/quiz/:quizid/name', (req: Request, res: Response) => {
   const { token, name } = req.body;
   const response = adminQuizNameUpdate(token, parseInt(req.params.quizid), name);
 
-  if ('error' in response) {
-    if (response.error === 'Quiz ID does not refer to a valid quiz.' ||
-     response.error === 'Quiz ID does not refer to a quiz that this user owns.') {
-      return res.status(403).json(response);
-    } else if (response.error === 'Token is empty or invalid.') {
-      return res.status(401).json(response);
-    } else {
-      return res.status(400).json(response);
-    }
-  }
+  res.json(response);
+});
 
-  return res.status(200).json({});
+app.put('/v2/admin/quiz/:quizid/name', (req: Request, res: Response) => {
+  const { name } = req.body;
+  const token = req.headers.token as string;
+  const response = adminQuizNameUpdate(token, parseInt(req.params.quizid), name);
+
+  res.json(response);
+});
+
+app.put('/v1/admin/quiz/:quizid/thumbnail', (req: Request, res: Response) => {
+  const { imgUrl } = req.body;
+  const token = req.headers.token as string;
+  const response = adminQuizThumbnailUpdate(token, parseInt(req.params.quizid), imgUrl);
+
+  res.json(response);
 });
 
 app.post('/v1/admin/quiz/:quizid/restore', (req: Request, res: Response) => {
@@ -278,18 +278,16 @@ app.put('/v1/admin/quiz/:quizid/question/:questionid/move', (req: Request, res: 
 
 app.put('/v1/admin/quiz/:quizid/question/:questionid', (req: Request, res: Response) => {
   const { token, questionBody } = req.body;
-  const response = adminQuizQuestionUpdate(token, parseInt(req.params.quizid), parseInt(req.params.questionid), questionBody);
+  const response = adminQuizQuestionUpdate(token, parseInt(req.params.quizid), parseInt(req.params.questionid), questionBody, 1);
 
-  if ('error' in response) {
-    if (response.error === 'Token is empty or invalid.') {
-      return res.status(401).json(response);
-    } else if (response.error === 'Quiz ID does not refer to a valid quiz.' ||
-            response.error === 'Quiz ID does not refer to a quiz that this user owns.') {
-      return res.status(403).json(response);
-    } else {
-      return res.status(400).json(response);
-    }
-  }
+  res.json(response);
+});
+
+app.put('/v2/admin/quiz/:quizid/question/:questionid', (req: Request, res: Response) => {
+  const { questionBody } = req.body;
+  const token = req.headers.token as string;
+  const response = adminQuizQuestionUpdate(token, parseInt(req.params.quizid), parseInt(req.params.questionid), questionBody, 2);
+
   res.json(response);
 });
 
@@ -310,18 +308,17 @@ app.delete('/v1/admin/quiz/:quizid/question/:questionid', (req: Request, res: Re
 
 app.post('/v1/admin/quiz/:quizid/transfer', (req: Request, res: Response) => {
   const { token, userEmail } = req.body;
-  const response = adminQuizTransfer(token, parseInt(req.params.quizid), userEmail);
+  const response = adminQuizTransfer(token, parseInt(req.params.quizid), userEmail, 1);
 
-  if ('error' in response) {
-    if (response.error === 'Token is empty or invalid.') {
-      return res.status(401).json(response);
-    } else if (response.error === 'Quiz ID does not refer to a valid quiz.' ||
-            response.error === 'Quiz ID does not refer to a quiz that this user owns.') {
-      return res.status(403).json(response);
-    } else {
-      return res.status(400).json(response);
-    }
-  }
+  res.json(response);
+});
+
+app.post('/v2/admin/quiz/:quizid/transfer', (req: Request, res: Response) => {
+  const { userEmail } = req.body;
+  const token = req.headers.token as string;
+
+  const response = adminQuizTransfer(token, parseInt(req.params.quizid), userEmail, 2);
+
   res.json(response);
 });
 

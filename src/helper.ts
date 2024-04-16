@@ -175,7 +175,6 @@ export function setHash(password: string): string {
 export function validQuizId(quizid: number, user: User, data: DataStore): ErrorObject | object {
   const quizIndex = data.quizzes.findIndex(quizzes => quizzes.quizId === quizid);
   const trashedQuizIndex = data.trash.findIndex(quizzes => quizzes.quizId === quizid);
-
   if (quizIndex === -1 && trashedQuizIndex === -1) { throw httpError(403, 'Quiz ID does not refer to a valid quiz.'); }
 
   if (!user.ownedQuizzes.includes(quizid)) { throw httpError(403, 'Quiz ID does not refer to a quiz that this user owns.'); }
@@ -247,16 +246,45 @@ export function setupAnswers(newQuestion: Question, questionBody: QuestionBody):
   *
   * @returns { object } - Returns object if passes validation.
 */
-export function validateThumbnail(questionBody: QuestionBody): object {
+export function validateThumbnail(thumbnailUrl: string): object {
   const fileExtensionRegex = /\.(jpg|jpeg|png)$/i;
   switch (true) {
-    case questionBody.thumbnailUrl === '':
+    case thumbnailUrl === '':
       throw httpError(400, 'The thumbnailUrl is an empty string.');
-    case !questionBody.thumbnailUrl.startsWith('http://') && !questionBody.thumbnailUrl.startsWith('https://'):
+    case !thumbnailUrl.startsWith('http://') && !thumbnailUrl.startsWith('https://'):
       throw httpError(400, "The thumbnailUrl does not begin with 'http://' or 'https://'.");
-    case !fileExtensionRegex.test(questionBody.thumbnailUrl):
+    case !fileExtensionRegex.test(thumbnailUrl):
       throw httpError(400, 'The thumbnailUrl does not end with one of the following filetypes (case insensitive): jpg, jpeg, png.');
     default:
       return { };
   }
+}
+
+/**
+  * Updates the question values
+  *
+  * @param {Question} question - Question to be modified
+  * @param {QuestionBody} questionBody - Body Passed in
+  * @param {number} version - Version of endpoint
+  *
+  * @returns { object } - Returns object if passes validation.
+*/
+export function updateQuestion(question: Question, questionBody: QuestionBody, version: number): object {
+  question.question = questionBody.question;
+  question.duration = questionBody.duration;
+  question.points = questionBody.points;
+  question.answers = [];
+  for (const [index, answer] of questionBody.answers.entries()) {
+    const newAnswer: Answer = {
+      answerId: index,
+      answer: answer.answer,
+      colour: getColour(),
+      correct: answer.correct
+    };
+    question.answers.push(newAnswer);
+  }
+  if (version === 2) {
+    question.thumbnailUrl = questionBody.thumbnailUrl;
+  }
+  return { };
 }

@@ -1,6 +1,6 @@
 import { getData, setData } from './dataStore';
-import { type ErrorObject, type Quiz, type createQuizReturn, type QuizArray, type QuestionBody, type Question, type duplicateReturn, type Answer, type createQuestionReturn, State } from './interfaces';
-import { isError, findQuiz, getColour, validQuestion, validQuizName, validQuizId, validToken, setupAnswers, validateThumbnail } from './helper';
+import { type ErrorObject, type Quiz, type createQuizReturn, type QuizArray, type QuestionBody, type Question, type duplicateReturn, type createQuestionReturn, State } from './interfaces';
+import { isError, findQuiz, validQuestion, validQuizName, validQuizId, validToken, setupAnswers, validateThumbnail, updateQuestion } from './helper';
 import httpError from 'http-errors';
 /**
  * Given basic details about a new quiz, create one for the logged in user.
@@ -67,24 +67,13 @@ export function adminQuizCreate(token: string, name: string, description: string
 */
 export function adminQuizDescriptionUpdate(token: string, quizid: number, description: string): ErrorObject | object {
   const data = getData();
-  const quizIndex = data.quizzes.findIndex(quizzes => quizzes.quizId === quizid);
   const checkToken = validToken(token);
 
-  // 401 error
-  if (isError(checkToken)) {
-    return { error: 'Token is empty or invalid' };
-  }
+  validQuizId(quizid, checkToken, data);
 
-  // 400 error
-  if (description.length > 100) { return { error: 'Description must be less than 100 characters.' }; }
+  if (description.length > 100) { throw httpError(400, 'Description must be less than 100 characters.'); }
 
-  // 403 error
-  if (quizIndex === -1) { return { error: 'Quiz ID does not refer to a valid quiz.' }; }
-
-  // 403 error
-  if (!checkToken.ownedQuizzes.includes(quizid)) { return { error: 'Quiz ID does not refer to a quiz that this user owns.' }; }
-
-  data.quizzes[quizIndex].description = description;
+  data.quizzes.find(quiz => quiz.quizId === quizid).description = description;
   setData(data);
   return { };
 }
@@ -103,24 +92,12 @@ export function adminQuizDescriptionUpdate(token: string, quizid: number, descri
  * @return {QuizArray} - returns an array of quizzes
  */
 
-export function adminQuizInfo(token: string, quizid: number): object | ErrorObject {
+export function adminQuizInfo(token: string, quizid: number) {
   const data = getData();
 
   const checkToken = validToken(token);
 
-  if (isError(checkToken)) {
-    return {
-      error: checkToken.error
-    };
-  }
-
-  const checkQuizId = validQuizId(quizid, checkToken, data);
-
-  if (isError(checkQuizId)) {
-    return {
-      error: checkQuizId.error
-    };
-  }
+  validQuizId(quizid, checkToken, data);
 
   const quiz = findQuiz(quizid, data);
   const validQuiz = quiz as Quiz;
@@ -133,27 +110,52 @@ export function adminQuizInfo(token: string, quizid: number): object | ErrorObje
       correct: answer.correct
     }));
 
-    return {
-      questionId: question.questionId,
-      question: question.question,
-      duration: question.duration,
-      points: question.points,
-      answers: answers
-    };
+    if (validQuiz.thumbnailUrl) {
+      return {
+        questionId: question.questionId,
+        question: question.question,
+        duration: question.duration,
+        thumbnailUrl: validQuiz.thumbnailUrl,
+        points: question.points,
+        answers: answers
+      };
+    } else {
+      return {
+        questionId: question.questionId,
+        question: question.question,
+        duration: question.duration,
+        points: question.points,
+        answers: answers
+      };
+    }
   });
 
   const totalDuration = validQuiz.questions.reduce((acc, question) => acc + question.duration, 0);
 
-  return {
-    quizId: validQuiz.quizId,
-    name: validQuiz.name,
-    timeCreated: validQuiz.timeCreated,
-    timeLastEdited: validQuiz.timeLastEdited,
-    description: validQuiz.description,
-    numQuestions: validQuiz.questions.length,
-    questions: questionsWithAnswers,
-    duration: totalDuration,
-  };
+  if (validQuiz.thumbnailUrl) {
+    return {
+      quizId: validQuiz.quizId,
+      name: validQuiz.name,
+      timeCreated: validQuiz.timeCreated,
+      timeLastEdited: validQuiz.timeLastEdited,
+      description: validQuiz.description,
+      numQuestions: validQuiz.questions.length,
+      questions: questionsWithAnswers,
+      duration: totalDuration,
+      thumbnailUrl: validQuiz.thumbnailUrl,
+    };
+  } else {
+    return {
+      quizId: validQuiz.quizId,
+      name: validQuiz.name,
+      timeCreated: validQuiz.timeCreated,
+      timeLastEdited: validQuiz.timeLastEdited,
+      description: validQuiz.description,
+      numQuestions: validQuiz.questions.length,
+      questions: questionsWithAnswers,
+      duration: totalDuration,
+    };
+  }
 }
 
 /**
@@ -168,15 +170,10 @@ export function adminQuizInfo(token: string, quizid: number): object | ErrorObje
  * @return {QuizArray} - returns an array of quizzes in the list;
  */
 
-export function adminQuizList(token: string): ErrorObject | QuizArray {
+export function adminQuizList(token: string): QuizArray {
   const data = getData();
 
   const checkToken = validToken(token);
-  if (isError(checkToken)) {
-    return {
-      error: checkToken.error
-    };
-  }
 
   const ownedQuizzes = checkToken.ownedQuizzes;
   const quizInTrash = data.trash;
@@ -222,33 +219,18 @@ export function adminQuizList(token: string): ErrorObject | QuizArray {
 
 export function adminQuizNameUpdate(token: string, quizid: number, name: string): ErrorObject | object {
   const data = getData();
-  const quizIndex = data.quizzes.findIndex(quizzes => quizzes.quizId === quizid);
   const checkToken = validToken(token);
 
-  // 401 error
-  if (isError(checkToken)) {
-    return { error: 'Token is empty or invalid.' };
-  }
+  validQuizId(quizid, checkToken, data);
+  validQuizName(name);
 
-  // 400 error
-  const checkQuizName = validQuizName(name);
-  if (isError(checkQuizName)) {
-    return { error: 'Quiz name is not valid.' };
-  }
-
-  // 400 error
   const existingQuiz = data.quizzes.find(quiz => quiz.name === name);
   if (existingQuiz) {
-    if (checkToken.ownedQuizzes.find(quiz => quiz === existingQuiz.quizId)) { return { error: 'Name is already used by the current logged in user for another quiz.' }; }
+    if (checkToken.ownedQuizzes.find(quiz => quiz === existingQuiz.quizId)) {
+      throw httpError(400, 'Name is already used by the current logged in user for another quiz.');
+    }
   }
-
-  // 403 error
-  if (quizIndex === -1) { return { error: 'Quiz ID does not refer to a valid quiz.' }; }
-
-  // 403 error
-  if (!checkToken.ownedQuizzes.includes(quizid)) { return { error: 'Quiz ID does not refer to a quiz that this user owns.' }; }
-
-  data.quizzes[quizIndex].name = name;
+  data.quizzes.find(quiz => quiz.quizId === quizid).name = name;
   setData(data);
   return { };
 }
@@ -294,7 +276,7 @@ export function adminQuizQuestionCreate(token: string, quizid: number, questionB
       setData(data);
       return { questionId: newQuestion.questionId };
     } else {
-      validateThumbnail(questionBody);
+      validateThumbnail(questionBody.thumbnailUrl);
 
       let newQuestion: Question = {
         questionId: validQuiz.questionCounter,
@@ -539,62 +521,25 @@ export function adminQuizSession(token: string, quizid: number, autoStartNum: nu
   * @returns { { error: }  } - Returns object when conditions fail
   * @returns { object } - returns an empty object question is updated.
 */
-export function adminQuizQuestionUpdate(token: string, quizid: number, questionid: number, questionBody: QuestionBody): object | ErrorObject {
+export function adminQuizQuestionUpdate(token: string, quizid: number, questionid: number, questionBody: QuestionBody, version: number): object {
   const data = getData();
   const checkToken = validToken(token);
 
-  if (isError(checkToken)) {
-    return { error: 'Token is empty or invalid.' };
-  }
-
-  const checkQuizId = validQuizId(quizid, checkToken, data);
-
-  if (isError(checkQuizId)) {
-    return {
-      error: checkQuizId.error
-    };
-  }
+  validQuizId(quizid, checkToken, data);
 
   const quiz = findQuiz(quizid, data);
 
   if (quiz != null) {
-    const checkQuestion = validQuestion(questionBody, quiz as Quiz);
-    if (isError(checkQuestion)) {
-      return {
-        error: checkQuestion.error
-      };
-    }
+    validQuestion(questionBody, quiz as Quiz);
     const validQuiz = quiz as Quiz;
-    let checkValidQuestion = false;
-    for (const question of validQuiz.questions) {
-      if (question.questionId === questionid) {
-        checkValidQuestion = true;
-        question.question = questionBody.question;
-        question.duration = questionBody.duration;
-        question.points = questionBody.points;
-        question.answers = [];
-        for (const [index, answer] of questionBody.answers.entries()) {
-          const newAnswer: Answer = {
-            answerId: index,
-            answer: answer.answer,
-            colour: getColour(),
-            correct: answer.correct
-          };
-          question.answers.push(newAnswer);
-        }
-      }
+    const question = validQuiz.questions.find(question => question.questionId === questionid);
+    if (!question) {
+      throw httpError(400, 'Question Id does not refer to a valid question within this quiz.');
     }
-
-    if (!checkValidQuestion) {
-      return {
-        error: 'Question Id does not refer to a valid question within this quiz'
-      };
-    }
+    updateQuestion(question, questionBody, version);
 
     validQuiz.timeLastEdited = Date.now();
-
     setData(data);
-
     return { };
   }
 }
@@ -650,8 +595,6 @@ export function adminQuizRemove(token: string, quizid: number): object | ErrorOb
  * @param {number} quizid - relevant quizID
  * @param {string} userEmail - Email of user to be transferred
  *
- * @returns {ErrorObject} - returns error object based on following conditions:
- *
  * userEmail is not a real user
  * userEmail is the current logged in user
  * Quiz ID refers to a quiz that has a name that is already used by the target user
@@ -661,22 +604,16 @@ export function adminQuizRemove(token: string, quizid: number): object | ErrorOb
  * @returns {object} - returns an empty object when a quiz is transferred
  */
 
-export function adminQuizTransfer(token: string, quizid: number, userEmail: string): object | ErrorObject {
+export function adminQuizTransfer(token: string, quizid: number, userEmail: string, version: number): object {
   const data = getData();
   const user = data.users.find(users => users.email === userEmail);
   const checkToken = validToken(token);
 
-  if (isError(checkToken)) {
-    return {
-      error: checkToken.error
-    };
-  }
-
   if (!user) {
-    return { error: 'userEmail is not a real user.' };
+    throw httpError(400, 'userEmail is not a real user.');
   }
 
-  if (userEmail === checkToken.email) { return { error: 'userEmail is the current logged in user' }; }
+  if (userEmail === checkToken.email) { throw httpError(400, 'userEmail is the current logged in user'); }
 
   const tokenQuiz = findQuiz(checkToken.userId, data);
 
@@ -685,17 +622,15 @@ export function adminQuizTransfer(token: string, quizid: number, userEmail: stri
     const userQuiz = findQuiz(ownedQuiz, data);
     if (tokenQuiz != null && userQuiz != null) {
       if ((tokenQuiz as Quiz).name === (userQuiz as Quiz).name) {
-        return { error: 'Quiz ID refers to a quiz that has a name that is already used by the target user.' };
+        throw httpError(400, 'Quiz ID refers to a quiz that has a name that is already used by the target user.');
       }
     }
   }
 
-  const checkQuizId = validQuizId(quizid, checkToken, data);
+  validQuizId(quizid, checkToken, data);
 
-  if (isError(checkQuizId)) {
-    return {
-      error: checkQuizId.error
-    };
+  if (data.sessions.find(sessions => sessions.state !== State.END && sessions.metadata.quizId === quizid)) {
+    throw httpError(400, 'All sessions assosciated to the quiz must not be active to transfer.');
   }
 
   user.ownedQuizzes.push(quizid);
@@ -729,37 +664,20 @@ export function adminQuizEmptyTrash(token: string, quizids: number[]): object | 
 
   const checkToken = validToken(token);
 
-  if (isError(checkToken)) {
-    return {
-      error: checkToken.error
-    };
-  }
   for (const quizInTrash of data.trash) {
     const searchTrash = quizids.find(quizid => quizid === quizInTrash.quizId);
     if (!searchTrash) {
-      return {
-        error: 'One or more of the Quiz IDs is not currently in the trash.'
-      };
+      throw httpError(400, 'One or more of the Quiz IDs is not currently in the trash.');
     }
   }
 
-  for (const ownedQuiz of checkToken.ownedQuizzes) {
-    const searchOwnedQuizzes = quizids.find(quiz => quiz === ownedQuiz);
-
-    if (!searchOwnedQuizzes) {
-      return {
-        error: 'Valid token is provided, but one or more of the Quiz IDs refers to a quiz that this current user does not own.'
-      };
-    }
+  for (const quiz of quizids) {
+    validQuizId(quiz, checkToken, data);
   }
+  const filteredTrash = data.trash.filter(trashedQuiz => !quizids.includes(trashedQuiz.quizId));
+  data.trash = filteredTrash;
+  setData(data);
 
-  for (const quizid of quizids) {
-    const removedTrash = data.trash.findIndex(trashedQuiz => trashedQuiz.quizId === quizid);
-
-    if (removedTrash) {
-      data.quizzes.splice(removedTrash, 1);
-    }
-  }
   return {};
 }
 
@@ -854,4 +772,20 @@ export function adminQuizViewTrash(token: string): ErrorObject | QuizArray {
   return {
     quizzes: foundTrash
   };
+}
+
+export function adminQuizThumbnailUpdate(token: string, quizid: number, imgUrl: string): object {
+  const data = getData();
+
+  const checkToken = validToken(token);
+  validQuizId(quizid, checkToken, data);
+  validateThumbnail(imgUrl);
+
+  const quiz = data.quizzes.find(quiz => quiz.quizId === quizid);
+
+  quiz.thumbnailUrl = imgUrl;
+  quiz.timeLastEdited = Date.now();
+
+  setData(data);
+  return { };
 }

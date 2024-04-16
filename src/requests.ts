@@ -154,28 +154,52 @@ export const v2RequestAdminQuizCreate = (token: string, name:string, description
     { name: name, description: description }, { token });
 };
 
-export const requestAdminQuizDescriptionUpdate = (token: string, quizid: number, description: string) => {
-  return oldRequestHelper('PUT',
+export const v1RequestAdminQuizDescriptionUpdate = (token: string, quizid: number, description: string) => {
+  return requestHelper('PUT',
     `/v1/admin/quiz/${quizid}/description`,
-    { token: token, quizid: quizid, description: description });
+    { token: token, description: description });
 };
 
-export const requestAdminQuizInfo = (token: string, quizid: number) => {
-  return oldRequestHelper('GET',
+export const v2RequestAdminQuizDescriptionUpdate = (token: string, quizid: number, newDescription: string) => {
+  return requestHelper('PUT',
+    `/v2/admin/quiz/${quizid}/description`,
+    { description: newDescription }, { token });
+};
+
+export const v1RequestAdminQuizInfo = (token: string, quizid: number) => {
+  return requestHelper('GET',
     `/v1/admin/quiz/${quizid}`,
     { token: token });
 };
 
-export const requestAdminQuizList = (token: string) => {
-  return oldRequestHelper('GET',
+export const v2RequestAdminQuizInfo = (token: string, quizid: number) => {
+  return requestHelper('GET',
+    `/v2/admin/quiz/${quizid}`,
+    { }, { token });
+};
+
+export const v1RequestAdminQuizList = (token: string) => {
+  return requestHelper('GET',
     '/v1/admin/quiz/list',
     { token: token });
 };
 
-export const requestAdminQuizNameUpdate = (token: string, quizid: number, newName: string) => {
-  return oldRequestHelper('PUT',
+export const v2RequestAdminQuizList = (token: string) => {
+  return requestHelper('GET',
+    '/v2/admin/quiz/list',
+    { }, { token });
+};
+
+export const v1RequestAdminQuizNameUpdate = (token: string, quizid: number, newName: string) => {
+  return requestHelper('PUT',
     `/v1/admin/quiz/${quizid}/name`,
     { token: token, name: newName });
+};
+
+export const v2RequestAdminQuizNameUpdate = (token: string, quizid: number, newName: string) => {
+  return requestHelper('PUT',
+    `/v2/admin/quiz/${quizid}/name`,
+    { name: newName }, { token });
 };
 
 export const v1RequestAdminQuizRemove = (token: string, quizid: number) => {
@@ -184,11 +208,11 @@ export const v1RequestAdminQuizRemove = (token: string, quizid: number) => {
     { token: token });
 };
 
-// export const v2requestAdminQuizRemove = (token: string, quizid: number) => {
-//   return oldRequestHelper('DELETE',
-//     `/v1/admin/quiz/${quizid}`,
-//     { token: token });
-// };
+export const v2RequestAdminQuizRemove = (token: string, quizid: number) => {
+  return oldRequestHelper('DELETE',
+    `/v1/admin/quiz/${quizid}`,
+    { token: token });
+};
 
 export const v1RequestAdminQuizQuestionCreate = (token: string, quizid: number, questionBody: QuestionBody) => {
   return requestHelper('POST',
@@ -214,10 +238,16 @@ export const requestAdminQuizQuestionDelete = (token: string, quizid: number, qu
     { token: token });
 };
 
-export const requestAdminQuizQuestionUpdate = (token: string, quizid: number, questionid: number, questionBody: QuestionBody) => {
-  return oldRequestHelper('PUT',
+export const v1RequestAdminQuizQuestionUpdate = (token: string, quizid: number, questionid: number, questionBody: QuestionBody) => {
+  return requestHelper('PUT',
     `/v1/admin/quiz/${quizid}/question/${questionid}`,
     { token: token, questionBody: questionBody });
+};
+
+export const v2RequestAdminQuizQuestionUpdate = (token: string, quizid: number, questionid: number, questionBody: QuestionBody) => {
+  return requestHelper('PUT',
+    `/v2/admin/quiz/${quizid}/question/${questionid}`,
+    { questionBody: questionBody }, { token });
 };
 
 export const requestAdminQuizQuestionMove = (token: string, quizid: number, questionid: number, newPosition: number) => {
@@ -226,16 +256,28 @@ export const requestAdminQuizQuestionMove = (token: string, quizid: number, ques
     { token: token, newPosition: newPosition });
 };
 
-export const requestAdminQuizTransfer = (token: string, quizid: number, userEmail: string) => {
-  return oldRequestHelper('POST',
+export const v1RequestAdminQuizTransfer = (token: string, quizid: number, userEmail: string) => {
+  return requestHelper('POST',
     `/v1/admin/quiz/${quizid}/transfer`,
     { token: token, userEmail: userEmail });
 };
 
-export const requestAdminQuizTrashEmpty = (token: string, quizids: number[]) => {
-  return oldRequestHelper('DELETE',
+export const v2RequestAdminQuizTransfer = (token: string, quizid: number, userEmail: string) => {
+  return requestHelper('POST',
+    `/v2/admin/quiz/${quizid}/transfer`,
+    { userEmail: userEmail }, { token });
+};
+
+export const v1RequestAdminQuizTrashEmpty = (token: string, quizids: number[]) => {
+  return requestHelper('DELETE',
     '/v1/admin/quiz/trash/empty',
     { token: token, quizIds: quizids });
+};
+
+export const v2RequestAdminQuizTrashEmpty = (token: string, quizids: number[]) => {
+  return requestHelper('DELETE',
+    '/v2/admin/quiz/trash/empty',
+    { quizIds: quizids }, { token });
 };
 
 export const v1RequestAdminUserDetails = (token: string) => {
@@ -278,6 +320,12 @@ export const requestAdminQuizViewTrash = (token: string) => {
   return oldRequestHelper('GET',
     '/v1/admin/quiz/trash',
     { token: token });
+};
+
+export const v1RequestAdminQuizThumbnailUpdate = (token: string, quizid: number, imgUrl: string) => {
+  return requestHelper('PUT',
+    `/v1/admin/quiz/${quizid}/thumbnail`,
+    { imgUrl: imgUrl }, { token });
 };
 
 export const requestClear = () => {
