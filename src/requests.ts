@@ -280,6 +280,12 @@ export const requestAdminQuizViewTrash = (token: string) => {
     { token: token });
 };
 
+export const v1RequestAdminQuizThumbnailUpdate = (token: string, quizid: number, thumbnail: string) => {
+  return requestHelper('PUT',
+    `/v1/admin/quiz/${quizid}/thumbnail`,
+    {quizid: quizid}, {});
+}
+
 export const requestClear = () => {
   return oldRequestHelper('DELETE', '/v1/clear');
 };

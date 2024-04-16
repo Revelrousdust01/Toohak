@@ -4,7 +4,7 @@ import {
   requestAdminQuizList, requestAdminQuizNameUpdate, requestAdminQuizRemove,
   v1RequestAdminQuizQuestionCreate, v2RequestAdminQuizQuestionCreate, requestAdminQuizQuestionMove, requestAdminQuizQuestionUpdate,
   v1RequestAdminQuizTransfer, v2RequestAdminQuizTransfer, requestAdminQuizTrashEmpty, requestAdminQuizQuestionDuplicate,
-  requestAdminQuizInfo, requestAdminQuizQuestionDelete, requestClear, v1RequestAdminQuizSession
+  requestAdminQuizInfo, requestAdminQuizQuestionDelete, requestClear, v1RequestAdminQuizSession, v1RequestAdminQuizThumbnailUpdate
 } from './requests';
 import { ErrorObject, QuestionBody } from './interfaces';
 import HTTPError from 'http-errors';
@@ -1778,4 +1778,48 @@ describe('V1 - Test adminQuizSession', () => {
     requestAdminQuizRemove(register.token as string, quiz.quizId as number);
     expect(() => v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum)).toThrow(HTTPError[400]);
   });
+});
+
+describe('V1 - Test adminQuizThumbnailUpdate', () => {
+  const firstName = 'Christian';
+  const lastName = 'Politis';
+  const email = 'cpolitis@student.unsw.edu.au';
+  const password = 'a1b2c3d4e5f6';
+  const quizName = 'New Quiz';
+  const quizDescription = 'This is a new quiz';
+  const thumbnailUrl = 'http://google.com/some/image/path.jpg'
+
+  test('Valid inputs', () => {
+    const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quiz = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
+    expect(v1RequestAdminQuizThumbnailUpdate(registered.token, quiz.quizid, thumbnailUrl)).toMatchObject({ });
+  });
+
+  test.each([
+    { invalidToken: '' },
+    { invalidToken: '123' },
+    { invalidToken: 'b77d409a-10cd-4a47-8e94-b0cd0ab50aa1' },
+    { invalidToken: 'abc' },
+  ])("Invalid Token: '$invalidToken", ({ invalidToken }) => {
+    v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    expect(() => v1RequestAdminQuizCreate(invalidToken, quizName, quizDescription)).toThrow(HTTPError[401]);
+  });
+
+  test('QuizId does not refer to a quiz that this user owns', () => {
+    const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const newQuiz = v1RequestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
+    const user2 = v1RequestAdminAuthRegister('bob.smith@gmail.com', 'a1234567', 'Smith', 'Bob');
+    expect(() => v1RequestAdminQuizThumbnailUpdate(user2.token, newQuiz.quizId, thumbnailUrl)).toThrow(HTTPError[403]);
+  });
+
+  test.each([
+    { invalidUrl: '' },
+    { invalidUrl: 'http://google.com/some/image/' },
+    { invalidUrl: 'google.com/some/image/path.jpg' },
+  ])("Invalid Url: '$invalidUrl'", ({ invalidUrl }) => {
+    const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const newQuiz = v2RequestAdminQuizCreate(user.token as string, quizName, quizDescription);
+    expect(() => v1RequestAdminQuizThumbnailUpdate(user.token, newQuiz.quizId, invalidUrl)).toThrow(HTTPError[400]);
+  });
+
 });
