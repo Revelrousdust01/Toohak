@@ -3,7 +3,7 @@ import {
   requestAdminQuizViewTrash, requestAdminQuizRestore, requestAdminQuizDescriptionUpdate,
   requestAdminQuizList, requestAdminQuizNameUpdate, requestAdminQuizRemove,
   v1RequestAdminQuizQuestionCreate, v2RequestAdminQuizQuestionCreate, requestAdminQuizQuestionMove, requestAdminQuizQuestionUpdate,
-  v1RequestAdminQuizTransfer, v2RequestAdminQuizTransfer, requestAdminQuizTrashEmpty, requestAdminQuizQuestionDuplicate,
+  v1RequestAdminQuizTransfer, v2RequestAdminQuizTransfer, v1RequestAdminQuizTrashEmpty, v2RequestAdminQuizTrashEmpty,requestAdminQuizQuestionDuplicate,
   requestAdminQuizInfo, requestAdminQuizQuestionDelete, requestClear, v1RequestAdminQuizSession
 } from './requests';
 import { ErrorObject, QuestionBody } from './interfaces';
@@ -1632,7 +1632,7 @@ describe.skip('adminQuizViewTrash', () => {
 });
 
 // adminQuizTrashEmpty
-describe.skip('Test adminQuizTrashEmpty', () => {
+describe('V1 - Test adminQuizTrashEmpty', () => {
   const firstName = 'Christian';
   const lastName = 'Politis';
   const email = 'cpolitis@student.unsw.edu.au';
@@ -1642,13 +1642,11 @@ describe.skip('Test adminQuizTrashEmpty', () => {
 
   test('Valid inputs', () => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const quiz1 = v1RequestAdminQuizCreate(register.jsonBody.token as string, quizName, quizDescription);
-    const quiz2 = v1RequestAdminQuizCreate(register.jsonBody.token as string, 'Special quiz name', quizDescription);
-    requestAdminQuizRemove(register.jsonBody.token as string, quiz1.jsonBody.quizId as number);
-    requestAdminQuizRemove(register.jsonBody.token as string, quiz2.jsonBody.quizId as number);
-    const response = requestAdminQuizTrashEmpty(register.jsonBody.token as string, [quiz1.jsonBody.quizId as number, quiz2.jsonBody.quizId as number]);
-    expect(response.jsonBody).toStrictEqual({});
-    expect(response.statusCode).toStrictEqual(200);
+    const quiz1 = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
+    const quiz2 = v1RequestAdminQuizCreate(register.token as string, 'Special quiz name', quizDescription);
+    requestAdminQuizRemove(register.token as string, quiz1.quizId as number);
+    requestAdminQuizRemove(register.token as string, quiz2.quizId as number);
+    expect(v1RequestAdminQuizTrashEmpty(register.token as string, [quiz1.quizId as number, quiz2.quizId as number])).toMatchObject({ });
   });
 
   test.each([
@@ -1657,13 +1655,11 @@ describe.skip('Test adminQuizTrashEmpty', () => {
     { invalidQuizIds: [150, 250] },
   ])("QuizId does not refer to valid quiz: '$invalidQuizIds'", ({ invalidQuizIds }) => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const quiz1 = v1RequestAdminQuizCreate(register.jsonBody.token as string, quizName, quizDescription);
-    const quiz2 = v1RequestAdminQuizCreate(register.jsonBody.token as string, 'Special quiz name', quizDescription);
-    requestAdminQuizRemove(register.jsonBody.token as string, quiz1.jsonBody.quizId as number);
-    requestAdminQuizRemove(register.jsonBody.token as string, quiz2.jsonBody.quizId as number);
-    const response = requestAdminQuizTrashEmpty(register.jsonBody.token as string, invalidQuizIds);
-    expect(response.jsonBody).toStrictEqual(ERROR);
-    expect(response.statusCode).toStrictEqual(400);
+    const quiz1 = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
+    const quiz2 = v1RequestAdminQuizCreate(register.token as string, 'Special quiz name', quizDescription);
+    requestAdminQuizRemove(register.token as string, quiz1.quizId as number);
+    requestAdminQuizRemove(register.token as string, quiz2.quizId as number);
+    expect(() => v1RequestAdminQuizTrashEmpty(register.token as string, invalidQuizIds)).toThrow(HTTPError[400]);
   });
 
   test.each([
@@ -1673,27 +1669,80 @@ describe.skip('Test adminQuizTrashEmpty', () => {
     { invalidToken: 'abc' },
   ])("Invalid Token: '$invalidToken", ({ invalidToken }) => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const quiz1 = v1RequestAdminQuizCreate(register.jsonBody.token as string, quizName, quizDescription);
-    const quiz2 = v1RequestAdminQuizCreate(register.jsonBody.token as string, 'Special quiz name', quizDescription);
-    requestAdminQuizRemove(register.jsonBody.token as string, quiz1.jsonBody.quizId as number);
-    requestAdminQuizRemove(register.jsonBody.token as string, quiz2.jsonBody.quizId as number);
-    const response = requestAdminQuizTrashEmpty(invalidToken, [quiz1.jsonBody.quizId as number, quiz2.jsonBody.quizId as number]);
-    expect(response.jsonBody).toStrictEqual(ERROR);
-    expect(response.statusCode).toStrictEqual(401);
+    const quiz1 = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
+    const quiz2 = v1RequestAdminQuizCreate(register.token as string, 'Special quiz name', quizDescription);
+    requestAdminQuizRemove(register.token as string, quiz1.quizId as number);
+    requestAdminQuizRemove(register.token as string, quiz2.quizId as number);
+    expect(() => v1RequestAdminQuizTrashEmpty(invalidToken, [quiz1.quizId as number, quiz2.quizId as number])).toThrow(HTTPError[401]);
   });
 
   test('QuizId does not refer to valid quiz', () => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    v1RequestAdminQuizCreate(register.jsonBody.token as string, quizName, quizDescription);
-    v1RequestAdminQuizCreate(register.jsonBody.token as string, 'Special quiz name', quizDescription);
+    v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
+    v1RequestAdminQuizCreate(register.token as string, 'Special quiz name', quizDescription);
     v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const quiz3 = v1RequestAdminQuizCreate(register.jsonBody.token as string, quizName, quizDescription);
-    const quiz4 = v1RequestAdminQuizCreate(register.jsonBody.token as string, 'Special quiz name', quizDescription);
-    requestAdminQuizRemove(register.jsonBody.token as string, quiz3.jsonBody.quizId as number);
-    requestAdminQuizRemove(register.jsonBody.token as string, quiz4.jsonBody.quizId as number);
-    const response = requestAdminQuizTrashEmpty(register.jsonBody.token as string, [quiz3.jsonBody.quizId as number, quiz4.jsonBody.quizId as number]);
-    expect(response.jsonBody).toStrictEqual(ERROR);
-    expect(response.statusCode).toStrictEqual(403);
+    const quiz3 = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
+    const quiz4 = v1RequestAdminQuizCreate(register.token as string, 'Special quiz name', quizDescription);
+    requestAdminQuizRemove(register.token as string, quiz3.quizId as number);
+    requestAdminQuizRemove(register.token as string, quiz4.quizId as number);
+    expect(() => v1RequestAdminQuizTrashEmpty(register.token as string, [quiz3.quizId as number, quiz4.quizId as number])).toThrow(HTTPError[403]);
+  });
+});
+
+describe('V2 - Test adminQuizTrashEmpty', () => {
+  const firstName = 'Christian';
+  const lastName = 'Politis';
+  const email = 'cpolitis@student.unsw.edu.au';
+  const password = 'a1b2c3d4e5f6';
+  const quizName = 'New Quiz';
+  const quizDescription = 'This is a new quiz';
+
+  test('Valid inputs', () => {
+    const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quiz1 = v2RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
+    const quiz2 = v2RequestAdminQuizCreate(register.token as string, 'Special quiz name', quizDescription);
+    requestAdminQuizRemove(register.token as string, quiz1.quizId as number);
+    requestAdminQuizRemove(register.token as string, quiz2.quizId as number);
+    expect(v2RequestAdminQuizTrashEmpty(register.token as string, [quiz1.quizId as number, quiz2.quizId as number])).toMatchObject({ });
+  });
+
+  test.each([
+    { invalidQuizIds: [null, 0] },
+    { invalidQuizIds: [0, null] },
+    { invalidQuizIds: [150, 250] },
+  ])("QuizId does not refer to valid quiz: '$invalidQuizIds'", ({ invalidQuizIds }) => {
+    const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quiz1 = v2RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
+    const quiz2 = v2RequestAdminQuizCreate(register.token as string, 'Special quiz name', quizDescription);
+    requestAdminQuizRemove(register.token as string, quiz1.quizId as number);
+    requestAdminQuizRemove(register.token as string, quiz2.quizId as number);
+    expect(() => v2RequestAdminQuizTrashEmpty(register.token as string, invalidQuizIds)).toThrow(HTTPError[400]);
+  });
+
+  test.each([
+    { invalidToken: '' },
+    { invalidToken: '123' },
+    { invalidToken: 'b77d409a-10cd-4a47-8e94-b0cd0ab50aa1' },
+    { invalidToken: 'abc' },
+  ])("Invalid Token: '$invalidToken", ({ invalidToken }) => {
+    const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quiz1 = v2RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
+    const quiz2 = v2RequestAdminQuizCreate(register.token as string, 'Special quiz name', quizDescription);
+    requestAdminQuizRemove(register.token as string, quiz1.quizId as number);
+    requestAdminQuizRemove(register.token as string, quiz2.quizId as number);
+    expect(() => v2RequestAdminQuizTrashEmpty(invalidToken, [quiz1.quizId as number, quiz2.quizId as number])).toThrow(HTTPError[401]);
+  });
+
+  test('QuizId does not refer to valid quiz', () => {
+    const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    v2RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
+    v2RequestAdminQuizCreate(register.token as string, 'Special quiz name', quizDescription);
+    v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quiz3 = v2RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
+    const quiz4 = v2RequestAdminQuizCreate(register.token as string, 'Special quiz name', quizDescription);
+    requestAdminQuizRemove(register.token as string, quiz3.quizId as number);
+    requestAdminQuizRemove(register.token as string, quiz4.quizId as number);
+    expect(() => v2RequestAdminQuizTrashEmpty(register.token as string, [quiz3.quizId as number, quiz4.quizId as number])).toThrow(HTTPError[403]);
   });
 });
 
