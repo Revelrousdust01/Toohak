@@ -143,7 +143,7 @@ describe('V2 - Test adminQuizCreate', () => {
 });
 
 // adminQuizDescriptionUpdate
-describe.only('V1 - Test adminQuizDescriptionUpdate', () => {
+describe('V1 - Test adminQuizDescriptionUpdate', () => {
   const firstName = 'Leon';
   const lastName = 'Sun';
   const email = 'leonsun@gmail.com';
@@ -190,6 +190,56 @@ describe.only('V1 - Test adminQuizDescriptionUpdate', () => {
     const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const newQuiz = v1RequestAdminQuizCreate(user.token, quizName, quizDescription);
     expect(() => v1RequestAdminQuizDescriptionUpdate(user.token, newQuiz.quizId, 'A'.repeat(101))).toThrow(HTTPError[400]);
+  });
+});
+
+describe('V2 - Test adminQuizDescriptionUpdate', () => {
+  const firstName = 'Leon';
+  const lastName = 'Sun';
+  const email = 'leonsun@gmail.com';
+  const password = 'qwer88888888';
+  const quizName = 'Quiz 1 Name';
+  const quizDescription = 'This is the first new quiz';
+  const newQuizDescription = 'New Quiz 1 description';
+
+  test('Working input, 0 errors expected', () => {
+    const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const newQuiz = v1RequestAdminQuizCreate(user.token, quizName, quizDescription);
+    expect(v2RequestAdminQuizDescriptionUpdate(user.token, newQuiz.quizId, newQuizDescription)).toMatchObject({});
+  });
+
+  test.each([
+    { invalidToken: '' },
+    { invalidToken: '123' },
+    { invalidToken: 'b77d409a-10cd-4a47-8e94-b0cd0ab50aa1' },
+    { invalidToken: 'abc' },
+  ])("Invalid Token: '$invalidToken", ({ invalidToken }) => {
+    const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const newQuiz = v1RequestAdminQuizCreate(user.token, quizName, quizDescription);
+    expect(() => v2RequestAdminQuizDescriptionUpdate(invalidToken, newQuiz.quizId, newQuizDescription)).toThrow(HTTPError[401]);
+  });
+
+  test.each([
+    { invalidQuizId: null },
+    { invalidQuizId: 0 },
+    { invalidQuizId: 150 },
+  ])('QuizId does not refer to valid quiz: $invalidQuizId', ({ invalidQuizId }) => {
+    const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    v1RequestAdminQuizCreate(user.token, quizName, quizDescription);
+    expect(() => v2RequestAdminQuizDescriptionUpdate(user.token, invalidQuizId, newQuizDescription)).toThrow(HTTPError[403]);
+  });
+
+  test('QuizId does not refer to a quiz that this user owns', () => {
+    const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const newQuiz = v1RequestAdminQuizCreate(user.token, quizName, quizDescription);
+    const user2 = v1RequestAdminAuthRegister('bob.smith@gmail.com', 'a1234567', 'Smith', 'Bob');
+    expect(() => v2RequestAdminQuizDescriptionUpdate(user2.token, newQuiz.quizId, newQuizDescription)).toThrow(HTTPError[403]);
+  });
+
+  test('Quiz description is greater than 100 characters', () => {
+    const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const newQuiz = v1RequestAdminQuizCreate(user.token, quizName, quizDescription);
+    expect(() => v2RequestAdminQuizDescriptionUpdate(user.token, newQuiz.quizId, 'A'.repeat(101))).toThrow(HTTPError[400]);
   });
 });
 

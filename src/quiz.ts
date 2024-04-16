@@ -71,7 +71,7 @@ export function adminQuizDescriptionUpdate(token: string, quizid: number, descri
 
   validQuizId(quizid, checkToken, data);
 
-  if (description.length > 100) { throw httpError(400, 'Description must be less than 100 characters.');}
+  if (description.length > 100) { throw httpError(400, 'Description must be less than 100 characters.'); }
 
   data.quizzes.find(quiz => quiz.quizId === quizid).description = description;
   setData(data);
