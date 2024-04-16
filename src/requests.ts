@@ -244,10 +244,16 @@ export const v2RequestAdminQuizTransfer = (token: string, quizid: number, userEm
     { userEmail: userEmail }, { token });
 };
 
-export const requestAdminQuizTrashEmpty = (token: string, quizids: number[]) => {
-  return oldRequestHelper('DELETE',
+export const v1RequestAdminQuizTrashEmpty = (token: string, quizids: number[]) => {
+  return requestHelper('DELETE',
     '/v1/admin/quiz/trash/empty',
     { token: token, quizIds: quizids });
+};
+
+export const v2RequestAdminQuizTrashEmpty = (token: string, quizids: number[]) => {
+  return requestHelper('DELETE',
+    '/v2/admin/quiz/trash/empty',
+    { quizIds: quizids }, { token });
 };
 
 export const v1RequestAdminUserDetails = (token: string) => {

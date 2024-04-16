@@ -699,37 +699,20 @@ export function adminQuizEmptyTrash(token: string, quizids: number[]): object | 
 
   const checkToken = validToken(token);
 
-  if (isError(checkToken)) {
-    return {
-      error: checkToken.error
-    };
-  }
   for (const quizInTrash of data.trash) {
     const searchTrash = quizids.find(quizid => quizid === quizInTrash.quizId);
     if (!searchTrash) {
-      return {
-        error: 'One or more of the Quiz IDs is not currently in the trash.'
-      };
+      throw httpError(400, 'One or more of the Quiz IDs is not currently in the trash.');
     }
   }
 
-  for (const ownedQuiz of checkToken.ownedQuizzes) {
-    const searchOwnedQuizzes = quizids.find(quiz => quiz === ownedQuiz);
-
-    if (!searchOwnedQuizzes) {
-      return {
-        error: 'Valid token is provided, but one or more of the Quiz IDs refers to a quiz that this current user does not own.'
-      };
-    }
+  for (const quiz of quizids) {
+    validQuizId(quiz, checkToken, data);
   }
+  const filteredTrash = data.trash.filter(trashedQuiz => !quizids.includes(trashedQuiz.quizId));
+  data.trash = filteredTrash;
+  setData(data);
 
-  for (const quizid of quizids) {
-    const removedTrash = data.trash.findIndex(trashedQuiz => trashedQuiz.quizId === quizid);
-
-    if (removedTrash) {
-      data.quizzes.splice(removedTrash, 1);
-    }
-  }
   return {};
 }
 

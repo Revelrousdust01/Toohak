@@ -102,17 +102,19 @@ app.get('/v1/admin/quiz/trash', (req: Request, res: Response) => {
 app.delete('/v1/admin/quiz/trash/empty', (req: Request, res: Response) => {
   const quizIds = req.query.quizIds as string[];
   const numberQuizIds = quizIds.map(id => parseInt(id));
-  const response = adminQuizEmptyTrash(req.query.token as string, numberQuizIds);
+  const token = req.query.token as string;
+  const response = adminQuizEmptyTrash(token, numberQuizIds);
 
-  if ('error' in response) {
-    if (response.error === 'One or more of the Quiz IDs is not currently in the trash.') {
-      return res.status(400).json(response);
-    } else if (response.error === 'Token is empty or invalid.') {
-      return res.status(401).json(response);
-    } else {
-      return res.status(403).json(response);
-    }
-  }
+  res.json(response);
+});
+
+app.delete('/v2/admin/quiz/trash/empty', (req: Request, res: Response) => {
+  const quizIds = req.query.quizIds as string[];
+  const numberQuizIds = quizIds.map(id => parseInt(id));
+  const token = req.headers.token as string;
+
+  const response = adminQuizEmptyTrash(token, numberQuizIds);
+
   res.json(response);
 });
 
