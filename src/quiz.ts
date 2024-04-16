@@ -217,7 +217,6 @@ export function adminQuizList(token: string): ErrorObject | QuizArray {
 
 export function adminQuizNameUpdate(token: string, quizid: number, name: string): ErrorObject | object {
   const data = getData();
-  const quizIndex = data.quizzes.findIndex(quizzes => quizzes.quizId === quizid);
   const checkToken = validToken(token);
 
   validQuizId(quizid, checkToken, data);
@@ -229,8 +228,7 @@ export function adminQuizNameUpdate(token: string, quizid: number, name: string)
       throw httpError(400, 'Name is already used by the current logged in user for another quiz.');
     }
   }
-
-  data.quizzes[quizIndex].name = name;
+  data.quizzes.find(quiz => quiz.quizId === quizid).name = name;
   setData(data);
   return { };
 }
