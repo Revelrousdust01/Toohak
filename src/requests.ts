@@ -178,8 +178,8 @@ export const v2RequestAdminQuizList = (token: string) => {
     { }, { token });
 };
 
-export const requestAdminQuizNameUpdate = (token: string, quizid: number, newName: string) => {
-  return oldRequestHelper('PUT',
+export const v1RequestAdminQuizNameUpdate = (token: string, quizid: number, newName: string) => {
+  return requestHelper('PUT',
     `/v1/admin/quiz/${quizid}/name`,
     { token: token, name: newName });
 };

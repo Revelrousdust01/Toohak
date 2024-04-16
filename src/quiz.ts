@@ -222,26 +222,28 @@ export function adminQuizNameUpdate(token: string, quizid: number, name: string)
 
   // 401 error
   if (isError(checkToken)) {
-    return { error: 'Token is empty or invalid.' };
+    throw httpError(401, 'Token is empty or invalid.');
   }
 
   // 400 error
   const checkQuizName = validQuizName(name);
   if (isError(checkQuizName)) {
-    return { error: 'Quiz name is not valid.' };
+    throw httpError(400, 'Quiz name is not valid.');
   }
 
   // 400 error
   const existingQuiz = data.quizzes.find(quiz => quiz.name === name);
   if (existingQuiz) {
-    if (checkToken.ownedQuizzes.find(quiz => quiz === existingQuiz.quizId)) { return { error: 'Name is already used by the current logged in user for another quiz.' }; }
+    if (checkToken.ownedQuizzes.find(quiz => quiz === existingQuiz.quizId)) {
+      throw httpError(400, 'Name is already used by the current logged in user for another quiz.');
+    } 
   }
 
   // 403 error
-  if (quizIndex === -1) { return { error: 'Quiz ID does not refer to a valid quiz.' }; }
+  if (quizIndex === -1) { throw httpError(403, 'Quiz ID does not refer to a valid quiz.'); }
 
   // 403 error
-  if (!checkToken.ownedQuizzes.includes(quizid)) { return { error: 'Quiz ID does not refer to a quiz that this user owns.' }; }
+  if (!checkToken.ownedQuizzes.includes(quizid)) { throw httpError(403, 'Quiz ID does not refer to a quiz that this user owns.'); }
 
   data.quizzes[quizIndex].name = name;
   setData(data);
