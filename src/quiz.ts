@@ -170,13 +170,8 @@ export function adminQuizInfo(token: string, quizid: number): object | ErrorObje
 
 export function adminQuizList(token: string): ErrorObject | QuizArray {
   const data = getData();
-
+  console.log(token);
   const checkToken = validToken(token);
-  if (isError(checkToken)) {
-    return {
-      error: checkToken.error
-    };
-  }
 
   const ownedQuizzes = checkToken.ownedQuizzes;
   const quizInTrash = data.trash;
