@@ -220,6 +220,7 @@ export function adminQuizNameUpdate(token: string, quizid: number, name: string)
   const quizIndex = data.quizzes.findIndex(quizzes => quizzes.quizId === quizid);
   const checkToken = validToken(token);
 
+  validQuizId(quizid, checkToken, data);
   validQuizName(name);
 
   const existingQuiz = data.quizzes.find(quiz => quiz.name === name);
@@ -228,10 +229,6 @@ export function adminQuizNameUpdate(token: string, quizid: number, name: string)
       throw httpError(400, 'Name is already used by the current logged in user for another quiz.');
     }
   }
-
-  if (quizIndex === -1) { throw httpError(403, 'Quiz ID does not refer to a valid quiz.'); }
-
-  if (!checkToken.ownedQuizzes.includes(quizid)) { throw httpError(403, 'Quiz ID does not refer to a quiz that this user owns.'); }
 
   data.quizzes[quizIndex].name = name;
   setData(data);
