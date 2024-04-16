@@ -323,7 +323,7 @@ describe('V1 - Test adminQuizInfo', () => {
   ])("Invalid Token: '$invalidToken", ({ invalidToken }) => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
-    expect(v1RequestAdminQuizInfo(invalidToken, quizId.quizId as number)).toThrow(HTTPError[401]);
+    expect(() => v1RequestAdminQuizInfo(invalidToken, quizId.quizId as number)).toThrow(HTTPError[401]);
   });
 
   test.each([
@@ -332,14 +332,14 @@ describe('V1 - Test adminQuizInfo', () => {
     { invalidQuizId: 150 },
   ])("QuizId does not refer to valid quiz: '$invalidQuizId", ({ invalidQuizId }) => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    expect(v1RequestAdminQuizInfo(registered.token as string, invalidQuizId)).toThrow(HTTPError[403]);
+    expect(() => v1RequestAdminQuizInfo(registered.token as string, invalidQuizId)).toThrow(HTTPError[403]);
   });
 
   test('QuizId does not refer to a quiz that this user owns', () => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const newQuiz = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
     const registered1 = v1RequestAdminAuthRegister('bob.smith@gmail.com', 'a1234567', 'Smith', 'Bob');
-    expect(v1RequestAdminQuizInfo(registered1.token as string, newQuiz.jsonBody.quizId as number)).toThrow(HTTPError[403]);
+    expect(() => v1RequestAdminQuizInfo(registered1.token as string, newQuiz.quizId as number)).toThrow(HTTPError[403]);
   });
 });
 
@@ -350,7 +350,7 @@ describe('V2 - Test adminQuizInfo', () => {
   const password = 'str0ngpassword';
   const quizName = 'New Quiz';
   const quizDescription = 'This is a new quiz';
-  const thumbnailUrl = 'http://google.com/some/image/path.jpg'
+  const thumbnailUrl = 'http://google.com/some/image/path.jpg';
   const question: QuestionBody = {
     question: 'Who is the Monarch of England?',
     duration: 1,
@@ -371,7 +371,7 @@ describe('V2 - Test adminQuizInfo', () => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
     const questionId = v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question);
-    v1RequestAdminQuizThumbnailUpdate(registered.token, quizId.quizId, thumbnailUrl)
+    v1RequestAdminQuizThumbnailUpdate(registered.token, quizId.quizId, thumbnailUrl);
     expect(v1RequestAdminQuizInfo(registered.token as string, quizId.quizId as number)).toMatchObject({
       quizId: quizId.quizId as number,
       name: quizName,
@@ -415,7 +415,7 @@ describe('V2 - Test adminQuizInfo', () => {
   ])("Invalid Token: '$invalidToken", ({ invalidToken }) => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quizId = v2RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
-    expect(v2RequestAdminQuizInfo(invalidToken, quizId.quizId as number)).toThrow(HTTPError[401]);
+    expect(() => v2RequestAdminQuizInfo(invalidToken, quizId.quizId as number)).toThrow(HTTPError[401]);
   });
 
   test.each([
@@ -424,14 +424,14 @@ describe('V2 - Test adminQuizInfo', () => {
     { invalidQuizId: 150 },
   ])("QuizId does not refer to valid quiz: '$invalidQuizId", ({ invalidQuizId }) => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    expect(v2RequestAdminQuizInfo(registered.token as string, invalidQuizId)).toThrow(HTTPError[403]);
+    expect(() => v2RequestAdminQuizInfo(registered.token as string, invalidQuizId)).toThrow(HTTPError[403]);
   });
 
   test('QuizId does not refer to a quiz that this user owns', () => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const newQuiz = v2RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
     const registered1 = v1RequestAdminAuthRegister('bob.smith@gmail.com', 'a1234567', 'Smith', 'Bob');
-    expect(v2RequestAdminQuizInfo(registered1.token as string, newQuiz.jsonBody.quizId as number)).toThrow(HTTPError[403]);
+    expect(() => v2RequestAdminQuizInfo(registered1.token as string, newQuiz.quizId as number)).toThrow(HTTPError[403]);
   });
 });
 // adminQuizList

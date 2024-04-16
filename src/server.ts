@@ -134,14 +134,13 @@ app.get('/v2/admin/quiz/list', (req: Request, res: Response) => {
 app.get('/v1/admin/quiz/:quizid', (req: Request, res: Response) => {
   const response = adminQuizInfo(req.query.token as string, parseInt(req.params.quizid));
 
-  if ('error' in response) {
-    if (response.error === 'Token is empty or invalid.') {
-      return res.status(401).json(response);
-    } else if (response.error === 'Quiz ID does not refer to a valid quiz.' ||
-            response.error === 'Quiz ID does not refer to a quiz that this user owns.') {
-      return res.status(403).json(response);
-    }
-  }
+  res.json(response);
+});
+
+app.get('/v2/admin/quiz/:quizid', (req: Request, res: Response) => {
+  const token = req.headers.token as string;
+  const response = adminQuizInfo(token, parseInt(req.params.quizid));
+
   res.json(response);
 });
 
