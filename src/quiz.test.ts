@@ -1150,9 +1150,9 @@ describe('V1 - Test adminQuizQuestionUpdate', () => {
 
   test('Valid inputs', () => {
     const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const newQuiz = v1RequestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
-    const newQuestion = v1RequestAdminQuizQuestionCreate(user.token as string, newQuiz.quizId as number, question);
-    expect(v1RequestAdminQuizQuestionUpdate(user.token as string, newQuiz.quizId as number, newQuestion.questionId as number, updatedQuestion)).toStrictEqual({});
+    const newQuiz = v1RequestAdminQuizCreate(user.token, quizName, quizDescription);
+    const newQuestion = v1RequestAdminQuizQuestionCreate(user.token, newQuiz.quizId, question);
+    expect(v1RequestAdminQuizQuestionUpdate(user.token, newQuiz.quizId, newQuestion.questionId, updatedQuestion)).toStrictEqual({});
   });
 
   test.each([
@@ -1161,9 +1161,16 @@ describe('V1 - Test adminQuizQuestionUpdate', () => {
   ])("Invalid question string length '$questionString'", ({ questionString }) => {
     const invalidQuestion = { ...updatedQuestion, question: questionString };
     const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const newQuiz = v1RequestAdminQuizCreate(user.token as string, quizName, quizDescription);
-    const newQuestion = v1RequestAdminQuizQuestionCreate(user.token as string, newQuiz.quizId as number, question);
-    expect(() => v1RequestAdminQuizQuestionUpdate(user.token as string, newQuiz.quizId as number, newQuestion.questionId as number, invalidQuestion)).toThrow(HTTPError[400]);
+    const newQuiz = v1RequestAdminQuizCreate(user.token, quizName, quizDescription);
+    const newQuestion = v1RequestAdminQuizQuestionCreate(user.token, newQuiz.quizId, question);
+    expect(() => v1RequestAdminQuizQuestionUpdate(user.token, newQuiz.quizId, newQuestion.questionId, invalidQuestion)).toThrow(HTTPError[400]);
+  });
+
+  test('Question Id does not refer to a valid question within this quiz', () => {
+    const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const newQuiz = v1RequestAdminQuizCreate(user.token, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(user.token, newQuiz.quizId, question);
+    expect(() => v1RequestAdminQuizQuestionUpdate(user.token, newQuiz.quizId, -20, updatedQuestion)).toThrow(HTTPError[400]);
   });
 
   test.each([
@@ -1183,7 +1190,6 @@ describe('V1 - Test adminQuizQuestionUpdate', () => {
     const newQuiz = v1RequestAdminQuizCreate(user.token as string, quizName, quizDescription);
     const newQuestion = v1RequestAdminQuizQuestionCreate(user.token as string, newQuiz.quizId as number, question);
     expect(() => v1RequestAdminQuizQuestionUpdate(user.token as string, newQuiz.quizId as number, newQuestion.questionId as number, invalidQuestion).toThrow(HTTPError[400]));
-
   });
 
   test('Question duration is not a positive number', () => {
@@ -1195,12 +1201,11 @@ describe('V1 - Test adminQuizQuestionUpdate', () => {
   });
 
   test('The sum of the question durations in the quiz exceeds 3 minutes', () => {
-    const question1 = { ...updatedQuestion, duration: 250 };
+    const question1 = { ...updatedQuestion, duration: 350 };
     const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const newQuiz = v1RequestAdminQuizCreate(user.token as string, quizName, quizDescription);
-    v1RequestAdminQuizQuestionCreate(user.token as string, newQuiz.quizId as number, question);
-    const newQuestion = v1RequestAdminQuizQuestionCreate(user.token as string, newQuiz.quizId as number, question);
-    expect(() => v1RequestAdminQuizQuestionUpdate(user.token as string, newQuiz.quizId as number, newQuestion.questionId as number, question1).toThrow(HTTPError[400]));
+    const quiz = v1RequestAdminQuizQuestionCreate(user.token as string, newQuiz.quizId as number, question);
+    expect(() => v1RequestAdminQuizQuestionUpdate(user.token as string, newQuiz.quizId as number, quiz.questionId as number, question1).toThrow(HTTPError[400]));
   });
 
   test.each([
@@ -1212,7 +1217,6 @@ describe('V1 - Test adminQuizQuestionUpdate', () => {
     const newQuiz = v1RequestAdminQuizCreate(user.token as string, quizName, quizDescription);
     const newQuestion = v1RequestAdminQuizQuestionCreate(user.token as string, newQuiz.quizId as number, question);
     expect(() => v1RequestAdminQuizQuestionUpdate(user.token as string, newQuiz.quizId as number, newQuestion.questionId as number, invalidQuestion).toThrow(HTTPError[400]));
-
   });
 
   test.each([
@@ -1309,7 +1313,7 @@ describe('V2 - Test adminQuizQuestionUpdate', () => {
 
   test('Valid inputs', () => {
     const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const newQuiz = v2RequestAdminQuizCreate(user.jsonBody.token as string, quizName, quizDescription);
+    const newQuiz = v2RequestAdminQuizCreate(user.token as string, quizName, quizDescription);
     const newQuestion = v2RequestAdminQuizQuestionCreate(user.token as string, newQuiz.quizId as number, question);
     expect(v2RequestAdminQuizQuestionUpdate(user.token as string, newQuiz.quizId as number, newQuestion.questionId as number, updatedQuestion)).toStrictEqual({});
   });
@@ -1342,7 +1346,6 @@ describe('V2 - Test adminQuizQuestionUpdate', () => {
     const newQuiz = v2RequestAdminQuizCreate(user.token as string, quizName, quizDescription);
     const newQuestion = v2RequestAdminQuizQuestionCreate(user.token as string, newQuiz.quizId as number, question);
     expect(() => v2RequestAdminQuizQuestionUpdate(user.token as string, newQuiz.quizId as number, newQuestion.questionId as number, invalidQuestion).toThrow(HTTPError[400]));
-
   });
 
   test('Question duration is not a positive number', () => {
@@ -1354,12 +1357,11 @@ describe('V2 - Test adminQuizQuestionUpdate', () => {
   });
 
   test('The sum of the question durations in the quiz exceeds 3 minutes', () => {
-    const question1 = { ...updatedQuestion, duration: 250 };
+    const question1 = { ...updatedQuestion, duration: 350 };
     const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const newQuiz = v2RequestAdminQuizCreate(user.token as string, quizName, quizDescription);
-    v2RequestAdminQuizQuestionCreate(user.token as string, newQuiz.quizId as number, question);
-    const newQuestion = v2RequestAdminQuizQuestionCreate(user.token as string, newQuiz.quizId as number, question);
-    expect(() => v2RequestAdminQuizQuestionUpdate(user.token as string, newQuiz.quizId as number, newQuestion.questionId as number, question1).toThrow(HTTPError[400]));
+    const quiz = v2RequestAdminQuizQuestionCreate(user.token as string, newQuiz.quizId as number, question);
+    expect(() => v2RequestAdminQuizQuestionUpdate(user.token as string, newQuiz.quizId as number, quiz.questionId as number, question1).toThrow(HTTPError[400]));
   });
 
   test.each([
@@ -1371,7 +1373,6 @@ describe('V2 - Test adminQuizQuestionUpdate', () => {
     const newQuiz = v2RequestAdminQuizCreate(user.token as string, quizName, quizDescription);
     const newQuestion = v2RequestAdminQuizQuestionCreate(user.token as string, newQuiz.quizId as number, question);
     expect(() => v2RequestAdminQuizQuestionUpdate(user.token as string, newQuiz.quizId as number, newQuestion.questionId as number, invalidQuestion).toThrow(HTTPError[400]));
-
   });
 
   test.each([
@@ -1435,7 +1436,6 @@ describe('V2 - Test adminQuizQuestionUpdate', () => {
     const newQuestion = v2RequestAdminQuizQuestionCreate(user.token, newQuiz.quizId, question);
     expect(() => v2RequestAdminQuizQuestionUpdate(user.token, newQuiz.quizId, newQuestion.questionId, invalidQuestion).toThrow(HTTPError[400]));
   });
-
 });
 
 // adminQuizQuestionMove

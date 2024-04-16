@@ -216,7 +216,7 @@ export const v1RequestAdminQuizQuestionUpdate = (token: string, quizid: number, 
 
 export const v2RequestAdminQuizQuestionUpdate = (token: string, quizid: number, questionid: number, questionBody: QuestionBody) => {
   return requestHelper('PUT',
-    `/v1/admin/quiz/${quizid}/question/${questionid}`,
+    `/v2/admin/quiz/${quizid}/question/${questionid}`,
     { questionBody: questionBody }, { token });
 };
 

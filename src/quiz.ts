@@ -1,6 +1,6 @@
 import { getData, setData } from './dataStore';
-import { type ErrorObject, type Quiz, type createQuizReturn, type QuizArray, type QuestionBody, type Question, type duplicateReturn, type Answer, type createQuestionReturn, State } from './interfaces';
-import { isError, findQuiz, getColour, validQuestion, validQuizName, validQuizId, validToken, setupAnswers, validateThumbnail } from './helper';
+import { type ErrorObject, type Quiz, type createQuizReturn, type QuizArray, type QuestionBody, type Question, type duplicateReturn, type createQuestionReturn, State } from './interfaces';
+import { isError, findQuiz, validQuestion, validQuizName, validQuizId, validToken, setupAnswers, validateThumbnail, updateQuestion } from './helper';
 import httpError from 'http-errors';
 /**
  * Given basic details about a new quiz, create one for the logged in user.
@@ -539,62 +539,25 @@ export function adminQuizSession(token: string, quizid: number, autoStartNum: nu
   * @returns { { error: }  } - Returns object when conditions fail
   * @returns { object } - returns an empty object question is updated.
 */
-export function adminQuizQuestionUpdate(token: string, quizid: number, questionid: number, questionBody: QuestionBody): object | ErrorObject {
+export function adminQuizQuestionUpdate(token: string, quizid: number, questionid: number, questionBody: QuestionBody, version: number): object {
   const data = getData();
   const checkToken = validToken(token);
 
-  if (isError(checkToken)) {
-    return { error: 'Token is empty or invalid.' };
-  }
-
-  const checkQuizId = validQuizId(quizid, checkToken, data);
-
-  if (isError(checkQuizId)) {
-    return {
-      error: checkQuizId.error
-    };
-  }
+  validQuizId(quizid, checkToken, data);
 
   const quiz = findQuiz(quizid, data);
 
   if (quiz != null) {
-    const checkQuestion = validQuestion(questionBody, quiz as Quiz);
-    if (isError(checkQuestion)) {
-      return {
-        error: checkQuestion.error
-      };
-    }
+    validQuestion(questionBody, quiz as Quiz);
     const validQuiz = quiz as Quiz;
-    let checkValidQuestion = false;
-    for (const question of validQuiz.questions) {
-      if (question.questionId === questionid) {
-        checkValidQuestion = true;
-        question.question = questionBody.question;
-        question.duration = questionBody.duration;
-        question.points = questionBody.points;
-        question.answers = [];
-        for (const [index, answer] of questionBody.answers.entries()) {
-          const newAnswer: Answer = {
-            answerId: index,
-            answer: answer.answer,
-            colour: getColour(),
-            correct: answer.correct
-          };
-          question.answers.push(newAnswer);
-        }
-      }
+    const question = validQuiz.questions.find(question => question.questionId === questionid);
+    if (!question) {
+      throw httpError(400, 'Question Id does not refer to a valid question within this quiz.');
     }
-
-    if (!checkValidQuestion) {
-      return {
-        error: 'Question Id does not refer to a valid question within this quiz'
-      };
-    }
+    updateQuestion(question, questionBody, version);
 
     validQuiz.timeLastEdited = Date.now();
-
     setData(data);
-
     return { };
   }
 }
