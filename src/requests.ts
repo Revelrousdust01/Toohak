@@ -209,9 +209,9 @@ export const v1RequestAdminQuizRemove = (token: string, quizid: number) => {
 };
 
 export const v2RequestAdminQuizRemove = (token: string, quizid: number) => {
-  return oldRequestHelper('DELETE',
-    `/v1/admin/quiz/${quizid}`,
-    { token: token });
+  return requestHelper('DELETE',
+    `/v2/admin/quiz/${quizid}`,
+    { }, { token });
 };
 
 export const v1RequestAdminQuizQuestionCreate = (token: string, quizid: number, questionBody: QuestionBody) => {

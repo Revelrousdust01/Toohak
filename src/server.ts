@@ -328,6 +328,13 @@ app.delete('/v1/admin/quiz/:quizid', (req: Request, res: Response) => {
   res.json(response);
 });
 
+app.delete('/v2/admin/quiz/:quizid', (req: Request, res: Response) => {
+  const token = req.headers.token as string;
+  const response = adminQuizRemove(token, parseInt(req.params.quizid));
+
+  res.json(response);
+});
+
 app.post('/v1/admin/quiz/:quizid/session/start', (req: Request, res: Response) => {
   const { autoStartNum } = req.body;
   const token = req.headers.token as string;

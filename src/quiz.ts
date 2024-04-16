@@ -558,24 +558,13 @@ export function adminQuizQuestionUpdate(token: string, quizid: number, questioni
  * @returns {object} - returns an empty object when a quiz is removed
  */
 
-export function adminQuizRemove(token: string, quizid: number): object | ErrorObject {
+export function adminQuizRemove(token: string, quizid: number): object {
   const data = getData();
   const quizIndex = data.quizzes.findIndex(quizzes => quizzes.quizId === quizid);
+
   const checkToken = validToken(token);
 
-  if (isError(checkToken)) {
-    return {
-      error: checkToken.error
-    };
-  }
-
-  const checkQuizId = validQuizId(quizid, checkToken, data);
-
-  if (isError(checkQuizId)) {
-    return {
-      error: checkQuizId.error
-    };
-  }
+  validQuizId(quizid, checkToken, data);
 
   data.quizzes[quizIndex].timeLastEdited = Date.now();
 
