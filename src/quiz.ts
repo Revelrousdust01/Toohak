@@ -858,5 +858,6 @@ export function adminQuizThumbnailUpdate(token: string, quizid: number, imgUrl: 
   quiz.thumbnailUrl = imgUrl;
   quiz.timeLastEdited = Date.now();
 
+  setData(data);
   return { };
 }
