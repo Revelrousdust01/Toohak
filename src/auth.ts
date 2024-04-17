@@ -173,35 +173,15 @@ export function adminUserDetails(token: string): ReturnUser | ErrorObject {
  */
 
 export function adminUserDetailsUpdate(token: string, email: string, nameFirst: string, nameLast: string): ErrorObject | object {
-  const checkToken = validToken(token);
-  if (isError(checkToken)) {
-    return {
-      error: checkToken.error
-    };
-  }
-
-  const checkEmail = validEmail(email);
-  if (isError(checkEmail)) {
-    return {
-      error: checkEmail.error
-    };
-  }
-
-  const checkNameFirst = validName(nameFirst, true);
-  if (isError(checkNameFirst)) {
-    return {
-      error: checkNameFirst.error
-    };
-  }
-
-  const checkNameLast = validName(nameLast, false);
-  if (isError(checkNameLast)) {
-    return {
-      error: checkNameLast.error
-    };
-  }
-
   const data = getData();
+
+  const checkToken = validToken(token);
+
+  validEmail(email);
+
+  validName(nameFirst, true);
+
+  validName(nameLast, false);
 
   checkToken.email = email;
   checkToken.nameFirst = nameFirst;
