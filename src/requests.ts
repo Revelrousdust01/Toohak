@@ -256,7 +256,6 @@ export const v2RequestAdminQuizQuestionMove = (token: string, quizid: number, qu
     { newPosition: newPosition }, { token });
 };
 
-
 export const v1RequestAdminQuizTransfer = (token: string, quizid: number, userEmail: string) => {
   return requestHelper('POST',
     `/v1/admin/quiz/${quizid}/transfer`,

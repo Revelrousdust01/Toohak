@@ -1781,7 +1781,7 @@ describe('V1 - Test adminQuizQuestionMove', () => {
   });
 });
 
-describe.only('V2 - Test adminQuizQuestionMove', () => {
+describe('V2 - Test adminQuizQuestionMove', () => {
   const firstName = 'Leon';
   const lastName = 'Sun';
   const email = 'leonsun@gmail.com';
@@ -1801,7 +1801,8 @@ describe.only('V2 - Test adminQuizQuestionMove', () => {
         answer: 'Prince Charless',
         correct: false
       }
-    ]
+    ],
+    thumbnailUrl: 'http://google.com/some/image/path.jpg'
   };
 
   const updatedQuestion: QuestionBody = {
@@ -1817,7 +1818,8 @@ describe.only('V2 - Test adminQuizQuestionMove', () => {
         answer: 'Prince Charlez',
         correct: true
       }
-    ]
+    ],
+    thumbnailUrl: 'http://google.com/some/image/path.jpg'
   };
 
   test('Valid inputs', () => {
