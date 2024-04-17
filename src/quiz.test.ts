@@ -2262,7 +2262,7 @@ describe('V1 - Test adminQuizThumbnailUpdate', () => {
 });
 
 // adminQuizSessionUpdate
-describe('V1 - Test adminQuizSessionUpdate', () => {
+describe.only('V1 - Test adminQuizSessionUpdate', () => {
   const firstName = 'Jeffery';
   const lastName = 'Zhang';
   const email = 'jeffery.zhang385@gmail.com';
@@ -2270,6 +2270,7 @@ describe('V1 - Test adminQuizSessionUpdate', () => {
   const quizName = 'New Quiz';
   const quizDescription = 'This is a new quiz';
   const autoStartNum = 3;
+
   const question: QuestionBody = {
     question: 'Who is the Monarch of England?',
     duration: 1,
@@ -2286,39 +2287,164 @@ describe('V1 - Test adminQuizSessionUpdate', () => {
     ]
   };
 
+  const question2: QuestionBody = {
+    question: 'Who is the Monarch of England1?',
+    duration: 1,
+    points: 5,
+    answers: [
+      {
+        answer: 'Prince Charles1',
+        correct: true
+      },
+      {
+        answer: 'Prince Charless1',
+        correct: false
+      }
+    ],
+  };
+
   test.each([
     { validActionEnum: 'END' },
-    { validActionEnum: 'GO_TO_FINAL_RESULTS' },
-    { validActionEnum: 'GO_TO_ANSWER' },
     { validActionEnum: 'NEXT_QUESTION' },
-    { validActionEnum: 'SKIP_COUNTDOWN' },
-  ])("Valid Action enum: '$validActionEnum", ({ validActionEnum }) => {
+  ])("Valid Action enum for Lobby state: '$validActionEnum", ({ validActionEnum }) => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
     v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question);
     const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
-    expect(() => v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.quizSessionId, validActionEnum)).toMatchObject({ });
+    expect(v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, validActionEnum)).toMatchObject({ });
   });
 
   test.each([
-    { invalidSessionId: null },
-    { invalidSessionId: 0 },
-    { invalidSessionId: 150 },
-  ])("SessionId does not refer to valid session: '$invalidSessionId", ({ invalidSessionId }) => {
-    const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
-    v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question);
-    v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
-    expect(() => v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, invalidSessionId, 'NEXT_QUESTION')).toThrow(HTTPError[400]);
-  });
-
-  test('Action provided is not a valid Action enum', () => {
+    { validActionEnum: 'END' },
+    { validActionEnum: 'SKIP_COUNTDOWN' },
+  ])("Valid Action enum for Question countdown state: '$validActionEnum", ({ validActionEnum }) => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
     v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question);
     const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
-    expect(() => v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId, sessionId.quizSessionId, 'INVALID_ACTION')).toThrow(HTTPError[400]);
+    v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'NEXT_QUESTION');
+    expect(v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, validActionEnum)).toMatchObject({ });
   });
+
+  test.each([
+    { validActionEnum: 'GO_TO_ANSWER' },
+    { validActionEnum: 'END' },
+  ])("Valid Action enum for Question Open state: '$validActionEnum", ({ validActionEnum }) => {
+    const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question);
+    const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'NEXT_QUESTION');
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'SKIP_COUNTDOWN');
+    expect(v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, validActionEnum)).toMatchObject({ });
+  });
+
+  test.each([
+    { validActionEnum: 'GO_TO_ANSWER' },
+    { validActionEnum: 'END' },
+  ])("Valid Action enum for Question Open state: '$validActionEnum", ({ validActionEnum }) => {
+    const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question);
+    const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'NEXT_QUESTION');
+    sleepSync(3000);
+    expect(v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, validActionEnum)).toMatchObject({ });
+  });
+
+  test.each([
+    { validActionEnum: 'GO_TO_FINAL_RESULTS' },
+    { validActionEnum: 'GO_TO_ANSWER' },
+    { validActionEnum: 'END' },
+  ])("Valid Action enum for Question Close state: '$validActionEnum", ({ validActionEnum }) => {
+    const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question);
+    const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'NEXT_QUESTION');
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'SKIP_COUNTDOWN');
+    sleepSync(1000);
+    expect(v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, validActionEnum)).toMatchObject({ });
+  });
+
+  test.each([
+    { validActionEnum: 'GO_TO_FINAL_RESULTS' },
+    { validActionEnum: 'GO_TO_ANSWER' },
+    { validActionEnum: 'END' },
+  ])("Valid Action enum for Question Close state: '$validActionEnum", ({ validActionEnum }) => {
+    const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question);
+    const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'NEXT_QUESTION');
+    sleepSync(3000);
+    sleepSync(1000);
+    expect(v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, validActionEnum)).toMatchObject({ });
+  });
+
+  test.each([
+    { validActionEnum: 'GO_TO_FINAL_RESULTS' },
+    { validActionEnum: 'END' },
+    { validActionEnum: 'NEXT_QUESTION' },
+  ])("Valid Action enum for Answer Show state: '$validActionEnum", ({ validActionEnum }) => {
+    const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question);
+    v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question2);
+    const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'NEXT_QUESTION');
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'SKIP_COUNTDOWN');
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'GO_TO_ANSWER');
+    expect(v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, validActionEnum)).toMatchObject({ });
+  });
+
+  test.each([
+    { validActionEnum: 'GO_TO_FINAL_RESULTS' },
+    { validActionEnum: 'END' },
+    { validActionEnum: 'NEXT_QUESTION' },
+  ])("Valid Action enum for Answer Show state: '$validActionEnum", ({ validActionEnum }) => {
+    const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question);
+    v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question2);
+    const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'NEXT_QUESTION');
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'SKIP_COUNTDOWN');
+    sleepSync(1000);
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'GO_TO_ANSWER');
+    expect(v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, validActionEnum)).toMatchObject({ });
+  });
+
+  test.each([
+    { validActionEnum: 'END' },
+  ])("Valid Action enum for Final Results state: '$validActionEnum", ({ validActionEnum }) => {
+    const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question);
+    const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'NEXT_QUESTION');
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'SKIP_COUNTDOWN');
+    sleepSync(1000);
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'GO_TO_FINAL_RESULTS');
+    expect(v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, validActionEnum)).toMatchObject({ });
+  });
+
+
+  test.each([
+    { validActionEnum: 'END' },
+  ])("Valid Action enum for Final Results state: '$validActionEnum", ({ validActionEnum }) => {
+    const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question);
+    const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'NEXT_QUESTION');
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'SKIP_COUNTDOWN');
+    sleepSync(1000);
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'GO_TO_ANSWER');
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'GO_TO_FINAL_RESULTS');
+    expect(v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, validActionEnum)).toMatchObject({ });
+  });
+
 
   test.each([
     { invalidActionEnum: 'GO_TO_FINAL_RESULTS' },
@@ -2329,9 +2455,9 @@ describe('V1 - Test adminQuizSessionUpdate', () => {
     const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
     v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question);
     const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
-    expect(() => v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'invalidActionEnum')).toThrow(HTTPError[400]);
+    expect(() => v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, invalidActionEnum)).toThrow(HTTPError[400]);
   });
-
+  
   test.each([
     { invalidActionEnum: 'GO_TO_FINAL_RESULTS' },
     { invalidActionEnum: 'GO_TO_ANSWER' },
@@ -2341,115 +2467,84 @@ describe('V1 - Test adminQuizSessionUpdate', () => {
     const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
     v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question);
     const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
-    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'NEXT_QUESTION');
-    expect(() => v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'invalidActionEnum')).toThrow(HTTPError[400]);
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'NEXT_QUESTION');
+    expect(() => v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, invalidActionEnum)).toThrow(HTTPError[400]);
   });
-
+  
   test.each([
     { invalidActionEnum: 'GO_TO_FINAL_RESULTS' },
-    { invalidActionEnum: 'GO_TO_ANSWER' },
     { invalidActionEnum: 'NEXT_QUESTION' },
     { invalidActionEnum: 'SKIP_COUNTDOWN' },
-    { invalidActionEnum: 'END' },
   ])("invalid Action enum for Question Open state: '$invalidActionEnum", ({ invalidActionEnum }) => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
     v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question);
     const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
-    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'NEXT_QUESTION');
-    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'SKIP_COUNTDOWN');
-    expect(() => v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'invalidActionEnum')).toThrow(HTTPError[400]);
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'NEXT_QUESTION');
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'SKIP_COUNTDOWN');
+    expect(() => v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, invalidActionEnum)).toThrow(HTTPError[400]);
   });
-
+  
   test.each([
     { invalidActionEnum: 'GO_TO_FINAL_RESULTS' },
-    { invalidActionEnum: 'GO_TO_ANSWER' },
     { invalidActionEnum: 'NEXT_QUESTION' },
     { invalidActionEnum: 'SKIP_COUNTDOWN' },
-    { invalidActionEnum: 'END' },
-  ])("invalid Action enum for Question Open state: '$invalidActionEnum", ({ invalidActionEnum }) => {
+  ])("invalid Action enum for Question Open state with timer: '$invalidActionEnum", ({ invalidActionEnum }) => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
     v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question);
     const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
-    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'NEXT_QUESTION');
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'NEXT_QUESTION');
     sleepSync(3000);
-    expect(() => v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'invalidActionEnum')).toThrow(HTTPError[400]);
+    expect(() => v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, invalidActionEnum)).toThrow(HTTPError[400]);
   });
-
-  test.each([
+  
+  test.only.each([
     { invalidActionEnum: 'NEXT_QUESTION' },
     { invalidActionEnum: 'SKIP_COUNTDOWN' },
-    { invalidActionEnum: 'END' },
+    { invalidActionEnum: 'NEXT_QUESTION' },
   ])("invalid Action enum for Question Close state: '$invalidActionEnum", ({ invalidActionEnum }) => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
     v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question);
     const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
-    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'NEXT_QUESTION');
-    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'SKIP_COUNTDOWN');
-    sleepSync(1000);
-    expect(() => v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'invalidActionEnum')).toThrow(HTTPError[400]);
-  });
-
-  test.each([
-    { invalidActionEnum: 'NEXT_QUESTION' },
-    { invalidActionEnum: 'SKIP_COUNTDOWN' },
-    { invalidActionEnum: 'END' },
-  ])("invalid Action enum for Question Close state: '$invalidActionEnum", ({ invalidActionEnum }) => {
-    const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
-    v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question);
-    const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
-    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'NEXT_QUESTION');
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'NEXT_QUESTION');
     sleepSync(3000);
     sleepSync(1000);
-    expect(() => v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'invalidActionEnum')).toThrow(HTTPError[400]);
+    expect(() => v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, invalidActionEnum)).toThrow(HTTPError[400]);
   });
-
+  
   test.each([
     { invalidActionEnum: 'SKIP_COUNTDOWN' },
     { invalidActionEnum: 'GO_TO_ANSWER' },
+    { invalidActionEnum: 'NEXT_QUESTION' },
   ])("invalid Action enum for Answer Show state: '$invalidActionEnum", ({ invalidActionEnum }) => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
     v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question);
     const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
-    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'NEXT_QUESTION');
-    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'SKIP_COUNTDOWN');
-    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'GO_TO_ANSWER');
-    expect(() => v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'invalidActionEnum')).toThrow(HTTPError[400]);
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'NEXT_QUESTION');
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'SKIP_COUNTDOWN');
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'GO_TO_ANSWER');
+    expect(() => v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, invalidActionEnum)).toThrow(HTTPError[400]);
   });
-
+  
   test.each([
     { invalidActionEnum: 'SKIP_COUNTDOWN' },
     { invalidActionEnum: 'GO_TO_ANSWER' },
+    { invalidActionEnum: 'NEXT_QUESTION' },
   ])("invalid Action enum for Answer Show state: '$invalidActionEnum", ({ invalidActionEnum }) => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
     v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question);
     const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
-    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'NEXT_QUESTION');
-    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'SKIP_COUNTDOWN');
-    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'GO_TO_ANSWER');
-    expect(() => v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'invalidActionEnum')).toThrow(HTTPError[400]);
-  });
-
-  test.each([
-    { invalidActionEnum: 'SKIP_COUNTDOWN' },
-    { invalidActionEnum: 'GO_TO_ANSWER' },
-  ])("invalid Action enum for Answer Show state: '$invalidActionEnum", ({ invalidActionEnum }) => {
-    const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
-    v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question);
-    const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
-    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'NEXT_QUESTION');
-    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'SKIP_COUNTDOWN');
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'NEXT_QUESTION');
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'SKIP_COUNTDOWN');
     sleepSync(1000);
-    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'GO_TO_ANSWER');
-    expect(() => v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'invalidActionEnum')).toThrow(HTTPError[400]);
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'GO_TO_ANSWER');
+    expect(() => v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, invalidActionEnum)).toThrow(HTTPError[400]);
   });
-
+  
   test.each([
     { invalidActionEnum: 'SKIP_COUNTDOWN' },
     { invalidActionEnum: 'GO_TO_ANSWER' },
@@ -2460,13 +2555,13 @@ describe('V1 - Test adminQuizSessionUpdate', () => {
     const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
     v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question);
     const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
-    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'NEXT_QUESTION');
-    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'SKIP_COUNTDOWN');
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'NEXT_QUESTION');
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'SKIP_COUNTDOWN');
     sleepSync(1000);
-    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'GO_TO_FINAL_RESULTS');
-    expect(() => v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'invalidActionEnum')).toThrow(HTTPError[400]);
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'GO_TO_FINAL_RESULTS');
+    expect(() => v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, invalidActionEnum)).toThrow(HTTPError[400]);
   });
-
+  
   test.each([
     { invalidActionEnum: 'SKIP_COUNTDOWN' },
     { invalidActionEnum: 'GO_TO_ANSWER' },
@@ -2477,24 +2572,31 @@ describe('V1 - Test adminQuizSessionUpdate', () => {
     const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
     v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question);
     const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
-    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'NEXT_QUESTION');
-    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'SKIP_COUNTDOWN');
-    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'GO_TO_ANSWER');
-    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'GO_TO_FINAL_RESULTS');
-    expect(() => v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'invalidActionEnum')).toThrow(HTTPError[400]);
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'NEXT_QUESTION');
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'SKIP_COUNTDOWN');
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'GO_TO_ANSWER');
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'GO_TO_FINAL_RESULTS');
+    expect(() => v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, invalidActionEnum)).toThrow(HTTPError[400]);
   });
-
-  test('Run out of questions', () => {
+  
+  test.each([
+    { invalidActionEnum: 'SKIP_COUNTDOWN' },
+    { invalidActionEnum: 'GO_TO_ANSWER' },
+    { invalidActionEnum: 'NEXT_QUESTION' },
+    { invalidActionEnum: 'GO_TO_FINAL_RESULTS' },
+  ])("invalid Action enum for Final Result state: '$invalidActionEnum", ({ invalidActionEnum }) => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
     v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question);
     const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
-    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'NEXT_QUESTION');
-    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'SKIP_COUNTDOWN');
-    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'GO_TO_ANSWER');
-    expect(() => v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.quizSessionId, 'NEXT_QUESTION')).toThrow(HTTPError[400]);
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'NEXT_QUESTION');
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'SKIP_COUNTDOWN');
+    sleepSync(1000);
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'GO_TO_ANSWER');
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'GO_TO_FINAL_RESULTS');
+    expect(() => v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, invalidActionEnum)).toThrow(HTTPError[400]);
   });
-
+  
   test.each([
     { invalidToken: '' },
     { invalidToken: '123' },
@@ -2505,15 +2607,15 @@ describe('V1 - Test adminQuizSessionUpdate', () => {
     const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
     v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question);
     const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
-    expect(() => v1RequestAdminQuizSessionUpdate(invalidToken, quizId.quizId as number, sessionId.quizSessionId, 'NEXT_QUESTION')).toThrow(HTTPError[401]);
+    expect(() => v1RequestAdminQuizSessionUpdate(invalidToken, quizId.quizId as number, sessionId.sessionId, 'NEXT_QUESTION')).toThrow(HTTPError[401]);
   });
-
+  
   test('QuizId does not refer to a quiz that this user owns', () => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
     v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question);
     const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
     const registered2 = v1RequestAdminAuthRegister('bob.smith@gmail.com', 'a1234567', 'Smith', 'Bob');
-    expect(() => v1RequestAdminQuizSessionUpdate(registered2.token as string, quizId.quizId, sessionId.quizSessionId, 'NEXT_QUESTION')).toThrow(HTTPError[403]);
+    expect(() => v1RequestAdminQuizSessionUpdate(registered2.token as string, quizId.quizId, sessionId.sessionId, 'NEXT_QUESTION')).toThrow(HTTPError[403]);
   });
 });

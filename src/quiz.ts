@@ -1,7 +1,9 @@
 import { getData, setData } from './dataStore';
-import { type ErrorObject, type Quiz, type createQuizReturn, type QuizArray, type QuestionBody, type Question, type duplicateReturn, type createQuestionReturn, State } from './interfaces';
-import { isError, findQuiz, validQuestion, validQuizName, validQuizId, validToken, setupAnswers, validateThumbnail, updateQuestion } from './helper';
+import { type ErrorObject, type Quiz, type createQuizReturn, type QuizArray, type QuestionBody, type Question, type duplicateReturn, type createQuestionReturn, State, Action } from './interfaces';
+import { isError, findQuiz, validQuestion, validQuizName, validQuizId, validToken, setupAnswers, validateThumbnail, updateQuestion, validAction } from './helper';
 import httpError from 'http-errors';
+let timeouts: NodeJS.Timeout[] = [];
+let start: number;
 
 /**
  * Given basic details about a new quiz, create one for the logged in user.
@@ -514,6 +516,54 @@ export function adminQuizSession(token: string, quizid: number, autoStartNum: nu
       sessionId: newSessionId,
     };
   }
+}
+
+export function adminQuizSessionUpdate(token: string, quizid: number, sessionId: number, action: Action ): object {
+  const data = getData();
+  const checkToken = validToken(token, data);
+  validQuizId(quizid, checkToken, data);
+
+  if (!Object.keys(Action).includes(action)) {
+    throw httpError(400, 'Invalid Action enum');
+  }
+
+  const sessionDetails  = data.sessions.find(session => session.quizSessionId === sessionId);
+  if(!sessionDetails || sessionDetails.metadata.quizId !== quizid){
+    throw httpError(400, 'Session Id does not refer to a valid session within this quiz');
+  }
+
+  const checkAction = validAction(sessionId, action, data)
+  let currentState = sessionDetails.state;
+  console.log(checkAction);
+  if (!checkAction.valid || (sessionDetails.metadata.questions.length === sessionDetails.atQuestion 
+    && (currentState === State.ANSWER_SHOW || currentState === State.QUESTION_CLOSE) 
+    && action === Action.NEXT_QUESTION)){
+      throw httpError(400, 'Action cannot be applied in the current state');
+  }
+
+  sessionDetails.state = checkAction.state;
+  if (sessionDetails.state === State.QUESTION_COUNTDOWN) {
+    sessionDetails.atQuestion = sessionDetails.atQuestion + 1;
+    setData(data);
+    timeouts.push(setTimeout(() => {
+      sessionDetails.state = State.QUESTION_OPEN;
+      setData(data);
+      start = Math.floor(Date.now() / 1000);
+      timeouts.push(setTimeout(() => {
+        sessionDetails.state = State.QUESTION_CLOSE;
+        setData(data);
+      }, sessionDetails.metadata.questions[sessionDetails.atQuestion - 1].duration * 1000));
+    }, 100));
+    setData(data);
+  }
+
+  if (sessionDetails.state === State.FINAL_RESULTS || sessionDetails.state === State.END) {
+    sessionDetails.atQuestion = 0;
+  }
+
+  setData(data);
+
+  return { }
 }
 
 /**

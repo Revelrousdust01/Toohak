@@ -8,7 +8,8 @@ import {
   adminQuizQuestionMove, adminQuizRemove, adminQuizTransfer, adminQuizViewTrash,
   adminQuizRestore, adminQuizQuestionDuplicate, adminQuizInfo,
   adminQuizSession,
-  adminQuizThumbnailUpdate
+  adminQuizThumbnailUpdate,
+  adminQuizSessionUpdate
 } from './quiz';
 import { clear } from './other';
 import express, { json, Request, Response } from 'express';
@@ -341,6 +342,14 @@ app.post('/v1/admin/quiz/:quizid/session/start', (req: Request, res: Response) =
   const { autoStartNum } = req.body;
   const token = req.headers.token as string;
   const response = adminQuizSession(token, parseInt(req.params.quizid), autoStartNum);
+
+  res.json(response);
+});
+
+app.put('/v1/admin/quiz/:quizid/session/:sessionid', (req: Request, res: Response) => {
+  const { action } = req.body;
+  const token = req.headers.token as string;
+  const response = adminQuizSessionUpdate(token, parseInt(req.params.quizid),  parseInt(req.params.sessionid), action);
 
   res.json(response);
 });

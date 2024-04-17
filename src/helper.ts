@@ -1,5 +1,5 @@
 import { getData } from './dataStore';
-import type { ErrorObject, User, Quiz, QuestionBody, DataStore, Question, Answer } from './interfaces';
+import { type ErrorObject, type User, type Quiz, type QuestionBody, type DataStore, type Question, type Answer, State, validActionType, Action} from './interfaces';
 import validator from 'validator';
 import httpError from 'http-errors';
 
@@ -302,4 +302,125 @@ export function sleepSync(ms: number) {
   while (new Date().getTime() - startTime < ms) {
     // eslint-ignore-line
   }
+}
+
+
+export function validAction(sessionId: number, action: string, data: DataStore): validActionType{
+  let session = data.sessions.find(session => session.quizSessionId === sessionId);
+    console.log(session.state);
+      switch (session.state) {
+        case State.LOBBY:
+          if (action === Action.NEXT_QUESTION) {
+            return {
+              valid: true,
+              state: State.QUESTION_COUNTDOWN
+            };
+          } else if (action === Action.END) {
+            return {
+              valid: true,
+              state: State.END
+            };
+          } else {
+            return {
+              valid: false,
+              state: null
+            };
+          }
+        case State.QUESTION_COUNTDOWN:
+          if (action === Action.END) {
+            return {
+              valid: true,
+              state: State.END
+            };
+          } else if (action === Action.SKIP_COUNTDOWN) {
+            return {
+              valid: true,
+              state: State.QUESTION_OPEN
+            };
+          }
+          else {
+            return {
+              valid: false,
+              state: null
+            };
+          }
+        case State.QUESTION_OPEN:
+          if (action === Action.END) {
+            return {
+              valid: true,
+              state: State.END
+            };
+          } else if (action === Action.GO_TO_ANSWER) {
+            return {
+              valid: true,
+              state: State.ANSWER_SHOW
+            };
+          } else {
+            return {
+              valid: false,
+              state: null
+            };
+          }
+        case State.QUESTION_CLOSE:
+          if (action === Action.END) {
+            return {
+              valid: true,
+              state: State.END
+            };
+          } else if (action === Action.GO_TO_ANSWER) {
+            return {
+              valid: true,
+              state: State.ANSWER_SHOW
+            };
+          } else if (action === Action.GO_TO_FINAL_RESULTS) {
+            return {
+              valid: true,
+              state: State.FINAL_RESULTS
+            };
+          } else {
+            return {
+              valid: true,
+              state: State.QUESTION_COUNTDOWN
+            };
+          }
+        case State.ANSWER_SHOW:
+          if (action === Action.NEXT_QUESTION) {
+            return {
+              valid: true,
+              state: State.QUESTION_COUNTDOWN
+            };
+          } else if (action === Action.END) {
+            return {
+              valid: true,
+              state: State.END
+            };
+          } else if (action === Action.GO_TO_FINAL_RESULTS) {
+            return {
+              valid: true,
+              state: State.FINAL_RESULTS
+            };
+          } else {
+            return {
+              valid: false,
+              state: null
+            };
+          }
+        case State.FINAL_RESULTS:
+          if (action === Action.END) {
+            return {
+              valid: true,
+              state: State.END
+            };
+          } else {
+            return {
+              valid: false,
+              state: null
+            };
+          }
+        case State.END:
+          return {
+            valid: false,
+            state: null
+          };
+      }
 }

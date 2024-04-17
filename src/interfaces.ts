@@ -199,3 +199,8 @@ export enum Action {
     NEXT_QUESTION = 'NEXT_QUESTION',
     SKIP_COUNTDOWN = 'SKIP_COUNTDOWN'
 }
+
+export type validActionType = {
+    valid: boolean;
+    state: State;
+};
