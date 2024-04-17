@@ -19,7 +19,7 @@ tags:
   - name: "Iteration 3 (New)"
     description: Iteration 3 routes that are a mix of new routes as well as slightly modified routes from iteration 1 and 2
   - name: "Iteration 4 (Modified)"
-    description: Iteration 4 routes are a modification of iteration 1 and iteration 2 routes and iteration 3 routes
+    description: Iteration 4 routes are a modification of iteration 1, iteration 2 and iteration 3 routes
 
 components:
   prim:
