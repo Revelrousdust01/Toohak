@@ -678,25 +678,25 @@ export function adminQuizRestore(token: string, quizid: number): object | ErrorO
 
   // 401
   const checkToken = validToken(token, data);
-  if (isError(checkToken)) {
-    return {
-      error: checkToken.error
-    };
-  }
 
   const quizIndex = data.trash.findIndex(trash => trash.quizId === quizid);
   const quizIndex2 = data.quizzes.findIndex(quizzes => quizzes.quizId === quizid);
   // 403
-  if (quizIndex === -1 && quizIndex2 === -1) { return { error: 'Quiz ID does not refer to a valid quiz.' }; }
-  if (!checkToken.ownedQuizzes.includes(quizid)) { return { error: 'Quiz ID does not refer to a quiz that this user owns.' }; }
+  if (quizIndex === -1 && quizIndex2 === -1) {
+    throw httpError(403, 'Quiz ID does not refer to a valid quiz.');
+  }
+
+  if (!checkToken.ownedQuizzes.includes(quizid)) {
+    throw httpError(403, 'Quiz ID does not refer to a quiz that this user owns.');
+  }
   // 400
   if (quizIndex === -1) {
-    return { error: 'Quiz ID refers to a quiz that is not currently in the trash' };
+    throw httpError(400, 'Quiz ID refers to a quiz that is not currently in the trash');
   }
   const quiz = data.trash.find(quiz => quiz.quizId === quizid);
   for (const namedQuiz of data.quizzes) {
     if (namedQuiz.name === quiz.name) {
-      return { error: 'Quiz name of the restored quiz is already used by another active quiz' };
+      throw httpError(400, 'Quiz name of the restored quiz is already used by another active quiz');
     }
   }
 
