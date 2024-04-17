@@ -1,6 +1,6 @@
 import {
   v1RequestAdminAuthLogout, v2RequestAdminAuthLogout, v1RequestAdminAuthRegister, v1RequestAdminAuthLogin,
-  v1RequestAdminUserDetails, v2RequestAdminUserDetails, requestAdminUserDetailsUpdate, 
+  v1RequestAdminUserDetails, v2RequestAdminUserDetails, requestAdminUserDetailsUpdate,
   v1RequestAdminUserPasswordUpdate, v2RequestAdminUserPasswordUpdate,
   requestClear
 } from './requests';
@@ -347,7 +347,7 @@ describe('V1 - adminUserPasswordUpdate', () => {
 
   test('New Password has already been used by this user', () => {
     const user = v1RequestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    requestAdminUserPasswordUpdate(user.token as string,
+    v1RequestAdminUserPasswordUpdate(user.token as string,
       oldPassword, newPassword);
     expect(() => v1RequestAdminUserPasswordUpdate(user.token as string,
       newPassword, oldPassword)).toThrow(HTTPError[400]);
@@ -372,7 +372,7 @@ describe('V1 - adminUserPasswordUpdate', () => {
   ])("Password does not contain at least one number and at least one letter: '$badPassword'", ({ badPassword }) => {
     const user = v1RequestAdminAuthRegister(email, oldPassword, firstName, lastName);
     expect(() => v1RequestAdminUserPasswordUpdate(user.token as string,
-      newPassword, badPassword)).toThrow(HTTPError[400])
+      newPassword, badPassword)).toThrow(HTTPError[400]);
   });
 
   test.each([
@@ -413,7 +413,7 @@ describe('V2 - adminUserPasswordUpdate', () => {
 
   test('New Password has already been used by this user', () => {
     const user = v1RequestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    requestAdminUserPasswordUpdate(user.token as string,
+    v2RequestAdminUserPasswordUpdate(user.token as string,
       oldPassword, newPassword);
     expect(() => v2RequestAdminUserPasswordUpdate(user.token as string,
       newPassword, oldPassword)).toThrow(HTTPError[400]);
@@ -438,7 +438,7 @@ describe('V2 - adminUserPasswordUpdate', () => {
   ])("Password does not contain at least one number and at least one letter: '$badPassword'", ({ badPassword }) => {
     const user = v1RequestAdminAuthRegister(email, oldPassword, firstName, lastName);
     expect(() => v2RequestAdminUserPasswordUpdate(user.token as string,
-      newPassword, badPassword)).toThrow(HTTPError[400])
+      newPassword, badPassword)).toThrow(HTTPError[400]);
   });
 
   test.each([
