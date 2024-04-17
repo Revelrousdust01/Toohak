@@ -293,15 +293,13 @@ app.put('/v2/admin/quiz/:quizid/question/:questionid', (req: Request, res: Respo
 app.delete('/v1/admin/quiz/:quizid/question/:questionid', (req: Request, res: Response) => {
   const response = adminQuizQuestionDelete(req.query.token as string, parseInt(req.params.quizid), parseInt(req.params.questionid));
 
-  if ('error' in response) {
-    if (response.error === 'Token is empty or invalid.') {
-      return res.status(401).json(response);
-    } else if (response.error === 'Quiz ID does not refer to a valid quiz.' || response.error === 'Quiz ID does not refer to a quiz that this user owns.') {
-      return res.status(403).json(response);
-    } else {
-      return res.status(400).json(response);
-    }
-  }
+  res.json(response);
+});
+
+app.delete('/v2/admin/quiz/:quizid/question/:questionid', (req: Request, res: Response) => {
+  const token = req.headers.token as string;
+  const response = adminQuizQuestionDelete(token, parseInt(req.params.quizid), parseInt(req.params.questionid));
+
   res.json(response);
 });
 

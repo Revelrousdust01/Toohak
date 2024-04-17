@@ -226,10 +226,16 @@ export const requestAdminQuizQuestionDuplicate = (token: string, quizid: number,
     { token: token });
 };
 
-export const requestAdminQuizQuestionDelete = (token: string, quizid: number, questionid: number) => {
-  return oldRequestHelper('DELETE',
+export const v1RequestAdminQuizQuestionDelete = (token: string, quizid: number, questionid: number) => {
+  return requestHelper('DELETE',
     `/v1/admin/quiz/${quizid}/question/${questionid}`,
     { token: token });
+};
+
+export const v2RequestAdminQuizQuestionDelete = (token: string, quizid: number, questionid: number) => {
+  return requestHelper('DELETE',
+    `/v2/admin/quiz/${quizid}/question/${questionid}`,
+    { }, { token });
 };
 
 export const v1RequestAdminQuizQuestionUpdate = (token: string, quizid: number, questionid: number, questionBody: QuestionBody) => {
