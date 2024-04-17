@@ -854,7 +854,7 @@ describe('V1 - adminQuizRestore', () => {
   test('Valid inputs with one quiz restore', () => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
     const quizId = v1RequestAdminQuizCreate(user.token as string, quizName1, quizDescr1);
-    requestAdminQuizRemove(user.token as string, quizId.quizId as number);
+    v1RequestAdminQuizRemove(user.token as string, quizId.quizId as number);
     expect(v2RequestAdminQuizViewTrash(user.token as string)).toMatchObject({
       quizzes: [
         {
@@ -875,8 +875,8 @@ describe('V1 - adminQuizRestore', () => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
     const quizId1 = v2RequestAdminQuizCreate(user.token as string, quizName1, quizDescr1);
     const quizId2 = v2RequestAdminQuizCreate(user.token as string, quizName2, quizDescr2);
-    requestAdminQuizRemove(user.token as string, quizId1.quizId as number);
-    requestAdminQuizRemove(user.token as string, quizId2.quizId as number);
+    v1RequestAdminQuizRemove(user.token as string, quizId1.quizId as number);
+    v1RequestAdminQuizRemove(user.token as string, quizId2.quizId as number);
     expect(v1RequestAdminQuizRestore(user.token as string,
       quizId1.quizId as number)).toStrictEqual({ });
     expect(v1RequestAdminQuizRestore(user.token as string,
@@ -892,7 +892,7 @@ describe('V1 - adminQuizRestore', () => {
   test('Quiz name of the restored quiz is already used by another active quiz', () => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
     const quizId1 = v2RequestAdminQuizCreate(user.token as string, quizName1, quizDescr1);
-    requestAdminQuizRemove(user.token as string, quizId1.quizId as number);
+    v1RequestAdminQuizRemove(user.token as string, quizId1.quizId as number);
     v2RequestAdminQuizCreate(user.token as string, quizName1, quizDescr1);
     expect(() => v1RequestAdminQuizRestore(user.token as string,
       quizId1.quizId as number)).toThrow(HTTPError[400]);
@@ -913,7 +913,7 @@ describe('V1 - adminQuizRestore', () => {
   ])("Invalid or Empty Token: '$invalidToken", ({ invalidToken }) => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
     const quizId1 = v2RequestAdminQuizCreate(user.token as string, quizName1, quizDescr1);
-    requestAdminQuizRemove(user.token as string, quizId1.quizId as number);
+    v1RequestAdminQuizRemove(user.token as string, quizId1.quizId as number);
     expect(() => v1RequestAdminQuizRestore(invalidToken, quizId1.quizId as number)).toThrow(HTTPError[401]);
   });
 
@@ -924,14 +924,14 @@ describe('V1 - adminQuizRestore', () => {
   ])("QuizId does not refer to valid quiz: '$invalidQuizId", ({ invalidQuizId }) => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
     const quizId1 = v2RequestAdminQuizCreate(user.token as string, quizName1, quizDescr1);
-    requestAdminQuizRemove(user.token as string, quizId1.quizId as number);
+    v1RequestAdminQuizRemove(user.token as string, quizId1.quizId as number);
     expect(() => v1RequestAdminQuizRestore(user.token as string, invalidQuizId)).toThrow(HTTPError[403]);
   });
 
   test('QuizId does not refer to a quiz that this user owns', () => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
     const quizId1 = v2RequestAdminQuizCreate(user.token as string, quizName1, quizDescr1);
-    requestAdminQuizRemove(user.token as string, quizId1.quizId as number);
+    v1RequestAdminQuizRemove(user.token as string, quizId1.quizId as number);
     const user2 = v1RequestAdminAuthRegister(email2, password, firstName2, lastName2);
     expect(() => v1RequestAdminQuizRestore(user2.token as string,
       quizId1.quizId as number)).toThrow(HTTPError[403]);
@@ -954,7 +954,7 @@ describe('V2 - adminQuizRestore', () => {
   test('Valid inputs with one quiz restore', () => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
     const quizId = v1RequestAdminQuizCreate(user.token as string, quizName1, quizDescr1);
-    requestAdminQuizRemove(user.token as string, quizId.quizId as number);
+    v2RequestAdminQuizRemove(user.token as string, quizId.quizId as number);
     expect(v2RequestAdminQuizViewTrash(user.token as string)).toMatchObject({
       quizzes: [
         {
@@ -975,8 +975,8 @@ describe('V2 - adminQuizRestore', () => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
     const quizId1 = v2RequestAdminQuizCreate(user.token as string, quizName1, quizDescr1);
     const quizId2 = v2RequestAdminQuizCreate(user.token as string, quizName2, quizDescr2);
-    requestAdminQuizRemove(user.token as string, quizId1.quizId as number);
-    requestAdminQuizRemove(user.token as string, quizId2.quizId as number);
+    v2RequestAdminQuizRemove(user.token as string, quizId1.quizId as number);
+    v2RequestAdminQuizRemove(user.token as string, quizId2.quizId as number);
     expect(v2RequestAdminQuizRestore(user.token as string,
       quizId1.quizId as number)).toStrictEqual({ });
     expect(v2RequestAdminQuizRestore(user.token as string,
@@ -992,7 +992,7 @@ describe('V2 - adminQuizRestore', () => {
   test('Quiz name of the restored quiz is already used by another active quiz', () => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
     const quizId1 = v2RequestAdminQuizCreate(user.token as string, quizName1, quizDescr1);
-    requestAdminQuizRemove(user.token as string, quizId1.quizId as number);
+    v2RequestAdminQuizRemove(user.token as string, quizId1.quizId as number);
     v2RequestAdminQuizCreate(user.token as string, quizName1, quizDescr1);
     expect(() => v2RequestAdminQuizRestore(user.token as string,
       quizId1.quizId as number)).toThrow(HTTPError[400]);
@@ -1013,7 +1013,7 @@ describe('V2 - adminQuizRestore', () => {
   ])("Invalid or Empty Token: '$invalidToken", ({ invalidToken }) => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
     const quizId1 = v2RequestAdminQuizCreate(user.token as string, quizName1, quizDescr1);
-    requestAdminQuizRemove(user.token as string, quizId1.quizId as number);
+    v2RequestAdminQuizRemove(user.token as string, quizId1.quizId as number);
     expect(() => v2RequestAdminQuizRestore(invalidToken, quizId1.quizId as number)).toThrow(HTTPError[401]);
   });
 
@@ -1024,14 +1024,14 @@ describe('V2 - adminQuizRestore', () => {
   ])("QuizId does not refer to valid quiz: '$invalidQuizId", ({ invalidQuizId }) => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
     const quizId1 = v2RequestAdminQuizCreate(user.token as string, quizName1, quizDescr1);
-    requestAdminQuizRemove(user.token as string, quizId1.quizId as number);
+    v2RequestAdminQuizRemove(user.token as string, quizId1.quizId as number);
     expect(() => v2RequestAdminQuizRestore(user.token as string, invalidQuizId)).toThrow(HTTPError[403]);
   });
 
   test('QuizId does not refer to a quiz that this user owns', () => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
     const quizId1 = v2RequestAdminQuizCreate(user.token as string, quizName1, quizDescr1);
-    requestAdminQuizRemove(user.token as string, quizId1.quizId as number);
+    v2RequestAdminQuizRemove(user.token as string, quizId1.quizId as number);
     const user2 = v1RequestAdminAuthRegister(email2, password, firstName2, lastName2);
     expect(() => v2RequestAdminQuizRestore(user2.token as string,
       quizId1.quizId as number)).toThrow(HTTPError[403]);
@@ -2277,7 +2277,7 @@ describe('V1 - adminQuizViewTrash', () => {
   test('Valid inputs with one quiz in trash', () => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
     const quizId = v2RequestAdminQuizCreate(user.token as string, quizName1, quizDescr1);
-    requestAdminQuizRemove(user.token as string, quizId.quizId as number);
+    v1RequestAdminQuizRemove(user.token as string, quizId.quizId as number);
     expect(v1RequestAdminQuizViewTrash(user.token as string)).toMatchObject({
       quizzes: [
         {
@@ -2292,8 +2292,8 @@ describe('V1 - adminQuizViewTrash', () => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
     const quizId1 = v2RequestAdminQuizCreate(user.token as string, quizName1, quizDescr1);
     const quizId2 = v2RequestAdminQuizCreate(user.token as string, quizName2, quizDescr2);
-    requestAdminQuizRemove(user.token as string, quizId1.quizId as number);
-    requestAdminQuizRemove(user.token as string, quizId2.quizId as number);
+    v1RequestAdminQuizRemove(user.token as string, quizId1.quizId as number);
+    v1RequestAdminQuizRemove(user.token as string, quizId2.quizId as number);
     expect(v1RequestAdminQuizViewTrash(user.token as string)).toMatchObject({
       quizzes: [
         {
@@ -2316,7 +2316,7 @@ describe('V1 - adminQuizViewTrash', () => {
   ])("Invalid or Empty Token: '$invalidToken", ({ invalidToken }) => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
     const quizId1 = v2RequestAdminQuizCreate(user.token as string, quizName1, quizDescr1);
-    requestAdminQuizRemove(user.token as string, quizId1.quizId as number);
+    v2RequestAdminQuizRemove(user.token as string, quizId1.quizId as number);
     expect(() => v1RequestAdminQuizViewTrash(invalidToken)).toThrow(HTTPError[401]);
   });
 });
@@ -2334,7 +2334,7 @@ describe('V2 - adminQuizViewTrash', () => {
   test('Valid inputs with one quiz in trash', () => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
     const quizId = v2RequestAdminQuizCreate(user.token as string, quizName1, quizDescr1);
-    requestAdminQuizRemove(user.token as string, quizId.quizId as number);
+    v2RequestAdminQuizRemove(user.token as string, quizId.quizId as number);
     expect(v2RequestAdminQuizViewTrash(user.token as string)).toMatchObject({
       quizzes: [
         {
@@ -2349,8 +2349,8 @@ describe('V2 - adminQuizViewTrash', () => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
     const quizId1 = v2RequestAdminQuizCreate(user.token as string, quizName1, quizDescr1);
     const quizId2 = v2RequestAdminQuizCreate(user.token as string, quizName2, quizDescr2);
-    requestAdminQuizRemove(user.token as string, quizId1.quizId as number);
-    requestAdminQuizRemove(user.token as string, quizId2.quizId as number);
+    v2RequestAdminQuizRemove(user.token as string, quizId1.quizId as number);
+    v2RequestAdminQuizRemove(user.token as string, quizId2.quizId as number);
     expect(v2RequestAdminQuizViewTrash(user.token as string)).toMatchObject({
       quizzes: [
         {
@@ -2373,7 +2373,7 @@ describe('V2 - adminQuizViewTrash', () => {
   ])("Invalid or Empty Token: '$invalidToken", ({ invalidToken }) => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
     const quizId1 = v2RequestAdminQuizCreate(user.token as string, quizName1, quizDescr1);
-    requestAdminQuizRemove(user.token as string, quizId1.quizId as number);
+    v2RequestAdminQuizRemove(user.token as string, quizId1.quizId as number);
     expect(() => v2RequestAdminQuizViewTrash(invalidToken)).toThrow(HTTPError[401]);
   });
 });
