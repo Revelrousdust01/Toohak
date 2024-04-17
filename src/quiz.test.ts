@@ -1967,7 +1967,7 @@ describe('V1 - adminQuizViewTrash', () => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
     const quizId = v2RequestAdminQuizCreate(user.token as string, quizName1, quizDescr1);
     requestAdminQuizRemove(user.token as string, quizId.quizId as number);
-    expect(() => v1RequestAdminQuizViewTrash(user.token as string)).toMatchObject({
+    expect(v1RequestAdminQuizViewTrash(user.token as string)).toMatchObject({
       quizzes: [
         {
           quizId: quizId.quizId as number,
@@ -1983,7 +1983,7 @@ describe('V1 - adminQuizViewTrash', () => {
     const quizId2 = v2RequestAdminQuizCreate(user.token as string, quizName2, quizDescr2);
     requestAdminQuizRemove(user.token as string, quizId1.quizId as number);
     requestAdminQuizRemove(user.token as string, quizId2.quizId as number);
-    expect(() => v1RequestAdminQuizViewTrash(user.token as string)).toMatchObject({
+    expect(v1RequestAdminQuizViewTrash(user.token as string)).toMatchObject({
       quizzes: [
         {
           quizId: quizId1.quizId as number,
@@ -2024,7 +2024,7 @@ describe('V2 - adminQuizViewTrash', () => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
     const quizId = v2RequestAdminQuizCreate(user.token as string, quizName1, quizDescr1);
     requestAdminQuizRemove(user.token as string, quizId.quizId as number);
-    expect(() => v2RequestAdminQuizViewTrash(user.token as string)).toMatchObject({
+    expect(v2RequestAdminQuizViewTrash(user.token as string)).toMatchObject({
       quizzes: [
         {
           quizId: quizId.quizId as number,
@@ -2040,7 +2040,7 @@ describe('V2 - adminQuizViewTrash', () => {
     const quizId2 = v2RequestAdminQuizCreate(user.token as string, quizName2, quizDescr2);
     requestAdminQuizRemove(user.token as string, quizId1.quizId as number);
     requestAdminQuizRemove(user.token as string, quizId2.quizId as number);
-    expect(() => v2RequestAdminQuizViewTrash(user.token as string)).toMatchObject({
+    expect(v2RequestAdminQuizViewTrash(user.token as string)).toMatchObject({
       quizzes: [
         {
           quizId: quizId1.quizId as number,

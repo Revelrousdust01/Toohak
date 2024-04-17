@@ -748,15 +748,13 @@ export function adminQuizViewTrash(token: string): ErrorObject | QuizArray {
   const data = getData();
 
   const checkToken = validToken(token, data);
-  if (isError(checkToken)) {
-    return {
-      error: checkToken.error
-    };
-  }
 
   const ownedQuizzes = checkToken.ownedQuizzes;
   const quizInTrash = data.trash;
   const foundTrash = [];
+  console.log(foundTrash);
+  console.log(checkToken.ownedQuizzes);
+  console.log(data.trash);
 
   for (const ownedQuiz of ownedQuizzes) {
     for (const trashedQuiz of quizInTrash) {
@@ -769,6 +767,7 @@ export function adminQuizViewTrash(token: string): ErrorObject | QuizArray {
       }
     }
   }
+  console.log(foundTrash);
 
   return {
     quizzes: foundTrash
