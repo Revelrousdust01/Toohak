@@ -322,11 +322,17 @@ export const v1RequestAdminQuizSession = (token: string, quizid: number, autoSta
   { autoStartNum: autoStartNum }, { token });
 };
 
-export const requestAdminQuizViewTrash = (token: string) => {
-  return oldRequestHelper('GET',
+export const v1RequestAdminQuizViewTrash = (token: string) => {
+  return requestHelper('GET',
     '/v1/admin/quiz/trash',
     { token: token });
 };
+
+export const v2RequestAdminQuizViewTrash = (token: string) => {
+  return requestHelper('GET',
+    '/v2/admin/quiz/trash',
+    { }, { token });
+}
 
 export const v1RequestAdminQuizThumbnailUpdate = (token: string, quizid: number, imgUrl: string) => {
   return requestHelper('PUT',
