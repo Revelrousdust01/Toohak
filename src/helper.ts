@@ -288,3 +288,18 @@ export function updateQuestion(question: Question, questionBody: QuestionBody, v
   }
   return { };
 }
+
+/**
+  * Passes the specified amount of time
+  *
+  * @param {number} ms - ms needed to be passes 
+  *
+  * @returns 
+*/
+
+export function sleepSync(ms: number) {
+  const startTime = new Date().getTime();
+  while (new Date().getTime() - startTime < ms) {
+    // eslint-ignore-line
+  }
+}

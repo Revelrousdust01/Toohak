@@ -1,6 +1,6 @@
 import { getData, setData } from './dataStore';
 import { type ErrorObject, type Quiz, type createQuizReturn, type QuizArray, type QuestionBody, type Question, type duplicateReturn, type createQuestionReturn, State } from './interfaces';
-import { isError, findQuiz, validQuestion, validQuizName, validQuizId, validToken, setupAnswers, validateThumbnail, updateQuestion } from './helper';
+import { isError, findQuiz, validQuestion, validQuizName, validQuizId, validToken, setupAnswers, validateThumbnail, updateQuestion, sleepSync } from './helper';
 import httpError from 'http-errors';
 /**
  * Given basic details about a new quiz, create one for the logged in user.
@@ -65,6 +65,7 @@ export function adminQuizCreate(token: string, name: string, description: string
   *
   * @returns {object} - returns an empty object when a quiz description is updated
 */
+
 export function adminQuizDescriptionUpdate(token: string, quizid: number, description: string): ErrorObject | object {
   const data = getData();
 
@@ -246,6 +247,7 @@ export function adminQuizNameUpdate(token: string, quizid: number, name: string)
   * @returns { { error: }  } - Returns object when conditions fail
   * @returns { object } - returns an empty object question is updated.
 */
+
 export function adminQuizQuestionCreate(token: string, quizid: number, questionBody: QuestionBody, version: number): createQuestionReturn {
   const data = getData();
   const checkToken = validToken(token, data);
@@ -316,6 +318,7 @@ export function adminQuizQuestionCreate(token: string, quizid: number, questionB
  *
  * @returns {duplicateReturn} - returns the new question id when duplicated.
  */
+
 export function adminQuizQuestionDuplicate(token: string, quizid: number, questionid: number): duplicateReturn | ErrorObject {
   const data = getData();
 
@@ -361,6 +364,7 @@ export function adminQuizQuestionDuplicate(token: string, quizid: number, questi
   * @returns { { error: }  } - Returns object when conditions fail
   * @returns { object } - returns an empty object question is updated.
 */
+
 export function adminQuizQuestionDelete(token: string, quizid: number, questionid: number): object | ErrorObject {
   const data = getData();
   const checkToken = validToken(token, data);
@@ -697,6 +701,7 @@ export function adminQuizEmptyTrash(token: string, quizids: number[]): object | 
  *
  * @returns {object} - returns an empty object when quiz is restored
  */
+
 export function adminQuizRestore(token: string, quizid: number): object | ErrorObject {
   const data = getData();
 
