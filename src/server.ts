@@ -189,17 +189,13 @@ app.post('/v1/admin/quiz/:quizid/restore', (req: Request, res: Response) => {
   const { token } = req.body;
   const response = adminQuizRestore(token, parseInt(req.params.quizid));
 
-  if ('error' in response) {
-    if (response.error === 'Token is empty or invalid.') {
-      return res.status(401).json(response);
-    } else if (response.error === 'Quiz name of the restored quiz is already used by another active quiz' ||
-            response.error === 'Quiz ID refers to a quiz that is not currently in the trash') {
-      return res.status(400).json(response);
-    } else if (response.error === 'Quiz ID does not refer to a valid quiz.' ||
-            response.error === 'Quiz ID does not refer to a quiz that this user owns.') {
-      return res.status(403).json(response);
-    }
-  }
+  res.json(response);
+});
+
+app.post('/v2/admin/quiz/:quizid/restore', (req: Request, res: Response) => {
+  const token = req.headers.token as string;
+  const response = adminQuizRestore(token, parseInt(req.params.quizid));
+
   res.json(response);
 });
 
