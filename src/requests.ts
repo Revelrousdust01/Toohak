@@ -244,10 +244,16 @@ export const v2RequestAdminQuizQuestionUpdate = (token: string, quizid: number, 
     { questionBody: questionBody }, { token });
 };
 
-export const requestAdminQuizQuestionMove = (token: string, quizid: number, questionid: number, newPosition: number) => {
-  return oldRequestHelper('PUT',
+export const v1RequestAdminQuizQuestionMove = (token: string, quizid: number, questionid: number, newPosition: number) => {
+  return requestHelper('PUT',
     `/v1/admin/quiz/${quizid}/question/${questionid}/move`,
     { token: token, newPosition: newPosition });
+};
+
+export const v2RequestAdminQuizQuestionMove = (token: string, quizid: number, questionid: number, newPosition: number) => {
+  return requestHelper('PUT',
+    `/v2/admin/quiz/${quizid}/question/${questionid}/move`,
+    { newPosition: newPosition }, { token });
 };
 
 export const v1RequestAdminQuizTransfer = (token: string, quizid: number, userEmail: string) => {
