@@ -332,7 +332,7 @@ export const v2RequestAdminQuizViewTrash = (token: string) => {
   return requestHelper('GET',
     '/v2/admin/quiz/trash',
     { }, { token });
-}
+};
 
 export const v1RequestAdminQuizThumbnailUpdate = (token: string, quizid: number, imgUrl: string) => {
   return requestHelper('PUT',
