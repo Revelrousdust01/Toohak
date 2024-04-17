@@ -405,7 +405,7 @@ export function adminQuizQuestionDelete(token: string, quizid: number, questioni
 
 export function adminQuizQuestionMove(token: string, quizid: number, questionid: number, newPosition: number): object | ErrorObject {
   const data = getData();
-  const checkToken = validToken(token);
+  const checkToken = validToken(token, data);
   const quiz = data.quizzes.find(quiz => quiz.quizId === quizid);
 
   validQuizId(quizid, checkToken, data);
