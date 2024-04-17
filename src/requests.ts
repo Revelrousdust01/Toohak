@@ -326,7 +326,7 @@ export const v2RequestAdminQuizRestore = (token: string, quizid: number) => {
   return requestHelper('POST',
     `/v2/admin/quiz/${quizid}/restore`,
     { }, { token });
-}
+};
 
 export const v1RequestAdminQuizSession = (token: string, quizid: number, autoStartNum: number) => {
   return requestHelper('POST',

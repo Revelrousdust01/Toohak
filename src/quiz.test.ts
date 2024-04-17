@@ -814,7 +814,7 @@ describe('V1 - adminQuizRestore', () => {
       quizId1.quizId as number)).toStrictEqual({ });
     expect(v1RequestAdminQuizRestore(user.token as string,
       quizId2.quizId as number)).toStrictEqual({ });
-    
+
     expect(v2RequestAdminQuizViewTrash(user.token as string)).toMatchObject({
       quizzes: [
 
@@ -914,7 +914,7 @@ describe('V2 - adminQuizRestore', () => {
       quizId1.quizId as number)).toStrictEqual({ });
     expect(v2RequestAdminQuizRestore(user.token as string,
       quizId2.quizId as number)).toStrictEqual({ });
-    
+
     expect(v2RequestAdminQuizViewTrash(user.token as string)).toMatchObject({
       quizzes: [
 
