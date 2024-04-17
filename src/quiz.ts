@@ -748,11 +748,6 @@ export function adminQuizViewTrash(token: string): ErrorObject | QuizArray {
   const data = getData();
 
   const checkToken = validToken(token, data);
-  if (isError(checkToken)) {
-    return {
-      error: checkToken.error
-    };
-  }
 
   const ownedQuizzes = checkToken.ownedQuizzes;
   const quizInTrash = data.trash;

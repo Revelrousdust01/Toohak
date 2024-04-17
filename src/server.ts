@@ -92,10 +92,13 @@ app.get('/v2/admin/user/details', (req: Request, res: Response) => {
 
 app.get('/v1/admin/quiz/trash', (req: Request, res: Response) => {
   const response = adminQuizViewTrash(req.query.token as string);
+  res.json(response);
+});
 
-  if ('error' in response) {
-    return res.status(401).json(response);
-  }
+app.get('/v2/admin/quiz/trash', (req: Request, res: Response) => {
+  const token = req.headers.token as string;
+  const response = adminQuizViewTrash(token);
+
   res.json(response);
 });
 
