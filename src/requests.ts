@@ -298,10 +298,16 @@ export const v2RequestAdminUserDetailsUpdate = (token: string, email: string, fi
     { email: email, nameFirst: firstName, nameLast: lastName }, { token });
 };
 
-export const requestAdminUserPasswordUpdate = (token: string, oldPassword: string, newPassword: string) => {
-  return oldRequestHelper('PUT',
+export const v1RequestAdminUserPasswordUpdate = (token: string, oldPassword: string, newPassword: string) => {
+  return requestHelper('PUT',
     '/v1/admin/user/password',
     { token: token, oldPassword: oldPassword, newPassword: newPassword });
+};
+
+export const v2RequestAdminUserPasswordUpdate = (token: string, oldPassword: string, newPassword: string) => {
+  return requestHelper('PUT',
+    '/v2/admin/user/password',
+    { oldPassword: oldPassword, newPassword: newPassword }, { token });
 };
 
 export const requestAdminQuizRestore = (token: string, quizid: number) => {

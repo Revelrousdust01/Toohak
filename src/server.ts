@@ -219,13 +219,14 @@ app.put('/v1/admin/user/password', (req: Request, res: Response) => {
   const { token, oldPassword, newPassword } = req.body;
   const response = adminUserPasswordUpdate(token, oldPassword, newPassword);
 
-  if ('error' in response) {
-    if (response.error === 'Token is empty or invalid.') {
-      return res.status(401).json(response);
-    } else {
-      return res.status(400).json(response);
-    }
-  }
+  res.json(response);
+});
+
+app.put('/v2/admin/user/password', (req: Request, res: Response) => {
+  const { oldPassword, newPassword } = req.body;
+  const token = req.headers.token as string;
+  const response = adminUserPasswordUpdate(token, oldPassword, newPassword);
+
   res.json(response);
 });
 

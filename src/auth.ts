@@ -1,7 +1,7 @@
 import { Guid } from 'guid-typescript';
 import { getData, setData } from './dataStore';
 import type { createTokenReturn, ErrorObject, ReturnUser, User, UserSessions } from './interfaces';
-import { isError, setHash, validEmail, validName, validPassword, validToken } from './helper';
+import { setHash, validEmail, validName, validPassword, validToken } from './helper';
 import httpError from 'http-errors';
 
 /**
@@ -139,7 +139,8 @@ export function adminAuthRegister(email: string, password: string, nameFirst: st
 */
 
 export function adminUserDetails(token: string): ReturnUser | ErrorObject {
-  const checkToken = validToken(token);
+  const data = getData();
+  const checkToken = validToken(token, data);
 
   return {
     user: {
@@ -175,7 +176,7 @@ export function adminUserDetails(token: string): ReturnUser | ErrorObject {
 export function adminUserDetailsUpdate(token: string, email: string, nameFirst: string, nameLast: string): ErrorObject | object {
   const data = getData();
 
-  const checkToken = validToken(token);
+  const checkToken = validToken(token, data);
 
   validEmail(email);
 
@@ -214,43 +215,24 @@ export function adminUserDetailsUpdate(token: string, email: string, nameFirst: 
 export function adminUserPasswordUpdate(token: string, oldPassword: string, newPassword: string): ErrorObject | object {
   const data = getData();
 
-  const checkToken = validToken(token);
-  if (isError(checkToken)) {
-    return {
-      error: checkToken.error
-    };
-  }
+  const checkToken = validToken(token, data);
 
-  if (!(checkToken.password === setHash(oldPassword))) {
-    return {
-      error: 'Old Password is not the correct old password'
-    };
+  if (checkToken.oldPasswords.find(oldPassword => oldPassword === setHash(newPassword))) {
+    throw httpError(400, 'New Password has already been used before by this user');
   }
 
   if (oldPassword === newPassword) {
-    return {
-      error: 'Old Password and New Password match exactly'
-    };
+    throw httpError(400, 'Old Password and New Password match exactly');
   }
 
-  const oldPasswordArray = checkToken.oldPasswords;
-  for (const oldPasswordUsed of oldPasswordArray) {
-    if (oldPasswordUsed === newPassword) {
-      return {
-        error: 'New Password has already been used before by this user'
-      };
-    }
+  if (!(checkToken.password === setHash(oldPassword))) {
+    throw httpError(400, 'Old Password is not the correct old password');
   }
 
-  const checkPassword = validPassword(newPassword);
-  if (isError(checkPassword)) {
-    return {
-      error: checkPassword.error
-    };
-  }
+  validPassword(newPassword);
 
-  checkToken.oldPasswords.push(oldPassword);
-  checkToken.password = newPassword;
+  checkToken.oldPasswords.push(setHash(oldPassword));
+  checkToken.password = setHash(newPassword);
 
   setData(data);
 
