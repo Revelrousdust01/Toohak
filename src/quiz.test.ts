@@ -2262,7 +2262,7 @@ describe('V1 - Test adminQuizThumbnailUpdate', () => {
 });
 
 // adminQuizSessionUpdate
-describe.only('V1 - Test adminQuizSessionUpdate', () => {
+describe('V1 - Test adminQuizSessionUpdate', () => {
   const firstName = 'Jeffery';
   const lastName = 'Zhang';
   const email = 'jeffery.zhang385@gmail.com';
@@ -2308,7 +2308,7 @@ describe.only('V1 - Test adminQuizSessionUpdate', () => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
     v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question);
-    const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
+    v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
     expect(() => v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, invalidSessionId, 'NEXT_QUESTION')).toThrow(HTTPError[400]);
   });
 
@@ -2316,7 +2316,7 @@ describe.only('V1 - Test adminQuizSessionUpdate', () => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
     v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question);
-    const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum)
+    const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
     expect(() => v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId, sessionId.quizSessionId, 'INVALID_ACTION')).toThrow(HTTPError[400]);
   });
 

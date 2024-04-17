@@ -1,7 +1,8 @@
 import { getData, setData } from './dataStore';
 import { type ErrorObject, type Quiz, type createQuizReturn, type QuizArray, type QuestionBody, type Question, type duplicateReturn, type createQuestionReturn, State } from './interfaces';
-import { isError, findQuiz, validQuestion, validQuizName, validQuizId, validToken, setupAnswers, validateThumbnail, updateQuestion, sleepSync } from './helper';
+import { isError, findQuiz, validQuestion, validQuizName, validQuizId, validToken, setupAnswers, validateThumbnail, updateQuestion } from './helper';
 import httpError from 'http-errors';
+
 /**
  * Given basic details about a new quiz, create one for the logged in user.
  *

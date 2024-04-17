@@ -292,9 +292,9 @@ export function updateQuestion(question: Question, questionBody: QuestionBody, v
 /**
   * Passes the specified amount of time
   *
-  * @param {number} ms - ms needed to be passes 
+  * @param {number} ms - ms needed to be passed
   *
-  * @returns 
+  * @returns
 */
 
 export function sleepSync(ms: number) {
