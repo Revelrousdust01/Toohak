@@ -67,24 +67,14 @@ export function adminQuizCreate(token: string, name: string, description: string
 */
 export function adminQuizDescriptionUpdate(token: string, quizid: number, description: string): ErrorObject | object {
   const data = getData();
-  const quizIndex = data.quizzes.findIndex(quizzes => quizzes.quizId === quizid);
+
   const checkToken = validToken(token, data);
 
-  // 401 error
-  if (isError(checkToken)) {
-    return { error: 'Token is empty or invalid' };
-  }
+  validQuizId(quizid, checkToken, data);
 
-  // 400 error
-  if (description.length > 100) { return { error: 'Description must be less than 100 characters.' }; }
+  if (description.length > 100) { throw httpError(400, 'Description must be less than 100 characters.'); }
 
-  // 403 error
-  if (quizIndex === -1) { return { error: 'Quiz ID does not refer to a valid quiz.' }; }
-
-  // 403 error
-  if (!checkToken.ownedQuizzes.includes(quizid)) { return { error: 'Quiz ID does not refer to a quiz that this user owns.' }; }
-
-  data.quizzes[quizIndex].description = description;
+  data.quizzes.find(quiz => quiz.quizId === quizid).description = description;
   setData(data);
   return { };
 }
@@ -103,24 +93,12 @@ export function adminQuizDescriptionUpdate(token: string, quizid: number, descri
  * @return {QuizArray} - returns an array of quizzes
  */
 
-export function adminQuizInfo(token: string, quizid: number): object | ErrorObject {
+export function adminQuizInfo(token: string, quizid: number) {
   const data = getData();
 
   const checkToken = validToken(token, data);
 
-  if (isError(checkToken)) {
-    return {
-      error: checkToken.error
-    };
-  }
-
-  const checkQuizId = validQuizId(quizid, checkToken, data);
-
-  if (isError(checkQuizId)) {
-    return {
-      error: checkQuizId.error
-    };
-  }
+  validQuizId(quizid, checkToken, data);
 
   const quiz = findQuiz(quizid, data);
   const validQuiz = quiz as Quiz;
@@ -133,27 +111,52 @@ export function adminQuizInfo(token: string, quizid: number): object | ErrorObje
       correct: answer.correct
     }));
 
-    return {
-      questionId: question.questionId,
-      question: question.question,
-      duration: question.duration,
-      points: question.points,
-      answers: answers
-    };
+    if (validQuiz.thumbnailUrl) {
+      return {
+        questionId: question.questionId,
+        question: question.question,
+        duration: question.duration,
+        thumbnailUrl: validQuiz.thumbnailUrl,
+        points: question.points,
+        answers: answers
+      };
+    } else {
+      return {
+        questionId: question.questionId,
+        question: question.question,
+        duration: question.duration,
+        points: question.points,
+        answers: answers
+      };
+    }
   });
 
   const totalDuration = validQuiz.questions.reduce((acc, question) => acc + question.duration, 0);
 
-  return {
-    quizId: validQuiz.quizId,
-    name: validQuiz.name,
-    timeCreated: validQuiz.timeCreated,
-    timeLastEdited: validQuiz.timeLastEdited,
-    description: validQuiz.description,
-    numQuestions: validQuiz.questions.length,
-    questions: questionsWithAnswers,
-    duration: totalDuration,
-  };
+  if (validQuiz.thumbnailUrl) {
+    return {
+      quizId: validQuiz.quizId,
+      name: validQuiz.name,
+      timeCreated: validQuiz.timeCreated,
+      timeLastEdited: validQuiz.timeLastEdited,
+      description: validQuiz.description,
+      numQuestions: validQuiz.questions.length,
+      questions: questionsWithAnswers,
+      duration: totalDuration,
+      thumbnailUrl: validQuiz.thumbnailUrl,
+    };
+  } else {
+    return {
+      quizId: validQuiz.quizId,
+      name: validQuiz.name,
+      timeCreated: validQuiz.timeCreated,
+      timeLastEdited: validQuiz.timeLastEdited,
+      description: validQuiz.description,
+      numQuestions: validQuiz.questions.length,
+      questions: questionsWithAnswers,
+      duration: totalDuration,
+    };
+  }
 }
 
 /**
@@ -168,7 +171,7 @@ export function adminQuizInfo(token: string, quizid: number): object | ErrorObje
  * @return {QuizArray} - returns an array of quizzes in the list;
  */
 
-export function adminQuizList(token: string): ErrorObject | QuizArray {
+export function adminQuizList(token: string): QuizArray {
   const data = getData();
 
   const checkToken = validToken(token, data);

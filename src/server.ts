@@ -134,31 +134,29 @@ app.get('/v2/admin/quiz/list', (req: Request, res: Response) => {
 app.get('/v1/admin/quiz/:quizid', (req: Request, res: Response) => {
   const response = adminQuizInfo(req.query.token as string, parseInt(req.params.quizid));
 
-  if ('error' in response) {
-    if (response.error === 'Token is empty or invalid.') {
-      return res.status(401).json(response);
-    } else if (response.error === 'Quiz ID does not refer to a valid quiz.' ||
-            response.error === 'Quiz ID does not refer to a quiz that this user owns.') {
-      return res.status(403).json(response);
-    }
-  }
+  res.json(response);
+});
+
+app.get('/v2/admin/quiz/:quizid', (req: Request, res: Response) => {
+  const token = req.headers.token as string;
+  const response = adminQuizInfo(token, parseInt(req.params.quizid));
+
   res.json(response);
 });
 
 app.put('/v1/admin/quiz/:quizid/description', (req: Request, res: Response) => {
   const { token, description } = req.body;
   const response = adminQuizDescriptionUpdate(token, parseInt(req.params.quizid), description);
-  if ('error' in response) {
-    if (response.error === 'Quiz ID does not refer to a valid quiz.' ||
-     response.error === 'Quiz ID does not refer to a quiz that this user owns.') {
-      return res.status(403).json(response);
-    } else if (response.error === 'Token is empty or invalid') {
-      return res.status(401).json(response);
-    } else {
-      return res.status(400).json(response);
-    }
-  }
-  return res.status(200).json({});
+
+  res.json(response);
+});
+
+app.put('/v2/admin/quiz/:quizid/description', (req: Request, res: Response) => {
+  const { description } = req.body;
+  const token = req.headers.token as string;
+  const response = adminQuizDescriptionUpdate(token, parseInt(req.params.quizid), description);
+
+  res.json(response);
 });
 
 app.put('/v1/admin/quiz/:quizid/name', (req: Request, res: Response) => {
@@ -206,13 +204,14 @@ app.put('/v1/admin/user/details', (req: Request, res: Response) => {
   const { token, email, nameFirst, nameLast } = req.body;
   const response = adminUserDetailsUpdate(token, email, nameFirst, nameLast);
 
-  if ('error' in response) {
-    if (response.error === 'Token is empty or invalid.') {
-      return res.status(401).json(response);
-    } else {
-      return res.status(400).json(response);
-    }
-  }
+  res.json(response);
+});
+
+app.put('/v2/admin/user/details', (req: Request, res: Response) => {
+  const { email, nameFirst, nameLast } = req.body;
+  const token = req.headers.token as string;
+  const response = adminUserDetailsUpdate(token, email, nameFirst, nameLast);
+
   res.json(response);
 });
 

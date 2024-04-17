@@ -1,7 +1,7 @@
 import { Guid } from 'guid-typescript';
 import { getData, setData } from './dataStore';
 import type { createTokenReturn, ErrorObject, ReturnUser, User, UserSessions } from './interfaces';
-import { isError, setHash, validEmail, validName, validPassword, validToken } from './helper';
+import { setHash, validEmail, validName, validPassword, validToken } from './helper';
 import httpError from 'http-errors';
 
 /**
@@ -177,32 +177,12 @@ export function adminUserDetailsUpdate(token: string, email: string, nameFirst: 
   const data = getData();
 
   const checkToken = validToken(token, data);
-  if (isError(checkToken)) {
-    return {
-      error: checkToken.error
-    };
-  }
 
-  const checkEmail = validEmail(email);
-  if (isError(checkEmail)) {
-    return {
-      error: checkEmail.error
-    };
-  }
+  validEmail(email);
 
-  const checkNameFirst = validName(nameFirst, true);
-  if (isError(checkNameFirst)) {
-    return {
-      error: checkNameFirst.error
-    };
-  }
+  validName(nameFirst, true);
 
-  const checkNameLast = validName(nameLast, false);
-  if (isError(checkNameLast)) {
-    return {
-      error: checkNameLast.error
-    };
-  }
+  validName(nameLast, false);
 
   checkToken.email = email;
   checkToken.nameFirst = nameFirst;
