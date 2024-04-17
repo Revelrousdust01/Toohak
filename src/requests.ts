@@ -316,11 +316,17 @@ export const v2RequestAdminUserPasswordUpdate = (token: string, oldPassword: str
     { oldPassword: oldPassword, newPassword: newPassword }, { token });
 };
 
-export const requestAdminQuizRestore = (token: string, quizid: number) => {
-  return oldRequestHelper('POST',
+export const v1RequestAdminQuizRestore = (token: string, quizid: number) => {
+  return requestHelper('POST',
   `/v1/admin/quiz/${quizid}/restore`,
   { token: token });
 };
+
+export const v2RequestAdminQuizRestore = (token: string, quizid: number) => {
+  return requestHelper('POST',
+    `/v2/admin/quiz/${quizid}/restore`,
+    { }, { token });
+}
 
 export const v1RequestAdminQuizSession = (token: string, quizid: number, autoStartNum: number) => {
   return requestHelper('POST',
