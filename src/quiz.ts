@@ -23,7 +23,7 @@ import httpError from 'http-errors';
 export function adminQuizCreate(token: string, name: string, description: string): ErrorObject | createQuizReturn {
   const data = getData();
 
-  const checkToken = validToken(token);
+  const checkToken = validToken(token, data);
 
   validQuizName(name);
 
@@ -67,7 +67,8 @@ export function adminQuizCreate(token: string, name: string, description: string
 */
 export function adminQuizDescriptionUpdate(token: string, quizid: number, description: string): ErrorObject | object {
   const data = getData();
-  const checkToken = validToken(token);
+
+  const checkToken = validToken(token, data);
 
   validQuizId(quizid, checkToken, data);
 
@@ -95,7 +96,7 @@ export function adminQuizDescriptionUpdate(token: string, quizid: number, descri
 export function adminQuizInfo(token: string, quizid: number) {
   const data = getData();
 
-  const checkToken = validToken(token);
+  const checkToken = validToken(token, data);
 
   validQuizId(quizid, checkToken, data);
 
@@ -173,7 +174,7 @@ export function adminQuizInfo(token: string, quizid: number) {
 export function adminQuizList(token: string): QuizArray {
   const data = getData();
 
-  const checkToken = validToken(token);
+  const checkToken = validToken(token, data);
 
   const ownedQuizzes = checkToken.ownedQuizzes;
   const quizInTrash = data.trash;
@@ -219,7 +220,7 @@ export function adminQuizList(token: string): QuizArray {
 
 export function adminQuizNameUpdate(token: string, quizid: number, name: string): ErrorObject | object {
   const data = getData();
-  const checkToken = validToken(token);
+  const checkToken = validToken(token, data);
 
   validQuizId(quizid, checkToken, data);
   validQuizName(name);
@@ -247,7 +248,7 @@ export function adminQuizNameUpdate(token: string, quizid: number, name: string)
 */
 export function adminQuizQuestionCreate(token: string, quizid: number, questionBody: QuestionBody, version: number): createQuestionReturn {
   const data = getData();
-  const checkToken = validToken(token);
+  const checkToken = validToken(token, data);
 
   validQuizId(quizid, checkToken, data);
 
@@ -318,7 +319,7 @@ export function adminQuizQuestionCreate(token: string, quizid: number, questionB
 export function adminQuizQuestionDuplicate(token: string, quizid: number, questionid: number): duplicateReturn | ErrorObject {
   const data = getData();
 
-  const checkToken = validToken(token);
+  const checkToken = validToken(token, data);
   if (isError(checkToken)) {
     return { error: 'Token is empty or invalid.' };
   }
@@ -362,7 +363,7 @@ export function adminQuizQuestionDuplicate(token: string, quizid: number, questi
 */
 export function adminQuizQuestionDelete(token: string, quizid: number, questionid: number): object | ErrorObject {
   const data = getData();
-  const checkToken = validToken(token);
+  const checkToken = validToken(token, data);
 
   if (isError(checkToken)) {
     return { error: 'Token is empty or invalid.' };
@@ -429,7 +430,7 @@ export function adminQuizQuestionMove(token: string, quizid: number, questionid:
 
 export function adminQuizSession(token: string, quizid: number, autoStartNum: number): object {
   const data = getData();
-  const checkToken = validToken(token);
+  const checkToken = validToken(token, data);
   if (autoStartNum > 50) {
     throw httpError(400, 'autoStartNum must be 50 or less.');
   }
@@ -507,7 +508,7 @@ export function adminQuizSession(token: string, quizid: number, autoStartNum: nu
 */
 export function adminQuizQuestionUpdate(token: string, quizid: number, questionid: number, questionBody: QuestionBody, version: number): object {
   const data = getData();
-  const checkToken = validToken(token);
+  const checkToken = validToken(token, data);
 
   validQuizId(quizid, checkToken, data);
 
@@ -545,7 +546,7 @@ export function adminQuizQuestionUpdate(token: string, quizid: number, questioni
 export function adminQuizRemove(token: string, quizid: number): object | ErrorObject {
   const data = getData();
   const quizIndex = data.quizzes.findIndex(quizzes => quizzes.quizId === quizid);
-  const checkToken = validToken(token);
+  const checkToken = validToken(token, data);
 
   if (isError(checkToken)) {
     return {
@@ -591,7 +592,7 @@ export function adminQuizRemove(token: string, quizid: number): object | ErrorOb
 export function adminQuizTransfer(token: string, quizid: number, userEmail: string, version: number): object {
   const data = getData();
   const user = data.users.find(users => users.email === userEmail);
-  const checkToken = validToken(token);
+  const checkToken = validToken(token, data);
 
   if (!user) {
     throw httpError(400, 'userEmail is not a real user.');
@@ -646,7 +647,7 @@ export function adminQuizTransfer(token: string, quizid: number, userEmail: stri
 export function adminQuizEmptyTrash(token: string, quizids: number[]): object | ErrorObject {
   const data = getData();
 
-  const checkToken = validToken(token);
+  const checkToken = validToken(token, data);
 
   for (const quizInTrash of data.trash) {
     const searchTrash = quizids.find(quizid => quizid === quizInTrash.quizId);
@@ -684,7 +685,7 @@ export function adminQuizRestore(token: string, quizid: number): object | ErrorO
   const data = getData();
 
   // 401
-  const checkToken = validToken(token);
+  const checkToken = validToken(token, data);
   if (isError(checkToken)) {
     return {
       error: checkToken.error
@@ -730,7 +731,7 @@ export function adminQuizRestore(token: string, quizid: number): object | ErrorO
 export function adminQuizViewTrash(token: string): ErrorObject | QuizArray {
   const data = getData();
 
-  const checkToken = validToken(token);
+  const checkToken = validToken(token, data);
   if (isError(checkToken)) {
     return {
       error: checkToken.error
@@ -761,7 +762,7 @@ export function adminQuizViewTrash(token: string): ErrorObject | QuizArray {
 export function adminQuizThumbnailUpdate(token: string, quizid: number, imgUrl: string): object {
   const data = getData();
 
-  const checkToken = validToken(token);
+  const checkToken = validToken(token, data);
   validQuizId(quizid, checkToken, data);
   validateThumbnail(imgUrl);
 

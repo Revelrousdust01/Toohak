@@ -187,12 +187,12 @@ export function validQuizId(quizid: number, user: User, data: DataStore): ErrorO
   * Checks for validToken
   *
   * @param {string} token - Token of session
+  * @param {data} DataStore - DataStore
   *
   * @returns { User } - Returns the user within the correct session when the token is valid
 */
 
-export function validToken(token: string): User {
-  const data = getData();
+export function validToken(token: string, data: DataStore): User {
   const session = data.userSessions.find(session => session.sessionId === token);
   if (!session) { throw httpError(401, 'Token is empty or invalid.'); }
 
