@@ -370,7 +370,11 @@ export function adminQuizQuestionDelete(token: string, quizid: number, questioni
 
   const questionIndex = data.quizzes[quizIndex].questions.findIndex(question => question.questionId === questionid);
 
-  if (questionIndex === -1) { throw httpError(400, 'Question ID does not refer to a valid question within the quiz.') };
+  if (questionIndex === -1) { throw httpError(400, 'Question ID does not refer to a valid question within the quiz.'); }
+
+  if (data.sessions.find(sessions => sessions.state !== State.END && sessions.metadata.quizId === quizid)) {
+    throw httpError(400, 'All sessions assosciated to the quiz must not be active to transfer.');
+  }
 
   data.quizzes[quizIndex].questions.splice(questionIndex, 1);
   data.quizzes[quizIndex].timeLastEdited = Date.now();

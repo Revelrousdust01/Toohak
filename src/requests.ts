@@ -234,7 +234,7 @@ export const v1RequestAdminQuizQuestionDelete = (token: string, quizid: number, 
 
 export const v2RequestAdminQuizQuestionDelete = (token: string, quizid: number, questionid: number) => {
   return requestHelper('DELETE',
-    `/v1/admin/quiz/${quizid}/question/${questionid}`,
+    `/v2/admin/quiz/${quizid}/question/${questionid}`,
     { }, { token });
 };
 

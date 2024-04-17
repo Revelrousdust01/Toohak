@@ -303,7 +303,7 @@ app.delete('/v1/admin/quiz/:quizid/question/:questionid', (req: Request, res: Re
 app.delete('/v2/admin/quiz/:quizid/question/:questionid', (req: Request, res: Response) => {
   const token = req.headers.token as string;
   const response = adminQuizQuestionDelete(token, parseInt(req.params.quizid), parseInt(req.params.questionid));
-  
+
   res.json(response);
 });
 

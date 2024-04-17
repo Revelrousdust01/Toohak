@@ -1280,7 +1280,7 @@ describe.skip('adminQuizQuestionDuplicate', () => {
 });
 
 // adminQuizQuestionDelete
-describe.only('V1 - Test adminQuizQuestionDelete', () => {
+describe('V1 - Test adminQuizQuestionDelete', () => {
   const firstName = 'Leon';
   const lastName = 'Sun';
   const email = 'leonsun@gmail.com';
@@ -1343,6 +1343,82 @@ describe.only('V1 - Test adminQuizQuestionDelete', () => {
     const newQuiz = v1RequestAdminQuizCreate(user.token, quizName, quizDescription);
     v1RequestAdminQuizQuestionCreate(user.token, newQuiz.quizId, question);
     expect(() => v1RequestAdminQuizQuestionDelete(user.token, newQuiz.quizId, invalidQuestionId)).toThrow(HTTPError[400]);
+  });
+});
+
+describe('V2 - Test adminQuizQuestionDelete', () => {
+  const firstName = 'Leon';
+  const lastName = 'Sun';
+  const email = 'leonsun@gmail.com';
+  const password = 'a1b2c3d4e5f6';
+  const quizName = 'New Quiz';
+  const quizDescription = 'This is a new quiz';
+  const autoStartNum = 3;
+  const question: QuestionBody = {
+    question: 'Who is the Monarch of England?',
+    duration: 150,
+    points: 5,
+    answers: [
+      {
+        answer: 'Prince Charles',
+        correct: true
+      },
+      {
+        answer: 'Prince Charless',
+
+        correct: false
+      }
+    ],
+    thumbnailUrl: 'http://google.com/some/image/path.jpg'
+  };
+
+  test('Valid inputs', () => {
+    const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const newQuiz = v2RequestAdminQuizCreate(user.token, quizName, quizDescription);
+    const newQuestion = v2RequestAdminQuizQuestionCreate(user.token, newQuiz.quizId, question);
+    expect(v2RequestAdminQuizQuestionDelete(user.token, newQuiz.quizId, newQuestion.questionId)).toMatchObject({});
+  });
+
+  test.each([
+    { invalidToken: '' },
+    { invalidToken: '123' },
+    { invalidToken: 'b77d409a-10cd-4a47-8e94-b0cd0ab50aa1' },
+    { invalidToken: 'abc' },
+  ])("Invalid Token: '$invalidToken", ({ invalidToken }) => {
+    const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const newQuiz = v2RequestAdminQuizCreate(user.token, quizName, quizDescription);
+    const newQuestion = v2RequestAdminQuizQuestionCreate(user.token, newQuiz.quizId, question);
+    expect(() => v2RequestAdminQuizQuestionDelete(invalidToken, newQuiz.quizId, newQuestion.questionId)).toThrow(HTTPError[401]);
+  });
+
+  test.each([
+    { invalidQuizId: null },
+    { invalidQuizId: 0 },
+    { invalidQuizId: 150 },
+  ])("Quiz ID is invalid or user does not own the quiz '$invalidQuizId'", ({ invalidQuizId }) => {
+    const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const newQuiz = v2RequestAdminQuizCreate(user.token, quizName, quizDescription);
+    const newQuestion = v2RequestAdminQuizQuestionCreate(user.token, newQuiz.quizId, question);
+    expect(() => v2RequestAdminQuizQuestionDelete(user.token, invalidQuizId, newQuestion.questionId)).toThrow(HTTPError[403]);
+  });
+
+  test.each([
+    { invalidQuestionId: null },
+    { invalidQuestionId: 0 },
+    { invalidQuestionId: 150 },
+  ])("Question ID does not refer to a valid question within the quiz. '$invalidQuestionId'", ({ invalidQuestionId }) => {
+    const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const newQuiz = v2RequestAdminQuizCreate(user.token, quizName, quizDescription);
+    v2RequestAdminQuizQuestionCreate(user.token, newQuiz.quizId, question);
+    expect(() => v2RequestAdminQuizQuestionDelete(user.token, newQuiz.quizId, invalidQuestionId)).toThrow(HTTPError[400]);
+  });
+
+  test('Any session for this quiz is not in END state', () => {
+    const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const newQuiz = v2RequestAdminQuizCreate(user.token, quizName, quizDescription);
+    const newQuestion = v2RequestAdminQuizQuestionCreate(user.token, newQuiz.quizId, question);
+    v1RequestAdminQuizSession(user.token, newQuiz.quizId, autoStartNum);
+    expect(() => v2RequestAdminQuizQuestionDelete(user.token, newQuiz.quizId, newQuestion.questionId)).toThrow(HTTPError[400]);
   });
 });
 
