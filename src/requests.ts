@@ -232,10 +232,16 @@ export const requestAdminQuizQuestionDuplicate = (token: string, quizid: number,
     { token: token });
 };
 
-export const requestAdminQuizQuestionDelete = (token: string, quizid: number, questionid: number) => {
-  return oldRequestHelper('DELETE',
+export const v1RequestAdminQuizQuestionDelete = (token: string, quizid: number, questionid: number) => {
+  return requestHelper('DELETE',
     `/v1/admin/quiz/${quizid}/question/${questionid}`,
     { token: token });
+};
+
+export const v2RequestAdminQuizQuestionDelete = (token: string, quizid: number, questionid: number) => {
+  return requestHelper('DELETE',
+    `/v2/admin/quiz/${quizid}/question/${questionid}`,
+    { }, { token });
 };
 
 export const v1RequestAdminQuizQuestionUpdate = (token: string, quizid: number, questionid: number, questionBody: QuestionBody) => {
@@ -250,10 +256,16 @@ export const v2RequestAdminQuizQuestionUpdate = (token: string, quizid: number, 
     { questionBody: questionBody }, { token });
 };
 
-export const requestAdminQuizQuestionMove = (token: string, quizid: number, questionid: number, newPosition: number) => {
-  return oldRequestHelper('PUT',
+export const v1RequestAdminQuizQuestionMove = (token: string, quizid: number, questionid: number, newPosition: number) => {
+  return requestHelper('PUT',
     `/v1/admin/quiz/${quizid}/question/${questionid}/move`,
     { token: token, newPosition: newPosition });
+};
+
+export const v2RequestAdminQuizQuestionMove = (token: string, quizid: number, questionid: number, newPosition: number) => {
+  return requestHelper('PUT',
+    `/v2/admin/quiz/${quizid}/question/${questionid}/move`,
+    { newPosition: newPosition }, { token });
 };
 
 export const v1RequestAdminQuizTransfer = (token: string, quizid: number, userEmail: string) => {
@@ -292,22 +304,40 @@ export const v2RequestAdminUserDetails = (token: string) => {
     { }, { token });
 };
 
-export const requestAdminUserDetailsUpdate = (token: string, email: string, firstName: string, lastName: string) => {
-  return oldRequestHelper('PUT',
+export const v1RequestAdminUserDetailsUpdate = (token: string, email: string, firstName: string, lastName: string) => {
+  return requestHelper('PUT',
     '/v1/admin/user/details',
     { token: token, email: email, nameFirst: firstName, nameLast: lastName });
 };
 
-export const requestAdminUserPasswordUpdate = (token: string, oldPassword: string, newPassword: string) => {
-  return oldRequestHelper('PUT',
+export const v2RequestAdminUserDetailsUpdate = (token: string, email: string, firstName: string, lastName: string) => {
+  return requestHelper('PUT',
+    '/v2/admin/user/details',
+    { email: email, nameFirst: firstName, nameLast: lastName }, { token });
+};
+
+export const v1RequestAdminUserPasswordUpdate = (token: string, oldPassword: string, newPassword: string) => {
+  return requestHelper('PUT',
     '/v1/admin/user/password',
     { token: token, oldPassword: oldPassword, newPassword: newPassword });
 };
 
-export const requestAdminQuizRestore = (token: string, quizid: number) => {
-  return oldRequestHelper('POST',
+export const v2RequestAdminUserPasswordUpdate = (token: string, oldPassword: string, newPassword: string) => {
+  return requestHelper('PUT',
+    '/v2/admin/user/password',
+    { oldPassword: oldPassword, newPassword: newPassword }, { token });
+};
+
+export const v1RequestAdminQuizRestore = (token: string, quizid: number) => {
+  return requestHelper('POST',
   `/v1/admin/quiz/${quizid}/restore`,
   { token: token });
+};
+
+export const v2RequestAdminQuizRestore = (token: string, quizid: number) => {
+  return requestHelper('POST',
+    `/v2/admin/quiz/${quizid}/restore`,
+    { }, { token });
 };
 
 export const v1RequestAdminQuizSession = (token: string, quizid: number, autoStartNum: number) => {
@@ -316,10 +346,16 @@ export const v1RequestAdminQuizSession = (token: string, quizid: number, autoSta
   { autoStartNum: autoStartNum }, { token });
 };
 
-export const requestAdminQuizViewTrash = (token: string) => {
-  return oldRequestHelper('GET',
+export const v1RequestAdminQuizViewTrash = (token: string) => {
+  return requestHelper('GET',
     '/v1/admin/quiz/trash',
     { token: token });
+};
+
+export const v2RequestAdminQuizViewTrash = (token: string) => {
+  return requestHelper('GET',
+    '/v2/admin/quiz/trash',
+    { }, { token });
 };
 
 export const v1RequestAdminQuizThumbnailUpdate = (token: string, quizid: number, imgUrl: string) => {

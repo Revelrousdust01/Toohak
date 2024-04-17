@@ -23,7 +23,7 @@ import httpError from 'http-errors';
 export function adminQuizCreate(token: string, name: string, description: string): ErrorObject | createQuizReturn {
   const data = getData();
 
-  const checkToken = validToken(token);
+  const checkToken = validToken(token, data);
 
   validQuizName(name);
 
@@ -65,9 +65,11 @@ export function adminQuizCreate(token: string, name: string, description: string
   *
   * @returns {object} - returns an empty object when a quiz description is updated
 */
+
 export function adminQuizDescriptionUpdate(token: string, quizid: number, description: string): ErrorObject | object {
   const data = getData();
-  const checkToken = validToken(token);
+
+  const checkToken = validToken(token, data);
 
   validQuizId(quizid, checkToken, data);
 
@@ -95,7 +97,7 @@ export function adminQuizDescriptionUpdate(token: string, quizid: number, descri
 export function adminQuizInfo(token: string, quizid: number) {
   const data = getData();
 
-  const checkToken = validToken(token);
+  const checkToken = validToken(token, data);
 
   validQuizId(quizid, checkToken, data);
 
@@ -173,7 +175,7 @@ export function adminQuizInfo(token: string, quizid: number) {
 export function adminQuizList(token: string): QuizArray {
   const data = getData();
 
-  const checkToken = validToken(token);
+  const checkToken = validToken(token, data);
 
   const ownedQuizzes = checkToken.ownedQuizzes;
   const quizInTrash = data.trash;
@@ -219,7 +221,7 @@ export function adminQuizList(token: string): QuizArray {
 
 export function adminQuizNameUpdate(token: string, quizid: number, name: string): ErrorObject | object {
   const data = getData();
-  const checkToken = validToken(token);
+  const checkToken = validToken(token, data);
 
   validQuizId(quizid, checkToken, data);
   validQuizName(name);
@@ -245,9 +247,10 @@ export function adminQuizNameUpdate(token: string, quizid: number, name: string)
   * @returns { { error: }  } - Returns object when conditions fail
   * @returns { object } - returns an empty object question is updated.
 */
+
 export function adminQuizQuestionCreate(token: string, quizid: number, questionBody: QuestionBody, version: number): createQuestionReturn {
   const data = getData();
-  const checkToken = validToken(token);
+  const checkToken = validToken(token, data);
 
   validQuizId(quizid, checkToken, data);
 
@@ -315,10 +318,11 @@ export function adminQuizQuestionCreate(token: string, quizid: number, questionB
  *
  * @returns {duplicateReturn} - returns the new question id when duplicated.
  */
+
 export function adminQuizQuestionDuplicate(token: string, quizid: number, questionid: number): duplicateReturn | ErrorObject {
   const data = getData();
 
-  const checkToken = validToken(token);
+  const checkToken = validToken(token, data);
   if (isError(checkToken)) {
     return { error: 'Token is empty or invalid.' };
   }
@@ -360,30 +364,23 @@ export function adminQuizQuestionDuplicate(token: string, quizid: number, questi
   * @returns { { error: }  } - Returns object when conditions fail
   * @returns { object } - returns an empty object question is updated.
 */
+
 export function adminQuizQuestionDelete(token: string, quizid: number, questionid: number): object | ErrorObject {
   const data = getData();
-  const checkToken = validToken(token);
-
-  if (isError(checkToken)) {
-    return { error: 'Token is empty or invalid.' };
-  }
-
+  const checkToken = validToken(token, data);
   const quizIndex = data.quizzes.findIndex(quiz => quiz.quizId === quizid);
-  if (quizIndex === -1) {
-    return { error: 'Quiz ID does not refer to a valid quiz.' };
-  }
 
-  if (!checkToken.ownedQuizzes.includes(quizid)) {
-    return { error: 'Quiz ID does not refer to a quiz that this user owns.' };
-  }
+  validQuizId(quizid, checkToken, data);
 
   const questionIndex = data.quizzes[quizIndex].questions.findIndex(question => question.questionId === questionid);
 
-  if (questionIndex === -1) {
-    return { error: 'Question ID does not refer to a valid question within the quiz.' };
-  }
-  data.quizzes[quizIndex].questions.splice(questionIndex, 1);
+  if (questionIndex === -1) { throw httpError(400, 'Question ID does not refer to a valid question within the quiz.'); }
 
+  if (data.sessions.find(sessions => sessions.state !== State.END && sessions.metadata.quizId === quizid)) {
+    throw httpError(400, 'All sessions assosciated to the quiz must not be active to transfer.');
+  }
+
+  data.quizzes[quizIndex].questions.splice(questionIndex, 1);
   data.quizzes[quizIndex].timeLastEdited = Date.now();
 
   setData(data);
@@ -404,36 +401,20 @@ export function adminQuizQuestionDelete(token: string, quizid: number, questioni
 
 export function adminQuizQuestionMove(token: string, quizid: number, questionid: number, newPosition: number): object | ErrorObject {
   const data = getData();
-  const checkToken = validToken(token);
-
-  if (isError(checkToken)) {
-    return { error: 'Token is empty or invalid.' };
-  }
-
+  const checkToken = validToken(token, data);
   const quiz = data.quizzes.find(quiz => quiz.quizId === quizid);
 
-  if (!quiz) {
-    return { error: 'Quiz ID does not refer to a valid quiz.' };
-  }
-
-  if (!checkToken.ownedQuizzes.includes(quizid)) {
-    return { error: 'Quiz ID does not refer to a quiz that this user owns.' };
-  }
+  validQuizId(quizid, checkToken, data);
 
   const questionIndex = quiz.questions.findIndex(question => question.questionId === questionid);
-  if (questionIndex === -1) {
-    return { error: 'Question ID does not refer to a valid question within the quiz.' };
-  }
+  if (questionIndex === -1) { throw httpError(400, 'Question ID does not refer to a valid question within the quiz.'); }
 
-  if (newPosition < 0 || newPosition >= quiz.questions.length) {
-    return { error: 'New position is out of valid range.' };
-  }
+  if (newPosition < 0 || newPosition >= quiz.questions.length) { throw httpError(400, 'New position is out of valid range.'); }
 
-  if (newPosition === questionIndex) {
-    return { error: 'New position is the same as the current position of the question.' };
-  }
+  if (newPosition === questionIndex) { throw httpError(400, 'New position is the same as the current position of the question.'); }
 
   const [questionToMove] = quiz.questions.splice(questionIndex, 1);
+
   quiz.questions.splice(newPosition, 0, questionToMove);
 
   quiz.timeLastEdited = Date.now();
@@ -445,7 +426,7 @@ export function adminQuizQuestionMove(token: string, quizid: number, questionid:
 
 export function adminQuizSession(token: string, quizid: number, autoStartNum: number): object {
   const data = getData();
-  const checkToken = validToken(token);
+  const checkToken = validToken(token, data);
   if (autoStartNum > 50) {
     throw httpError(400, 'autoStartNum must be 50 or less.');
   }
@@ -521,9 +502,10 @@ export function adminQuizSession(token: string, quizid: number, autoStartNum: nu
   * @returns { { error: }  } - Returns object when conditions fail
   * @returns { object } - returns an empty object question is updated.
 */
+
 export function adminQuizQuestionUpdate(token: string, quizid: number, questionid: number, questionBody: QuestionBody, version: number): object {
   const data = getData();
-  const checkToken = validToken(token);
+  const checkToken = validToken(token, data);
 
   validQuizId(quizid, checkToken, data);
 
@@ -562,9 +544,13 @@ export function adminQuizRemove(token: string, quizid: number): object {
   const data = getData();
   const quizIndex = data.quizzes.findIndex(quizzes => quizzes.quizId === quizid);
 
-  const checkToken = validToken(token);
+  const checkToken = validToken(token, data);
 
   validQuizId(quizid, checkToken, data);
+
+  if (data.sessions.find(sessions => sessions.state !== State.END && sessions.metadata.quizId === quizid)) {
+    throw httpError(400, 'All sessions assosciated to the quiz must not be active to transfer.');
+  }
 
   data.quizzes[quizIndex].timeLastEdited = Date.now();
 
@@ -596,7 +582,7 @@ export function adminQuizRemove(token: string, quizid: number): object {
 export function adminQuizTransfer(token: string, quizid: number, userEmail: string, version: number): object {
   const data = getData();
   const user = data.users.find(users => users.email === userEmail);
-  const checkToken = validToken(token);
+  const checkToken = validToken(token, data);
 
   if (!user) {
     throw httpError(400, 'userEmail is not a real user.');
@@ -651,7 +637,7 @@ export function adminQuizTransfer(token: string, quizid: number, userEmail: stri
 export function adminQuizEmptyTrash(token: string, quizids: number[]): object | ErrorObject {
   const data = getData();
 
-  const checkToken = validToken(token);
+  const checkToken = validToken(token, data);
 
   for (const quizInTrash of data.trash) {
     const searchTrash = quizids.find(quizid => quizid === quizInTrash.quizId);
@@ -685,30 +671,31 @@ export function adminQuizEmptyTrash(token: string, quizids: number[]): object | 
  *
  * @returns {object} - returns an empty object when quiz is restored
  */
+
 export function adminQuizRestore(token: string, quizid: number): object | ErrorObject {
   const data = getData();
 
   // 401
-  const checkToken = validToken(token);
-  if (isError(checkToken)) {
-    return {
-      error: checkToken.error
-    };
-  }
+  const checkToken = validToken(token, data);
 
   const quizIndex = data.trash.findIndex(trash => trash.quizId === quizid);
   const quizIndex2 = data.quizzes.findIndex(quizzes => quizzes.quizId === quizid);
   // 403
-  if (quizIndex === -1 && quizIndex2 === -1) { return { error: 'Quiz ID does not refer to a valid quiz.' }; }
-  if (!checkToken.ownedQuizzes.includes(quizid)) { return { error: 'Quiz ID does not refer to a quiz that this user owns.' }; }
+  if (quizIndex === -1 && quizIndex2 === -1) {
+    throw httpError(403, 'Quiz ID does not refer to a valid quiz.');
+  }
+
+  if (!checkToken.ownedQuizzes.includes(quizid)) {
+    throw httpError(403, 'Quiz ID does not refer to a quiz that this user owns.');
+  }
   // 400
   if (quizIndex === -1) {
-    return { error: 'Quiz ID refers to a quiz that is not currently in the trash' };
+    throw httpError(400, 'Quiz ID refers to a quiz that is not currently in the trash');
   }
   const quiz = data.trash.find(quiz => quiz.quizId === quizid);
   for (const namedQuiz of data.quizzes) {
     if (namedQuiz.name === quiz.name) {
-      return { error: 'Quiz name of the restored quiz is already used by another active quiz' };
+      throw httpError(400, 'Quiz name of the restored quiz is already used by another active quiz');
     }
   }
 
@@ -735,12 +722,7 @@ export function adminQuizRestore(token: string, quizid: number): object | ErrorO
 export function adminQuizViewTrash(token: string): ErrorObject | QuizArray {
   const data = getData();
 
-  const checkToken = validToken(token);
-  if (isError(checkToken)) {
-    return {
-      error: checkToken.error
-    };
-  }
+  const checkToken = validToken(token, data);
 
   const ownedQuizzes = checkToken.ownedQuizzes;
   const quizInTrash = data.trash;
@@ -766,7 +748,7 @@ export function adminQuizViewTrash(token: string): ErrorObject | QuizArray {
 export function adminQuizThumbnailUpdate(token: string, quizid: number, imgUrl: string): object {
   const data = getData();
 
-  const checkToken = validToken(token);
+  const checkToken = validToken(token, data);
   validQuizId(quizid, checkToken, data);
   validateThumbnail(imgUrl);
 
