@@ -46,7 +46,7 @@ describe('V1 - adminAuthLogout', () => {
 
   test('Valid Details', () => {
     const register = v1RequestAdminAuthRegister(email, password, firstName, lastName);
-    expect(v1RequestAdminAuthLogout(register.token as string)).toStrictEqual({ });
+    expect(v1RequestAdminAuthLogout(register.token)).toStrictEqual({ });
   });
 
   test.each([
@@ -68,7 +68,7 @@ describe('V2 - adminAuthLogout', () => {
 
   test('Valid Details', () => {
     const register = v1RequestAdminAuthRegister(email, password, firstName, lastName);
-    expect(v2RequestAdminAuthLogout(register.token as string)).toStrictEqual({ });
+    expect(v2RequestAdminAuthLogout(register.token)).toStrictEqual({ });
   });
 
   test.each([
@@ -176,7 +176,7 @@ describe('V1 - adminUserDetails', () => {
 
   test('Valid Details', () => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
-    expect(v1RequestAdminUserDetails(user.token as string)).toMatchObject({
+    expect(v1RequestAdminUserDetails(user.token)).toMatchObject({
       user: {
         userId: expect.any(Number),
         name: expect.any(String),
@@ -206,7 +206,7 @@ describe('V2 - adminUserDetails', () => {
 
   test('Valid Details', () => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
-    expect(v2RequestAdminUserDetails(user.token as string)).toMatchObject({
+    expect(v2RequestAdminUserDetails(user.token)).toMatchObject({
       user: {
         userId: expect.any(Number),
         name: expect.any(String),
@@ -237,7 +237,7 @@ describe('V1 - adminUserDetailsUpdate', () => {
 
   test('Valid Details', () => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
-    expect(v1RequestAdminUserDetailsUpdate(user.token as string,
+    expect(v1RequestAdminUserDetailsUpdate(user.token,
       'shuangupdated@student.unsw.edu.au', 'UpdateSamuel', 'UpdateHuang')).toStrictEqual({ });
   });
 
@@ -245,7 +245,7 @@ describe('V1 - adminUserDetailsUpdate', () => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
     v1RequestAdminAuthRegister('cpolitis@student.unsw.edu.au', 'a1b2c3d4e5f6',
       'Christian', 'Politis');
-    expect(() => v1RequestAdminUserDetailsUpdate(user.token as string,
+    expect(() => v1RequestAdminUserDetailsUpdate(user.token,
       'cpolitis@student.unsw.edu.au', firstName, lastName)).toThrow(HTTPError[400]);
   });
 
@@ -259,7 +259,7 @@ describe('V1 - adminUserDetailsUpdate', () => {
     { badEmail: 'shuang' }
   ])("Email does not satisfy validator: '$badEmail'", ({ badEmail }) => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
-    expect(() => v1RequestAdminUserDetailsUpdate(user.token as string,
+    expect(() => v1RequestAdminUserDetailsUpdate(user.token,
       badEmail, firstName, lastName)).toThrow(HTTPError[400]);
   });
 
@@ -273,7 +273,7 @@ describe('V1 - adminUserDetailsUpdate', () => {
     { character: '/' }
   ])("NameFirst contains unwanted Characters: '$character'", ({ character }) => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
-    expect(() => v1RequestAdminUserDetailsUpdate(user.token as string, email,
+    expect(() => v1RequestAdminUserDetailsUpdate(user.token, email,
       firstName.concat(character), lastName)).toThrow(HTTPError[400]);
   });
 
@@ -287,7 +287,7 @@ describe('V1 - adminUserDetailsUpdate', () => {
     { character: '/' }
   ])("NameLast contains unwanted Characters: '$character'", ({ character }) => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
-    expect(() => v1RequestAdminUserDetailsUpdate(user.token as string, email,
+    expect(() => v1RequestAdminUserDetailsUpdate(user.token, email,
       firstName, lastName.concat(character))).toThrow(HTTPError[400]);
   });
 
@@ -310,7 +310,7 @@ describe('V2 - adminUserDetailsUpdate', () => {
 
   test('Valid Details', () => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
-    expect(v2RequestAdminUserDetailsUpdate(user.token as string,
+    expect(v2RequestAdminUserDetailsUpdate(user.token,
       'shuangupdated@student.unsw.edu.au', 'UpdateSamuel', 'UpdateHuang')).toStrictEqual({ });
   });
 
@@ -318,7 +318,7 @@ describe('V2 - adminUserDetailsUpdate', () => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
     v1RequestAdminAuthRegister('cpolitis@student.unsw.edu.au', 'a1b2c3d4e5f6',
       'Christian', 'Politis');
-    expect(() => v1RequestAdminUserDetailsUpdate(user.token as string,
+    expect(() => v1RequestAdminUserDetailsUpdate(user.token,
       'cpolitis@student.unsw.edu.au', firstName, lastName)).toThrow(HTTPError[400]);
   });
 
@@ -332,7 +332,7 @@ describe('V2 - adminUserDetailsUpdate', () => {
     { badEmail: 'shuang' }
   ])("Email does not satisfy validator: '$badEmail'", ({ badEmail }) => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
-    expect(() => v2RequestAdminUserDetailsUpdate(user.token as string,
+    expect(() => v2RequestAdminUserDetailsUpdate(user.token,
       badEmail, firstName, lastName)).toThrow(HTTPError[400]);
   });
 
@@ -346,7 +346,7 @@ describe('V2 - adminUserDetailsUpdate', () => {
     { character: '/' }
   ])("NameFirst contains unwanted Characters: '$character'", ({ character }) => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
-    expect(() => v2RequestAdminUserDetailsUpdate(user.token as string, email,
+    expect(() => v2RequestAdminUserDetailsUpdate(user.token, email,
       firstName.concat(character), lastName)).toThrow(HTTPError[400]);
   });
 
@@ -360,7 +360,7 @@ describe('V2 - adminUserDetailsUpdate', () => {
     { character: '/' }
   ])("NameLast contains unwanted Characters: '$character'", ({ character }) => {
     const user = v1RequestAdminAuthRegister(email, password, firstName, lastName);
-    expect(() => v2RequestAdminUserDetailsUpdate(user.token as string, email,
+    expect(() => v2RequestAdminUserDetailsUpdate(user.token, email,
       firstName, lastName.concat(character))).toThrow(HTTPError[400]);
   });
 
@@ -385,27 +385,27 @@ describe('V1 - adminUserPasswordUpdate', () => {
 
   test('Valid Details', () => {
     const user = v1RequestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    expect(v1RequestAdminUserPasswordUpdate(user.token as string,
+    expect(v1RequestAdminUserPasswordUpdate(user.token,
       oldPassword, newPassword)).toStrictEqual({ });
   });
 
   test('Old Password is not the correct old password', () => {
     const user = v1RequestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    expect(() => v1RequestAdminUserPasswordUpdate(user.token as string,
+    expect(() => v1RequestAdminUserPasswordUpdate(user.token,
       'thisisthewrongpassword', newPassword)).toThrow(HTTPError[400]);
   });
 
   test('Old Password and New Password match exactly', () => {
     const user = v1RequestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    expect(() => v1RequestAdminUserPasswordUpdate(user.token as string,
+    expect(() => v1RequestAdminUserPasswordUpdate(user.token,
       oldPassword, oldPassword)).toThrow(HTTPError[400]);
   });
 
   test('New Password has already been used by this user', () => {
     const user = v1RequestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    v1RequestAdminUserPasswordUpdate(user.token as string,
+    v1RequestAdminUserPasswordUpdate(user.token,
       oldPassword, newPassword);
-    expect(() => v1RequestAdminUserPasswordUpdate(user.token as string,
+    expect(() => v1RequestAdminUserPasswordUpdate(user.token,
       newPassword, oldPassword)).toThrow(HTTPError[400]);
   });
 
@@ -418,7 +418,7 @@ describe('V1 - adminUserPasswordUpdate', () => {
     { badPassword: 'A123456' }
   ])("Password is less than 8 characters: '$badPassword'", ({ badPassword }) => {
     const user = v1RequestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    expect(() => v1RequestAdminUserPasswordUpdate(user.token as string,
+    expect(() => v1RequestAdminUserPasswordUpdate(user.token,
       oldPassword, badPassword)).toThrow(HTTPError[400]);
   });
 
@@ -427,7 +427,7 @@ describe('V1 - adminUserPasswordUpdate', () => {
     { badPassword: '11111111111111111111' },
   ])("Password does not contain at least one number and at least one letter: '$badPassword'", ({ badPassword }) => {
     const user = v1RequestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    expect(() => v1RequestAdminUserPasswordUpdate(user.token as string,
+    expect(() => v1RequestAdminUserPasswordUpdate(user.token,
       newPassword, badPassword)).toThrow(HTTPError[400]);
   });
 
@@ -451,27 +451,27 @@ describe('V2 - adminUserPasswordUpdate', () => {
 
   test('Valid Details', () => {
     const user = v1RequestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    expect(v2RequestAdminUserPasswordUpdate(user.token as string,
+    expect(v2RequestAdminUserPasswordUpdate(user.token,
       oldPassword, newPassword)).toStrictEqual({ });
   });
 
   test('Old Password is not the correct old password', () => {
     const user = v1RequestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    expect(() => v2RequestAdminUserPasswordUpdate(user.token as string,
+    expect(() => v2RequestAdminUserPasswordUpdate(user.token,
       'thisisthewrongpassword', newPassword)).toThrow(HTTPError[400]);
   });
 
   test('Old Password and New Password match exactly', () => {
     const user = v1RequestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    expect(() => v2RequestAdminUserPasswordUpdate(user.token as string,
+    expect(() => v2RequestAdminUserPasswordUpdate(user.token,
       oldPassword, oldPassword)).toThrow(HTTPError[400]);
   });
 
   test('New Password has already been used by this user', () => {
     const user = v1RequestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    v2RequestAdminUserPasswordUpdate(user.token as string,
+    v2RequestAdminUserPasswordUpdate(user.token,
       oldPassword, newPassword);
-    expect(() => v2RequestAdminUserPasswordUpdate(user.token as string,
+    expect(() => v2RequestAdminUserPasswordUpdate(user.token,
       newPassword, oldPassword)).toThrow(HTTPError[400]);
   });
 
@@ -484,7 +484,7 @@ describe('V2 - adminUserPasswordUpdate', () => {
     { badPassword: 'A123456' }
   ])("Password is less than 8 characters: '$badPassword'", ({ badPassword }) => {
     const user = v1RequestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    expect(() => v2RequestAdminUserPasswordUpdate(user.token as string,
+    expect(() => v2RequestAdminUserPasswordUpdate(user.token,
       oldPassword, badPassword)).toThrow(HTTPError[400]);
   });
 
@@ -493,7 +493,7 @@ describe('V2 - adminUserPasswordUpdate', () => {
     { badPassword: '11111111111111111111' },
   ])("Password does not contain at least one number and at least one letter: '$badPassword'", ({ badPassword }) => {
     const user = v1RequestAdminAuthRegister(email, oldPassword, firstName, lastName);
-    expect(() => v2RequestAdminUserPasswordUpdate(user.token as string,
+    expect(() => v2RequestAdminUserPasswordUpdate(user.token,
       newPassword, badPassword)).toThrow(HTTPError[400]);
   });
 
