@@ -307,7 +307,6 @@ export function sleepSync(ms: number) {
 
 export function validAction(sessionId: number, action: string, data: DataStore): validActionType{
   let session = data.sessions.find(session => session.quizSessionId === sessionId);
-    console.log(session.state);
       switch (session.state) {
         case State.LOBBY:
           if (action === Action.NEXT_QUESTION) {

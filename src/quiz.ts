@@ -2,7 +2,7 @@ import { getData, setData } from './dataStore';
 import { type ErrorObject, type Quiz, type createQuizReturn, type QuizArray, type QuestionBody, type Question, type duplicateReturn, type createQuestionReturn, State, Action } from './interfaces';
 import { isError, findQuiz, validQuestion, validQuizName, validQuizId, validToken, setupAnswers, validateThumbnail, updateQuestion, validAction } from './helper';
 import httpError from 'http-errors';
-let timeouts: NodeJS.Timeout[] = [];
+export let timers: ReturnType<typeof setTimeout>[] = [];
 let start: number;
 
 /**
@@ -534,7 +534,6 @@ export function adminQuizSessionUpdate(token: string, quizid: number, sessionId:
 
   const checkAction = validAction(sessionId, action, data)
   let currentState = sessionDetails.state;
-  console.log(checkAction);
   if (!checkAction.valid || (sessionDetails.metadata.questions.length === sessionDetails.atQuestion 
     && (currentState === State.ANSWER_SHOW || currentState === State.QUESTION_CLOSE) 
     && action === Action.NEXT_QUESTION)){
@@ -542,25 +541,39 @@ export function adminQuizSessionUpdate(token: string, quizid: number, sessionId:
   }
 
   sessionDetails.state = checkAction.state;
-  if (sessionDetails.state === State.QUESTION_COUNTDOWN) {
-    sessionDetails.atQuestion = sessionDetails.atQuestion + 1;
-    setData(data);
-    timeouts.push(setTimeout(() => {
+
+  if(action === Action.SKIP_COUNTDOWN){
+    for (const timer of timers) {
+      clearTimeout(timer);
+    }
+    timers.push(setTimeout(() => {
       sessionDetails.state = State.QUESTION_OPEN;
       setData(data);
       start = Math.floor(Date.now() / 1000);
-      timeouts.push(setTimeout(() => {
+      timers.push(setTimeout(() => {
+        sessionDetails.state = State.QUESTION_CLOSE;
+        setData(data);
+      }))}, sessionDetails.metadata.questions[sessionDetails.atQuestion - 1].duration * 1000));
+  }
+
+  if (sessionDetails.state === State.QUESTION_COUNTDOWN) {
+    sessionDetails.atQuestion = sessionDetails.atQuestion + 1;
+    setData(data);
+    timers.push(setTimeout(() => {
+      sessionDetails.state = State.QUESTION_OPEN;
+      setData(data);
+      start = Math.floor(Date.now() / 1000);
+      timers.push(setTimeout(() => {
         sessionDetails.state = State.QUESTION_CLOSE;
         setData(data);
       }, sessionDetails.metadata.questions[sessionDetails.atQuestion - 1].duration * 1000));
-    }, 100));
+    }, 3000));
     setData(data);
   }
 
   if (sessionDetails.state === State.FINAL_RESULTS || sessionDetails.state === State.END) {
     sessionDetails.atQuestion = 0;
   }
-
   setData(data);
 
   return { }
