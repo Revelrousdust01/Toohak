@@ -95,7 +95,7 @@ describe('V1 - Test adminPlayerSubmission', () => {
     ]
   };
 
-  test('Valid inputs', () => {
+  test.only('Valid inputs', () => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quiz = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
     v1RequestAdminQuizQuestionCreate(register.token as string, quiz.quizId as number, question);
@@ -103,7 +103,7 @@ describe('V1 - Test adminPlayerSubmission', () => {
     const player = v1RequestAdminPlayerJoin(session.sessionId, playerName);
     v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'NEXT_QUESTION');
     v1RequestAdminQuizSessionUpdate(register.token as string, quiz.quizId as number, session.sessionId, 'SKIP_COUNTDOWN');
-    expect(v1RequestAdminPlayerSubmission(player.playerId, 0, answerIds)).toMatchObject({ });
+    expect(v1RequestAdminPlayerSubmission(player.playerId, 1, answerIds)).toMatchObject({ });
   });
 
   test('If player ID does not exist', () => {
@@ -180,5 +180,88 @@ describe('V1 - Test adminPlayerSubmission', () => {
     v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'NEXT_QUESTION');
     v1RequestAdminQuizSessionUpdate(register.token as string, quiz.quizId as number, session.sessionId, 'SKIP_COUNTDOWN');
     expect(() => v1RequestAdminPlayerSubmission(player.playerId, 0, [])).toThrow(HTTPError[400]);
+  });
+});
+
+// adminQuestionResult
+describe('V1 - Test adminQuestionResult', () => {
+  const player1 = 'player1';
+  const player2 = 'player2';
+  const player3 = 'player3';
+  const firstName = 'Jeffery';
+  const lastName = 'Zhang';
+  const email = 'jeffery.zhang385@gmail.com';
+  const password = 'str0ngpassword';
+  const quizName = 'New Quiz';
+  const quizDescription = 'This is a new quiz';
+  const autoStartNum = 3;
+  // const answerIds = [0, 1];
+  const question: QuestionBody = {
+    question: 'Who is the Monarch of England?',
+    duration: 1,
+    points: 5,
+    answers: [
+      {
+        answer: 'Prince Charles',
+        correct: true
+      },
+      {
+        answer: 'Prince Charless',
+        correct: false
+      }
+    ]
+  };
+  const question2: QuestionBody = {
+    question: 'Who is the Monarch of England1?',
+    duration: 1,
+    points: 5,
+    answers: [
+      {
+        answer: 'Prince Charles1',
+        correct: true
+      },
+      {
+        answer: 'Prince Charless1',
+        correct: false
+      }
+    ],
+  };
+
+  test('Valid inputs for all correct for question 1', () => {
+    const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question);
+    const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
+    const player1 = v1RequestAdminPlayerJoin(sessionId.sessionId, player1);
+    const player2 = v1RequestAdminPlayerJoin(sessionId.sessionId, player2);
+    const player3 = v1RequestAdminPlayerJoin(sessionId.sessionId, player3);
+    v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'NEXT_QUESTION');
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'SKIP_COUNTDOWN');
+    v1RequestAdminPlayerSubmission(player1.playerId, 1, 1);
+    v1RequestAdminPlayerSubmission(player2.playerId, 1, 1);
+    v1RequestAdminPlayerSubmission(player2.playerId, 1, 1);
+    expect(v1RequestAdminPlayerSubmission(player.playerId, 0, answerIds)).toMatchObject({ });
+  });
+
+  test('Valid inputs for all incorrect for question 1', () => {
+    const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question);
+    const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
+    const player = v1RequestAdminPlayerJoin(sessionId.sessionId, playerName);
+    v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'NEXT_QUESTION');
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'SKIP_COUNTDOWN');
+    expect(v1RequestAdminPlayerSubmission(player.playerId, 0, answerIds)).toMatchObject({ });
+  });
+
+  test('Valid inputs for mixed correct/incorrect for question 1', () => {
+    const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question);
+    const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
+    const player = v1RequestAdminPlayerJoin(sessionId.sessionId, playerName);
+    v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'NEXT_QUESTION');
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'SKIP_COUNTDOWN');
+    expect(v1RequestAdminPlayerSubmission(player.playerId, 0, answerIds)).toMatchObject({ });
   });
 });

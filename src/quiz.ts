@@ -266,15 +266,15 @@ export function adminQuizQuestionCreate(token: string, quizid: number, questionB
       points: questionBody.points,
       answers: []
     };
-
+    
     newQuestion = setupAnswers(newQuestion, questionBody);
-
+    
     validQuiz.questionCounter++;
 
     validQuiz.timeLastEdited = Date.now();
 
     validQuiz.questions.push(newQuestion);
-
+    console.log(validQuiz.questions.answer);
     setData(data);
     return { questionId: newQuestion.questionId };
   } else {
@@ -288,6 +288,7 @@ export function adminQuizQuestionCreate(token: string, quizid: number, questionB
       answers: [],
       thumbnailUrl: questionBody.thumbnailUrl
     };
+
     newQuestion = setupAnswers(newQuestion, questionBody);
 
     validQuiz.questionCounter++;
