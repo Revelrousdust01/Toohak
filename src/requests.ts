@@ -339,6 +339,13 @@ export const v1RequestAdminPlayerSubmission = (playerid: number, questionpositio
     { answerIds: answerIds });
 };
 
+export const v1RequestAdminQuestionResult = (playerid: number, questionposition: number) => {
+  return requestHelper('GET',
+    `/v1/player/${playerid}/question/${questionposition}/results`,
+    { });
+};
+
+
 export function requestSleepSync(ms: number) {
   const startTime = new Date().getTime();
   while (new Date().getTime() - startTime < ms) {
