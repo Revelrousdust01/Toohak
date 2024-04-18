@@ -3,6 +3,7 @@ import { findQuiz, validQuizId, validToken, validAction } from './helper';
 import httpError from 'http-errors';
 import { type Quiz, type SessionsList, Action, State } from './interfaces';
 export let timers: ReturnType<typeof setTimeout>[] = [];
+export let start: number;
 /**
  * Creates a new quiz session if conditions permit, including session count and quiz validation. The session starts in the LOBBY state and waits for players.
  *
@@ -117,7 +118,7 @@ export function adminQuizSessionUpdate(token: string, quizid: number, sessionId:
     timers.forEach(timer => clearTimeout(timer));
     timers = [];
     sessionDetails.state = State.QUESTION_OPEN;
-
+    start = Math.floor(Date.now() / 1000);
     const newTimer = setTimeout(() => {
       sessionDetails.state = State.QUESTION_CLOSE;
       setData(data);
@@ -133,6 +134,7 @@ export function adminQuizSessionUpdate(token: string, quizid: number, sessionId:
 
     timers.push(setTimeout(() => {
       sessionDetails.state = State.QUESTION_OPEN;
+      start = Math.floor(Date.now() / 1000);
 
       timers.push(setTimeout(() => {
         sessionDetails.state = State.QUESTION_CLOSE;

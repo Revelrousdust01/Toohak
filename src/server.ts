@@ -24,7 +24,7 @@ import sui from 'swagger-ui-express';
 import fs from 'fs';
 import path from 'path';
 import process from 'process';
-import { adminPlayerJoin } from './player';
+import { adminPlayerJoin, adminPlayerSubmission } from './player';
 
 // Set up web app
 const app = express();
@@ -378,6 +378,12 @@ app.post('/v1/player/join', (req: Request, res: Response) => {
 app.get('/v1/admin/quiz/:quizid/sessions', (req: Request, res: Response) => {
   const token = req.headers.token as string;
   const response = adminViewQuizSessions(token, parseInt(req.params.quizid));
+  res.json(response);
+});
+
+app.put('/v1/player/:playerid/question/:questionposition/answer', (req: Request, res: Response) => {
+  const { answerIds } = req.body;
+  const response = adminPlayerSubmission(parseInt(req.params.playerid), parseInt(req.params.questionposition), answerIds.map((id: string) => parseInt(id)));
   res.json(response);
 });
 
