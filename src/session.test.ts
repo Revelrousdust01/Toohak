@@ -460,16 +460,32 @@ describe('V1 - Test adminViewQuizSessions', () => {
   const quizName = 'New Quiz 1';
   const quizDescription = 'This is the first new quiz';
   const autoStartNum = 3;
-  
+  const question: QuestionBody = {
+    question: 'Who is the Monarch of England?',
+    duration: 1,
+    points: 5,
+    answers: [
+      {
+        answer: 'Prince Charles',
+        correct: true
+      },
+      {
+        answer: 'Prince Charless',
+        correct: false
+      }
+    ]
+  };
+
   test('Valid inputs', () => {
     const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quizId = v1RequestAdminQuizCreate(user.token, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(user.token, quizId.quizId, question);
     const sessionId1 = v1RequestAdminQuizSession(user.token, quizId.quizId, autoStartNum);
-    v1RequestAdminQuizSessionUpdate(user.token, quizId.quizId, sessionId.sessionId, 'END');
+    v1RequestAdminQuizSessionUpdate(user.token, quizId.quizId, sessionId1.sessionId, 'END');
     const sessionId2 = v1RequestAdminQuizSession(user.token, quizId.quizId, autoStartNum);
-    expect(v1RequestAdminViewQuizSessions()).toMatchObject({
-      activeSessions: [ sessionId1 ],
-      inactiveSessions: [ sessionId2 ]
+    expect(v1RequestAdminViewQuizSessions(user.token, quizId.quizId)).toMatchObject({
+      activeSessions: [sessionId2.sessionId],
+      inactiveSessions: [sessionId1.sessionId]
     });
   });
 
@@ -482,7 +498,7 @@ describe('V1 - Test adminViewQuizSessions', () => {
     const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quizId = v1RequestAdminQuizCreate(user.token, quizName, quizDescription);
     v1RequestAdminQuizQuestionCreate(user.token, quizId.quizId, question);
-    const sessionId = v1RequestAdminQuizSession(user.token, quizId.quizId, autoStartNum);
+    v1RequestAdminQuizSession(user.token, quizId.quizId, autoStartNum);
     expect(() => v1RequestAdminViewQuizSessions(invalidToken, quizId.quizId)).toThrow(HTTPError[401]);
   });
 
@@ -490,7 +506,7 @@ describe('V1 - Test adminViewQuizSessions', () => {
     const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quizId = v1RequestAdminQuizCreate(user.token, quizName, quizDescription);
     v1RequestAdminQuizQuestionCreate(user.token, quizId.quizId, question);
-    const sessionId = v1RequestAdminQuizSession(user.token, quizId.quizId, autoStartNum);
+    v1RequestAdminQuizSession(user.token, quizId.quizId, autoStartNum);
     const user2 = v1RequestAdminAuthRegister('bob.smith@gmail.com', 'a1234567', 'Smith', 'Bob');
     expect(() => v1RequestAdminViewQuizSessions(user2.token, quizId.quizId)).toThrow(HTTPError[403]);
   });

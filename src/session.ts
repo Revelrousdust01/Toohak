@@ -1,7 +1,7 @@
 import { getData, setData } from './dataStore';
-import { findQuiz, validQuizId, validToken, validAction, clearTimer } from './helper';
+import { findQuiz, validQuizId, validToken, validAction } from './helper';
 import httpError from 'http-errors';
-import { type Quiz, Action, State } from './interfaces';
+import { type Quiz, type SessionsList, Action, State } from './interfaces';
 export let timers: ReturnType<typeof setTimeout>[] = [];
 
 export function adminQuizSession(token: string, quizid: number, autoStartNum: number): object {
@@ -149,4 +149,22 @@ export function adminQuizSessionUpdate(token: string, quizid: number, sessionId:
   setData(data);
 
   return { };
+}
+
+export function adminViewQuizSessions(token: string, quizid: number): SessionsList {
+  const data = getData();
+  const checkToken = validToken(token, data);
+  validQuizId(quizid, checkToken, data);
+
+  const sessionsForQuiz = data.sessions.filter(session => session.metadata.quizId === quizid);
+  const activeSessions = sessionsForQuiz.filter(session => session.state !== State.END).map(session => session.quizSessionId);
+  const inactiveSessions = sessionsForQuiz.filter(session => session.state === State.END).map(session => session.quizSessionId);
+
+  activeSessions.sort((a, b) => a - b);
+  inactiveSessions.sort((a, b) => a - b);
+
+  return {
+    activeSessions: activeSessions,
+    inactiveSessions: inactiveSessions
+  };
 }

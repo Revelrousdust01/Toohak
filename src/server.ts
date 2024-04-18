@@ -7,10 +7,10 @@ import {
   adminQuizList, adminQuizNameUpdate, adminQuizQuestionCreate, adminQuizQuestionDelete,
   adminQuizQuestionMove, adminQuizRemove, adminQuizTransfer, adminQuizViewTrash,
   adminQuizRestore, adminQuizQuestionDuplicate, adminQuizInfo,
-  adminQuizThumbnailUpdate,
+  adminQuizThumbnailUpdate
 } from './quiz';
 import {
-  adminQuizSession, adminQuizSessionUpdate
+  adminQuizSession, adminQuizSessionUpdate, adminViewQuizSessions
 } from './session';
 import { clear } from './other';
 import express, { json, Request, Response } from 'express';

@@ -388,7 +388,7 @@ export function requestSleepSync(ms: number) {
   }
 }
 
-export const v1RequestAdminViewQuizSessions = (token: string) => {
+export const v1RequestAdminViewQuizSessions = (token: string, quizid: number) => {
   return requestHelper('GET',
     `/v1/admin/quiz/${quizid}/sessions`,
     { }, { token });

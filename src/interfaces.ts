@@ -205,7 +205,7 @@ export type validActionType = {
     state: State;
 };
 
-export interface sessionsList {
+export interface SessionsList {
     activeSessions: number[],
     inactiveSessions: number[]
-};
+}
