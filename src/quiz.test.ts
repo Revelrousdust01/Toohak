@@ -85,7 +85,7 @@ describe('V1 - Test adminQuizCreate', () => {
   });
 });
 
-describe.skip('V2 - Test adminQuizCreate', () => {
+describe('V2 - Test adminQuizCreate', () => {
   const firstName = 'Jeffery';
   const lastName = 'Zhang';
   const email = 'jeffery.zhang385@gmail.com';
