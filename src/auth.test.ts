@@ -1,17 +1,17 @@
 import {
   v1RequestAdminAuthLogout, v2RequestAdminAuthLogout, v1RequestAdminAuthRegister, v1RequestAdminAuthLogin,
   v1RequestAdminUserDetails, v2RequestAdminUserDetails, v1RequestAdminUserDetailsUpdate, v2RequestAdminUserDetailsUpdate,
-  v1RequestAdminUserPasswordUpdate, v2RequestAdminUserPasswordUpdate, requestClear
+  v1RequestAdminUserPasswordUpdate, v2RequestAdminUserPasswordUpdate, v1RequestClear
 } from './requests';
 import HTTPError from 'http-errors';
 
 // Clear before each test
 beforeEach(() => {
-  requestClear();
+  v1RequestClear();
 });
 
 afterAll(() => {
-  requestClear();
+  v1RequestClear();
 });
 
 // adminAuthLogin

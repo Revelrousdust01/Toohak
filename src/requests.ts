@@ -364,14 +364,15 @@ export const v1RequestAdminQuizThumbnailUpdate = (token: string, quizid: number,
     { imgUrl: imgUrl }, { token });
 };
 
+export const v1RequestClear = () => {
+  return requestHelper('DELETE', '/v1/clear',
+    { });
+};
+
 export const v1RequestAdminQuizSessionUpdate = (token: string, quizid: number, sessionid: number, action: string) => {
   return requestHelper('PUT',
     `/v1/admin/quiz/${quizid}/session/${sessionid}`,
     { action: action }, { token });
-};
-
-export const requestClear = () => {
-  return oldRequestHelper('DELETE', '/v1/clear');
 };
 
 export function requestSleepSync(ms: number) {
