@@ -28,19 +28,8 @@ function getData(): DataStore {
 }
 
 function loadData(): DataStore {
-  if (fs.existsSync('./database.json')) {
-    const data = fs.readFileSync('./database.json');
-    return JSON.parse(data.toString());
-  } else {
-    return {
-      users: [],
-      quizzes: [],
-      userSessions: [],
-      trash: [],
-      quizCounter: 1,
-      sessions: []
-    };
-  }
+  const data = fs.readFileSync('./database.json');
+  return JSON.parse(data.toString());
 }
 
 // Use set(newData) to pass in the entire data object, with modifications made
@@ -52,4 +41,3 @@ function setData(newData: DataStore) {
 
 export { getData, setData };
 export type { DataStore };
-

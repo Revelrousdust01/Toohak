@@ -3,7 +3,6 @@ import { type ErrorObject, type Quiz, type createQuizReturn, type QuizArray, typ
 import { isError, findQuiz, validQuestion, validQuizName, validQuizId, validToken, setupAnswers, validateThumbnail, updateQuestion, validAction } from './helper';
 import httpError from 'http-errors';
 export let timers: ReturnType<typeof setTimeout>[] = [];
-let start: number;
 
 /**
  * Given basic details about a new quiz, create one for the logged in user.
@@ -494,7 +493,7 @@ export function adminQuizSession(token: string, quizid: number, autoStartNum: nu
   }
 }
 
-export function adminQuizSessionUpdate(token: string, quizid: number, sessionId: number, action: Action ): object {
+export function adminQuizSessionUpdate(token: string, quizid: number, sessionId: number, action: Action): object {
   const data = getData();
   const checkToken = validToken(token, data);
   validQuizId(quizid, checkToken, data);
@@ -503,55 +502,45 @@ export function adminQuizSessionUpdate(token: string, quizid: number, sessionId:
     throw httpError(400, 'Invalid Action enum');
   }
 
-  const sessionDetails  = data.sessions.find(session => session.quizSessionId === sessionId);
-  if(!sessionDetails || sessionDetails.metadata.quizId !== quizid){
+  const sessionDetails = data.sessions.find(session => session.quizSessionId === sessionId);
+  if (!sessionDetails || sessionDetails.metadata.quizId !== quizid) {
     throw httpError(400, 'Session Id does not refer to a valid session within this quiz');
   }
 
   const checkAction = validAction(sessionId, action, data);
-  let currentState = sessionDetails.state;
-  console.log(currentState);
-  console.log('current quiz state^');
-  if (!checkAction.valid || (sessionDetails.metadata.questions.length === sessionDetails.atQuestion 
-    && (currentState === State.ANSWER_SHOW || currentState === State.QUESTION_CLOSE) 
-    && action === Action.NEXT_QUESTION)){
-      throw httpError(400, `action: ${action} cannot be applied in the current state: ${currentState}`);
+  const currentState = sessionDetails.state;
+  if (!checkAction.valid || (sessionDetails.metadata.questions.length === sessionDetails.atQuestion &&
+    (currentState === State.ANSWER_SHOW || currentState === State.QUESTION_CLOSE) &&
+    action === Action.NEXT_QUESTION)) {
+    throw httpError(400, `action: ${action} cannot be applied in the current state: ${currentState}`);
   }
 
   if (action === Action.SKIP_COUNTDOWN) {
     timers.forEach(timer => clearTimeout(timer));
     timers = [];
-    console.log('cleared all timers');
-    sessionDetails.atQuestion = sessionDetails.atQuestion + 1;
     sessionDetails.state = State.QUESTION_OPEN;
 
     const newTimer = setTimeout(() => {
       sessionDetails.state = State.QUESTION_CLOSE;
       setData(data);
     }, sessionDetails.metadata.questions[sessionDetails.atQuestion - 1].duration * 1000);
-    
-    timers.push(newTimer);
-   }
 
-   if (sessionDetails.state === State.QUESTION_COUNTDOWN) {
+    timers.push(newTimer);
+  }
+
+  if (action === Action.NEXT_QUESTION) {
     timers.forEach(timer => clearTimeout(timer));
     timers = [];
     sessionDetails.atQuestion = sessionDetails.atQuestion + 1;
 
-    console.log('countdown timer started');
-
     timers.push(setTimeout(() => {
-      console.log('countdown timer fired');
       sessionDetails.state = State.QUESTION_OPEN;
-      start = Math.floor(Date.now() / 1000);
-      
-      console.log('answer timer started');
+
       timers.push(setTimeout(() => {
-        console.log('answer timer fired');
-      sessionDetails.state = State.QUESTION_CLOSE;
+        sessionDetails.state = State.QUESTION_CLOSE;
       }, sessionDetails.metadata.questions[sessionDetails.atQuestion - 1].duration * 1000));
     }, 3000));
-   }
+  }
 
   if (sessionDetails.state === State.FINAL_RESULTS || sessionDetails.state === State.END) {
     sessionDetails.atQuestion = 0;
@@ -560,7 +549,7 @@ export function adminQuizSessionUpdate(token: string, quizid: number, sessionId:
   sessionDetails.state = checkAction.state;
   setData(data);
 
-  return { }
+  return { };
 }
 
 /**

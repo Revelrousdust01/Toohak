@@ -367,3 +367,10 @@ export const v1RequestAdminQuizSessionUpdate = (token: string, quizid: number, s
 export const requestClear = () => {
   return oldRequestHelper('DELETE', '/v1/clear');
 };
+
+export function requestSleepSync(ms: number) {
+  const startTime = new Date().getTime();
+  while (new Date().getTime() - startTime < ms) {
+    // eslint-ignore-line
+  }
+}

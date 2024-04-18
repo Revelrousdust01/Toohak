@@ -344,7 +344,7 @@ app.post('/v1/admin/quiz/:quizid/session/start', (req: Request, res: Response) =
 app.put('/v1/admin/quiz/:quizid/session/:sessionid', (req: Request, res: Response) => {
   const { action } = req.body;
   const token = req.headers.token as string;
-  const response = adminQuizSessionUpdate(token, parseInt(req.params.quizid),  parseInt(req.params.sessionid), action);
+  const response = adminQuizSessionUpdate(token, parseInt(req.params.quizid), parseInt(req.params.sessionid), action);
 
   res.json(response);
 });
