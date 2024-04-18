@@ -256,7 +256,6 @@ export function adminQuizQuestionCreate(token: string, quizid: number, questionB
 
   const quiz = findQuiz(quizid, data);
 
-
   validQuestion(questionBody, quiz as Quiz);
   const validQuiz = quiz as Quiz;
   if (version === 1) {
@@ -684,7 +683,7 @@ export function adminQuizTransfer(token: string, quizid: number, userEmail: stri
 
   const ownedQuizIndex = checkToken.ownedQuizzes.indexOf(quizid);
 
-  checkToken.ownedQuizzes.splice(ownedQuizIndex, 1); 
+  checkToken.ownedQuizzes.splice(ownedQuizIndex, 1);
 
   setData(data);
 
