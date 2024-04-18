@@ -21,13 +21,20 @@ Example usage
 */
 
 // Use get() to access the data
+let data = loadData();
+
 function getData(): DataStore {
+  return data;
+}
+
+function loadData(): DataStore {
   const data = fs.readFileSync('./database.json');
   return JSON.parse(data.toString());
 }
 
 // Use set(newData) to pass in the entire data object, with modifications made
 function setData(newData: DataStore) {
+  data = newData;
   const jsonstr = JSON.stringify(newData);
   fs.writeFileSync('./database.json', jsonstr);
 }

@@ -18,6 +18,8 @@ tags:
     description: Iteration 3 routes are a modification of iteration 1 and iteration 2 routes
   - name: "Iteration 3 (New)"
     description: Iteration 3 routes that are a mix of new routes as well as slightly modified routes from iteration 1 and 2
+  - name: "Iteration 4 (Modified)"
+    description: Iteration 4 routes are a modification of iteration 1, iteration 2 and iteration 3 routes
 
 components:
   prim:
@@ -27,6 +29,9 @@ components:
     Password:
       type: string
       example: haydensmith123
+    MultimediaUrl:
+      type: string
+      example: https://www.youtube.com/watch?v=Kt9mLgF35Ik&ab_channel=MateuszMazur
     NameFirst:
       type: string
       example: Hayden
@@ -76,6 +81,9 @@ components:
     QuizQuestion:
       type: string
       example: Who is the Monarch of England?
+    QuizQuestionCategory:
+      type: string
+      example: England
     QuizQuestionDuration:
       type: integer
       example: 4
@@ -287,6 +295,23 @@ components:
         thumbnailUrl:
           $ref: '#/components/prim/Url'
 
+    QuestionMutateIter4: # Has Categories and multimedia
+      type: object
+      properties:
+        question:
+          $ref: '#/components/prim/QuizQuestion'
+        duration:
+          $ref: '#/components/prim/QuizQuestionDuration'
+        points:
+          $ref: '#/components/prim/QuizQuestionPoints'
+        answers:
+          $ref: '#/components/prim/QuizQuestionAnswersLite'
+        category:
+          $ref: '#/components/prim/QuizQuestionCategory'
+        thumbnailUrl:
+          $ref: '#/components/prim/Url'
+        multimediaUrl:
+          $ref: '#/components/prim/MultimediaUrl'
     MessagePayload:
       type: object
       properties:
@@ -348,7 +373,7 @@ components:
           type: array
           items:
             $ref: '#/components/group/QuestionResults'
-
+            
   path:
     PlayerId:
       in: path
@@ -685,6 +710,15 @@ components:
         properties:
           questionBody:
             $ref: '#/components/group/QuestionMutateIter3'
+    QuizQuestionMutateIter4:
+      in: body
+      name: body
+      required: true
+      schema:
+        type: object
+        properties:
+          questionBody:
+            $ref: '#/components/group/QuestionMutateIter4'
     QuizQuestionDelete:
       in: body
       name: body
@@ -1300,6 +1334,54 @@ paths:
             $ref: '#/components/return/Error'
       security:
         - Iteration 3 Token Authentication: []
+  /v3/admin/quiz/{quizid}/question:
+      post:
+        summary: Create quiz question
+        description: |
+          Create a new stub question for a particular quiz.
+          When this route is called, and a question is created, the timeLastEdited is set as the same as the created time, and the colours of all answers of that question are randomly generated.
+          It should also include setting categories as well as any multimedia that can be played.
+        tags:
+          # - "By Topic: Quiz Management"
+          - "Iteration 4 (Modified)"
+        parameters:
+          - $ref: '#/components/path/QuizId'
+          - $ref: '#/components/header/Token'
+          - $ref: '#/components/body/QuizQuestionMutateIter4'
+        responses:
+          200:
+            description: OK
+            schema:
+              $ref: '#/components/return/QuizQuestionNew'
+          401:
+            description: Token is empty or invalid (does not refer to valid logged in user session)
+            schema:
+              $ref: '#/components/return/Error'
+          403:
+            description: Valid token is provided, but user is not an owner of this quiz
+            schema:
+              $ref: '#/components/return/Error'
+          400:
+            description: |
+              If any of the following are true:
+              - Question string is less than 5 characters in length or greater than 50 characters in length
+              - The question has more than 6 answers or less than 2 answers
+              - The question duration is not a positive number
+              - The sum of the question durations in the quiz exceeds 3 minutes
+              - The points awarded for the question are less than 1 or greater than 10
+              - The length of any answer is shorter than 1 character long, or longer than 30 characters long
+              - Any answer strings are duplicates of one another (within the same question)
+              - There are no correct answers
+              - The thumbnailUrl is an empty string
+              - The thumbnailUrl does not end with one of the following filetypes (case insensitive): jpg, jpeg, png
+              - The thumbnailUrl does not begin with 'http://' or 'https://'
+              - Category string is less than 5 characters in length or greater than 25 characters in length
+              - The multimediaUrl is an empty string
+              - The multimediaUrl does not begin with 'http://' or 'https://'
+            schema:
+              $ref: '#/components/return/Error'
+        security:
+          - Iteration 3 Token Authentication: []
   /v1/admin/quiz/{quizid}:
     delete:
       summary: Send a quiz to trash
@@ -2020,6 +2102,53 @@ paths:
             $ref: '#/components/return/Error'
       security:
         - Iteration 3 Token Authentication: []
+  /v3/admin/quiz/{quizid}/question/{questionid}:
+    put:
+      summary: Update quiz question
+      description: |
+        Update the relevant details of a particular question within a quiz.
+        When this route is called, the last edited time is updated, and the colours of all answers of that question are randomly generated.
+      tags:
+        # - "By Topic: Quiz Management"
+        - "Iteration 4 (Modified)"
+      parameters:
+        - $ref: '#/components/path/QuizId'
+        - $ref: '#/components/path/QuestionId'
+        - $ref: '#/components/header/Token'
+        - $ref: '#/components/body/QuizQuestionMutateIter4'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/components/return/Empty'
+        401:
+          description: Token is empty or invalid (does not refer to valid logged in user session)
+          schema:
+            $ref: '#/components/return/Error'
+        403:
+          description: Valid token is provided, but user is not an owner of this quiz
+          schema:
+            $ref: '#/components/return/Error'
+        400:
+          description: |
+            If any of the following are true:
+            - Question Id does not refer to a valid question within this quiz
+            - Question string is less than 5 characters in length or greater than 50 characters in length
+            - The question has more than 6 answers or less than 2 answers
+            - The question duration is not a positive number
+            - If this question were to be updated, the sum of the question durations in the quiz exceeds 3 minutes
+            - The points awarded for the question are less than 1 or greater than 10
+            - The length of any answer is shorter than 1 character long, or longer than 30 characters long
+            - Any answer strings are duplicates of one another (within the same question)
+            - There are no correct answers
+            - The thumbnailUrl is an empty string
+            - The thumbnailUrl does not end with one of the following filetypes (case insensitive): jpg, jpeg, png
+            - The thumbnailUrl does not begin with 'http://' or 'https://'
+            - Category string is less than 5 characters in length or greater than 25 characters in length
+          schema:
+            $ref: '#/components/return/Error'
+      security:
+        - Iteration 3 Token Authentication: []
   /v1/admin/quiz/{quizid}/question/{questionid}/move:
     put:
       summary: Move a quiz question
@@ -2335,6 +2464,39 @@ paths:
       tags:
         # - "By Topic: Session Management"
         - "Iteration 3 (New)"
+      parameters:
+        - $ref: '#/components/path/QuizId'
+        - $ref: '#/components/path/SessionId'
+        - $ref: '#/components/header/Token'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/components/return/QuizSessionResultsCsv'
+        401:
+          description: Token is empty or invalid (does not refer to valid logged in user session)
+          schema:
+            $ref: '#/components/return/Error'
+        403:
+          description: Valid token is provided, but user is not an owner of this quiz
+          schema:
+            $ref: '#/components/return/Error'
+        400:
+          description: |
+            If any of the following are true:
+            - Session Id does not refer to a valid session within this quiz
+            - Session is not in FINAL_RESULTS state
+          schema:
+            $ref: '#/components/return/Error'
+      security:
+        - Iteration 3 Token Authentication: []
+  /v2/admin/quiz/{quizid}/session/{sessionid}/results/csv:
+    get:
+      summary: Get quiz session final results in CSV format
+      description: Get the a link to the final results (in CSV format) for all players for a completed quiz session, should be ordered by categories.
+      tags:
+        # - "By Topic: Session Management"
+        - "Iteration 4 (Modified)"
       parameters:
         - $ref: '#/components/path/QuizId'
         - $ref: '#/components/path/SessionId'

@@ -1,7 +1,9 @@
 import { getData, setData } from './dataStore';
-import { type ErrorObject, type Quiz, type createQuizReturn, type QuizArray, type QuestionBody, type Question, type duplicateReturn, type createQuestionReturn, State } from './interfaces';
-import { isError, findQuiz, validQuestion, validQuizName, validQuizId, validToken, setupAnswers, validateThumbnail, updateQuestion } from './helper';
+import { type ErrorObject, type Quiz, type createQuizReturn, type QuizArray, type QuestionBody, type Question, type duplicateReturn, type createQuestionReturn, State, Action } from './interfaces';
+import { findQuiz, validQuestion, validQuizName, validQuizId, validToken, setupAnswers, validateThumbnail, updateQuestion, validAction } from './helper';
 import httpError from 'http-errors';
+export let timers: ReturnType<typeof setTimeout>[] = [];
+
 /**
  * Given basic details about a new quiz, create one for the logged in user.
  *
@@ -323,23 +325,20 @@ export function adminQuizQuestionDuplicate(token: string, quizid: number, questi
   const data = getData();
 
   const checkToken = validToken(token, data);
-  if (isError(checkToken)) {
-    return { error: 'Token is empty or invalid.' };
-  }
 
   const quiz = data.quizzes.find(quiz => quiz.quizId === quizid);
   if (!quiz) {
-    return { error: 'Quiz ID does not refer to a valid quiz.' };
+    throw httpError(403, 'Quiz ID does not refer to a valid quiz.');
   }
 
   if (!checkToken.ownedQuizzes.includes(quizid)) {
-    return { error: 'Quiz ID does not refer to a quiz that this user owns.' };
+    throw httpError(403, 'Quiz ID does not refer to a quiz that this user owns');
   }
 
   const questionIndex = quiz.questions.findIndex(question => question.questionId === questionid);
 
   if (questionIndex === -1) {
-    return { error: 'Question ID does not refer to a valid question within the quiz.' };
+    throw httpError(400, 'Question ID does not refer to a valid question within the quiz.');
   }
 
   const questionToDuplicate = { ...quiz.questions[questionIndex], questionId: quiz.questionCounter };
@@ -491,6 +490,65 @@ export function adminQuizSession(token: string, quizid: number, autoStartNum: nu
   }
 }
 
+export function adminQuizSessionUpdate(token: string, quizid: number, sessionId: number, action: Action): object {
+  const data = getData();
+  const checkToken = validToken(token, data);
+  validQuizId(quizid, checkToken, data);
+
+  if (!Object.keys(Action).includes(action)) {
+    throw httpError(400, 'Invalid Action enum');
+  }
+
+  const sessionDetails = data.sessions.find(session => session.quizSessionId === sessionId);
+  if (!sessionDetails || sessionDetails.metadata.quizId !== quizid) {
+    throw httpError(400, 'Session Id does not refer to a valid session within this quiz');
+  }
+
+  const checkAction = validAction(sessionId, action, data);
+  const currentState = sessionDetails.state;
+  if (!checkAction.valid || (sessionDetails.metadata.questions.length === sessionDetails.atQuestion &&
+    (currentState === State.ANSWER_SHOW || currentState === State.QUESTION_CLOSE) &&
+    action === Action.NEXT_QUESTION)) {
+    throw httpError(400, `action: ${action} cannot be applied in the current state: ${currentState}`);
+  }
+
+  if (action === Action.SKIP_COUNTDOWN) {
+    timers.forEach(timer => clearTimeout(timer));
+    timers = [];
+    sessionDetails.state = State.QUESTION_OPEN;
+
+    const newTimer = setTimeout(() => {
+      sessionDetails.state = State.QUESTION_CLOSE;
+      setData(data);
+    }, sessionDetails.metadata.questions[sessionDetails.atQuestion - 1].duration * 1000);
+
+    timers.push(newTimer);
+  }
+
+  if (action === Action.NEXT_QUESTION) {
+    timers.forEach(timer => clearTimeout(timer));
+    timers = [];
+    sessionDetails.atQuestion = sessionDetails.atQuestion + 1;
+
+    timers.push(setTimeout(() => {
+      sessionDetails.state = State.QUESTION_OPEN;
+
+      timers.push(setTimeout(() => {
+        sessionDetails.state = State.QUESTION_CLOSE;
+      }, sessionDetails.metadata.questions[sessionDetails.atQuestion - 1].duration * 1000));
+    }, 3000));
+  }
+
+  if (sessionDetails.state === State.FINAL_RESULTS || sessionDetails.state === State.END) {
+    sessionDetails.atQuestion = 0;
+  }
+
+  sessionDetails.state = checkAction.state;
+  setData(data);
+
+  return { };
+}
+
 /**
   * Update Quiz Question.
   *
@@ -532,7 +590,7 @@ export function adminQuizQuestionUpdate(token: string, quizid: number, questioni
  * @param {string} token - User ID of admin
  * @param {number} quizid - relevant quizID
  *
- * @returns {ErrorObject} - returns error object based on following conditions:
+ * @returns {object} - returns error object based on following conditions:
  *
  * Token is empty or invalid (does not refer to valid logged in user session)
  * Valid token is provided, but either the quiz ID is invalid, or the user does not own the quiz
@@ -549,7 +607,7 @@ export function adminQuizRemove(token: string, quizid: number): object {
   validQuizId(quizid, checkToken, data);
 
   if (data.sessions.find(sessions => sessions.state !== State.END && sessions.metadata.quizId === quizid)) {
-    throw httpError(400, 'All sessions assosciated to the quiz must not be active to transfer.');
+    throw httpError(400, 'All sessions assosciated to the quiz must not be active to delete.');
   }
 
   data.quizzes[quizIndex].timeLastEdited = Date.now();

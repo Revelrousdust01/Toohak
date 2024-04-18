@@ -1,5 +1,5 @@
 import { getData } from './dataStore';
-import type { ErrorObject, User, Quiz, QuestionBody, DataStore, Question, Answer } from './interfaces';
+import { type ErrorObject, type User, type Quiz, type QuestionBody, type DataStore, type Question, type Answer, State, validActionType, Action } from './interfaces';
 import validator from 'validator';
 import httpError from 'http-errors';
 
@@ -18,17 +18,6 @@ export function findQuiz(quizid: number, data: DataStore): object | Quiz {
     return { };
   }
   return quiz;
-}
-
-/**
-  * Check whether object is of type ErrorObject or not:
-  *
-  * @param {unknown} object - Unknown Object
-  *
-  * @returns { } - Returns the error if it is of the same type.
-*/
-export function isError(object: unknown): object is ErrorObject {
-  return 'error' in (object as ErrorObject);
 }
 
 /**
@@ -122,7 +111,7 @@ export function validQuestion(questionBody: QuestionBody, quiz: Quiz): object | 
   }
   let counter = 0;
   for (const question of quiz.questions) {
-    counter = question.duration++;
+    counter += question.duration;
   }
   if (counter + questionBody.duration > 180) {
     throw httpError(400, 'The sum of the question durations in the quiz exceeds 3 minutes.');
@@ -287,4 +276,135 @@ export function updateQuestion(question: Question, questionBody: QuestionBody, v
     question.thumbnailUrl = questionBody.thumbnailUrl;
   }
   return { };
+}
+
+/**
+  * Passes the specified amount of time
+  *
+  * @param {number} ms - ms needed to be passed
+  *
+  * @returns
+*/
+
+export function validAction(sessionId: number, action: string, data: DataStore): validActionType {
+  const session = data.sessions.find(session => session.quizSessionId === sessionId);
+  switch (session.state) {
+    case State.LOBBY:
+      if (action === Action.NEXT_QUESTION) {
+        return {
+          valid: true,
+          state: State.QUESTION_COUNTDOWN
+        };
+      } else if (action === Action.END) {
+        return {
+          valid: true,
+          state: State.END
+        };
+      } else {
+        return {
+          valid: false,
+          state: null
+        };
+      }
+    case State.QUESTION_COUNTDOWN:
+      if (action === Action.END) {
+        return {
+          valid: true,
+          state: State.END
+        };
+      } else if (action === Action.SKIP_COUNTDOWN) {
+        return {
+          valid: true,
+          state: State.QUESTION_OPEN
+        };
+      } else {
+        return {
+          valid: false,
+          state: null
+        };
+      }
+    case State.QUESTION_OPEN:
+      if (action === Action.END) {
+        return {
+          valid: true,
+          state: State.END
+        };
+      } else if (action === Action.GO_TO_ANSWER) {
+        return {
+          valid: true,
+          state: State.ANSWER_SHOW
+        };
+      } else {
+        return {
+          valid: false,
+          state: null
+        };
+      }
+    case State.QUESTION_CLOSE:
+      if (action === Action.END) {
+        return {
+          valid: true,
+          state: State.END
+        };
+      } else if (action === Action.GO_TO_ANSWER) {
+        return {
+          valid: true,
+          state: State.ANSWER_SHOW
+        };
+      } else if (action === Action.GO_TO_FINAL_RESULTS) {
+        return {
+          valid: true,
+          state: State.FINAL_RESULTS
+        };
+      } else if (action === Action.NEXT_QUESTION) {
+        return {
+          valid: true,
+          state: State.QUESTION_COUNTDOWN
+        };
+      } else {
+        return {
+          valid: false,
+          state: null
+        };
+      }
+    case State.ANSWER_SHOW:
+      if (action === Action.NEXT_QUESTION) {
+        return {
+          valid: true,
+          state: State.QUESTION_COUNTDOWN
+        };
+      } else if (action === Action.END) {
+        return {
+          valid: true,
+          state: State.END
+        };
+      } else if (action === Action.GO_TO_FINAL_RESULTS) {
+        return {
+          valid: true,
+          state: State.FINAL_RESULTS
+        };
+      } else {
+        return {
+          valid: false,
+          state: null
+        };
+      }
+    case State.FINAL_RESULTS:
+      if (action === Action.END) {
+        return {
+          valid: true,
+          state: State.END
+        };
+      } else {
+        return {
+          valid: false,
+          state: null
+        };
+      }
+    case State.END:
+      return {
+        valid: false,
+        state: null
+      };
+  }
 }

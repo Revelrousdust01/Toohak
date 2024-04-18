@@ -117,12 +117,6 @@ export interface ErrorObject {
     error: string;
 }
 
-export interface OldRequestHelperReturnType {
-    statusCode: number;
-    jsonBody?: Record<string, string | number>;
-    error?: string;
-}
-
 export interface Payload {
     [key: string]: unknown;
 }
@@ -196,5 +190,11 @@ export enum Action {
     END = 'END',
     GO_TO_FINAL_RESULTS = 'GO_TO_FINAL_RESULTS',
     GO_TO_ANSWER = 'GO_TO_ANSWER',
-    NEXT_QUESTION = 'NEXT_QUESTION'
+    NEXT_QUESTION = 'NEXT_QUESTION',
+    SKIP_COUNTDOWN = 'SKIP_COUNTDOWN'
 }
+
+export type validActionType = {
+    valid: boolean;
+    state: State;
+};

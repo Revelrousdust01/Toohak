@@ -1,12 +1,16 @@
 import { port, url } from './config.json';
 import request, { HttpVerb } from 'sync-request-curl';
-import type { QuestionBody, Payload, OldRequestHelperReturnType } from './interfaces';
+import type { QuestionBody, Payload } from './interfaces';
 import { IncomingHttpHeaders } from 'http';
 import HTTPError from 'http-errors';
 
 const SERVER_URL = `${url}:${port}`;
-const TIMEOUT_MS = 10000;
+const TIMEOUT_MS = 15000;
 
+/**
+ * This helper function was referenced from lab08_quiz quiz.test.ts:
+ * https://nw-syd-gitlab.cseunsw.tech/COMP1531/24T1/students/z5388072/lab08_quiz/-/blob/master/src/quiz.test.ts?ref_type=heads
+ */
 const requestHelper = (
   method: HttpVerb,
   path: string,
@@ -58,64 +62,6 @@ const requestHelper = (
       }
   }
   return responseBody;
-};
-
-/**
-   * Sends a request to the given route and return its results
-   *
-   * Errors will be returned in the form:
-   *  { statusCode: number, error: string }
-   *
-   * Normal responses will be in the form
-   *  { statusCode: number, jsonBody: object }
-   *
-   * Reference: Week 5 server example: https://nw-syd-gitlab.cseunsw.tech/COMP1531/24T1/week5-server-example/-/blob/master/tests/wrapper.test.ts?ref_type=heads
-   */
-const oldRequestHelper = (
-  method: HttpVerb,
-  path: string,
-  payload: object = {}
-): OldRequestHelperReturnType => {
-  let qs = {};
-  let json = {};
-  if (['GET', 'DELETE'].includes(method)) {
-    qs = payload;
-  } else {
-    // PUT/POST
-    json = payload;
-  }
-  const res = request(method, SERVER_URL + path, { qs, json, timeout: 1000 });
-  const bodyString = res.body.toString();
-  let bodyObject: OldRequestHelperReturnType;
-  try {
-    // Return if valid JSON, in our own custom format
-    bodyObject = {
-      jsonBody: JSON.parse(bodyString),
-      statusCode: res.statusCode,
-    };
-  } catch (error: unknown) {
-    if (error instanceof Error) {
-      bodyObject = {
-        error: `\
-  Server responded with ${res.statusCode}, but body is not JSON!
-  
-  GIVEN:
-  ${bodyString}.
-  
-  REASON:
-  ${error.message}.
-  
-  HINT:
-  Did you res.json(undefined)?`,
-        statusCode: res.statusCode,
-      };
-    }
-  }
-  if ('error' in bodyObject) {
-    // Return the error in a custom structure for testing later
-    return { statusCode: res.statusCode, error: bodyObject.error };
-  }
-  return bodyObject;
 };
 
 export const v1RequestAdminAuthLogin = (email: string, password: string) => {
@@ -226,10 +172,16 @@ export const v2RequestAdminQuizQuestionCreate = (token: string, quizid: number, 
     { questionBody: questionBody }, { token });
 };
 
-export const requestAdminQuizQuestionDuplicate = (token: string, quizid: number, questionid: number) => {
-  return oldRequestHelper('POST',
+export const v1RequestAdminQuizQuestionDuplicate = (token: string, quizid: number, questionid: number) => {
+  return requestHelper('POST',
     `/v1/admin/quiz/${quizid}/question/${questionid}/duplicate`,
     { token: token });
+};
+
+export const v2RequestAdminQuizQuestionDuplicate = (token: string, quizid: number, questionid: number) => {
+  return requestHelper('POST',
+    `/v2/admin/quiz/${quizid}/question/${questionid}/duplicate`,
+    { }, { token });
 };
 
 export const v1RequestAdminQuizQuestionDelete = (token: string, quizid: number, questionid: number) => {
@@ -364,6 +316,20 @@ export const v1RequestAdminQuizThumbnailUpdate = (token: string, quizid: number,
     { imgUrl: imgUrl }, { token });
 };
 
-export const requestClear = () => {
-  return oldRequestHelper('DELETE', '/v1/clear');
+export const v1RequestClear = () => {
+  return requestHelper('DELETE', '/v1/clear',
+    { });
 };
+
+export const v1RequestAdminQuizSessionUpdate = (token: string, quizid: number, sessionid: number, action: string) => {
+  return requestHelper('PUT',
+    `/v1/admin/quiz/${quizid}/session/${sessionid}`,
+    { action: action }, { token });
+};
+
+export function requestSleepSync(ms: number) {
+  const startTime = new Date().getTime();
+  while (new Date().getTime() - startTime < ms) {
+    // eslint-ignore-line
+  }
+}
