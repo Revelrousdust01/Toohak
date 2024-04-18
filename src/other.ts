@@ -1,5 +1,5 @@
 import { setData } from './dataStore';
-import { timers } from './quiz';
+import { timers } from './session';
 
 /**
   * Reset the state of the application back to the start.

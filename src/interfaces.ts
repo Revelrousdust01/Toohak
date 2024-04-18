@@ -167,7 +167,7 @@ export enum State {
     ANSWER_SHOW = 'ANSWER_SHOW',
     FINAL_RESULTS = 'FINAL_RESULTS',
     END = 'END'
-  }
+}
 
 export interface Message {
     playerId: number;
@@ -203,4 +203,9 @@ export enum Action {
 export type validActionType = {
     valid: boolean;
     state: State;
+};
+
+export interface sessionsList {
+    activeSessions: number[],
+    inactiveSessions: number[]
 };

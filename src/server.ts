@@ -7,10 +7,11 @@ import {
   adminQuizList, adminQuizNameUpdate, adminQuizQuestionCreate, adminQuizQuestionDelete,
   adminQuizQuestionMove, adminQuizRemove, adminQuizTransfer, adminQuizViewTrash,
   adminQuizRestore, adminQuizQuestionDuplicate, adminQuizInfo,
-  adminQuizSession,
   adminQuizThumbnailUpdate,
-  adminQuizSessionUpdate
 } from './quiz';
+import {
+  adminQuizSession, adminQuizSessionUpdate
+} from './session';
 import { clear } from './other';
 import express, { json, Request, Response } from 'express';
 import { echo } from './newecho';
@@ -372,6 +373,12 @@ app.delete('/v1/clear', (req: Request, res: Response) => {
 app.post('/v1/player/join', (req: Request, res: Response) => {
   const { sessionId, name } = req.body;
   const response = adminPlayerJoin(sessionId, name);
+  res.json(response);
+});
+
+app.get('/v1/admin/quiz/:quizid/sessions', (req: Request, res: Response) => {
+  const token = req.headers.token as string;
+  const response = adminViewQuizSessions(token, parseInt(req.params.quizid));
   res.json(response);
 });
 
