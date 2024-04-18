@@ -141,14 +141,15 @@ describe('V1 - Test adminQuizSessionUpdate', () => {
     ],
   };
 
-  test('Quiz autostart from Lobby state', () => {
+  test.only('Quiz autostart from Lobby state', () => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
     v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question);
     const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
     v1RequestAdminPlayerJoin(sessionId.sessionId, "Leon");
     v1RequestAdminPlayerJoin(sessionId.sessionId, "Jeffery");
-    expect(v1RequestAdminPlayerJoin(sessionId.sessionId, "Samuel")).toMatchObject({ });
+    v1RequestAdminPlayerJoin(sessionId.sessionId, "Samuel");
+    expect(v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'SKIP_COUNTDOWN')).toMatchObject({ });
   });
 
   test.each([
