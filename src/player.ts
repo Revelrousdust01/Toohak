@@ -60,7 +60,6 @@ export function adminPlayerSubmission(playerid: number, questionposition: number
   if (answerIds.some((item, index) => answerIds.includes(item, index + 1))) {
     throw httpError(400, 'Duplicate answers have been submitted.');
   }
-  console.log(answerIds.length);
 
   const player = session.players.find(player => player.playerId === playerid);
 
