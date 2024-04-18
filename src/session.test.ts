@@ -489,6 +489,24 @@ describe('V1 - Test adminViewQuizSessions', () => {
     });
   });
 
+  test('Multiple sessions - valid inputs', () => {
+    const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = v1RequestAdminQuizCreate(user.token, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(user.token, quizId.quizId, question);
+
+    const sessionId1 = v1RequestAdminQuizSession(user.token, quizId.quizId, autoStartNum);
+    v1RequestAdminQuizSessionUpdate(user.token, quizId.quizId, sessionId1.sessionId, 'END');
+    v1RequestAdminQuizSession(user.token, quizId.quizId, autoStartNum);
+    const sessionId3 = v1RequestAdminQuizSession(user.token, quizId.quizId, autoStartNum);
+    v1RequestAdminQuizSessionUpdate(user.token, quizId.quizId, sessionId3.sessionId, 'END');
+    v1RequestAdminQuizSession(user.token, quizId.quizId, autoStartNum);
+
+    expect(v1RequestAdminViewQuizSessions(user.token, quizId.quizId)).toMatchObject({
+      activeSessions: [expect.any(Number), expect.any(Number)],
+      inactiveSessions: [expect.any(Number), expect.any(Number)]
+    });
+  });
+
   test.each([
     { invalidToken: '' },
     { invalidToken: '123' },
