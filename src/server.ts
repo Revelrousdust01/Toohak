@@ -355,6 +355,7 @@ app.post('/v2/admin/quiz', (req: Request, res: Response) => {
 
 app.delete('/v1/clear', (req: Request, res: Response) => {
   const response = clear();
+  
   res.json(response);
 });
 

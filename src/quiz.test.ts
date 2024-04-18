@@ -474,6 +474,7 @@ describe('V2 - Test adminQuizInfo', () => {
     expect(() => v2RequestAdminQuizInfo(registered1.token as string, newQuiz.quizId as number)).toThrow(HTTPError[403]);
   });
 });
+
 // adminQuizList
 describe('V1 - Test adminQuizList', () => {
   const firstName = 'Samuel';
