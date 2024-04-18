@@ -612,7 +612,7 @@ export function adminQuizQuestionUpdate(token: string, quizid: number, questioni
  * @returns {object} - returns an empty object when a quiz is removed
  */
 
-export function adminQuizRemove(token: string, quizid: number): object {
+export function adminQuizRemove(token: string, quizid: number, version: number): object {
   const data = getData();
   const quizIndex = data.quizzes.findIndex(quizzes => quizzes.quizId === quizid);
 
@@ -620,7 +620,8 @@ export function adminQuizRemove(token: string, quizid: number): object {
 
   validQuizId(quizid, checkToken, data);
 
-  if (data.sessions.find(sessions => sessions.state !== State.END && sessions.metadata.quizId === quizid)) {
+  if (data.sessions.find(sessions => sessions.state !== State.END && sessions.metadata.quizId === quizid) &&
+  version === 2) {
     throw httpError(400, 'All sessions assosciated to the quiz must not be active to delete.');
   }
 
@@ -675,7 +676,8 @@ export function adminQuizTransfer(token: string, quizid: number, userEmail: stri
 
   validQuizId(quizid, checkToken, data);
 
-  if (data.sessions.find(sessions => sessions.state !== State.END && sessions.metadata.quizId === quizid)) {
+  if (data.sessions.find(sessions => sessions.state !== State.END && sessions.metadata.quizId === quizid) &&
+  version === 2) {
     throw httpError(400, 'All sessions assosciated to the quiz must not be active to transfer.');
   }
 

@@ -319,14 +319,14 @@ app.post('/v2/admin/quiz/:quizid/transfer', (req: Request, res: Response) => {
 });
 
 app.delete('/v1/admin/quiz/:quizid', (req: Request, res: Response) => {
-  const response = adminQuizRemove(req.query.token as string, parseInt(req.params.quizid));
+  const response = adminQuizRemove(req.query.token as string, parseInt(req.params.quizid), 1);
 
   res.json(response);
 });
 
 app.delete('/v2/admin/quiz/:quizid', (req: Request, res: Response) => {
   const token = req.headers.token as string;
-  const response = adminQuizRemove(token, parseInt(req.params.quizid));
+  const response = adminQuizRemove(token, parseInt(req.params.quizid), 2);
 
   res.json(response);
 });
