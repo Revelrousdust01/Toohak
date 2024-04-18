@@ -3,7 +3,16 @@ import { findQuiz, validQuizId, validToken, validAction } from './helper';
 import httpError from 'http-errors';
 import { type Quiz, type SessionsList, Action, State } from './interfaces';
 export let timers: ReturnType<typeof setTimeout>[] = [];
-
+/**
+ * Creates a new quiz session if conditions permit, including session count and quiz validation. The session starts in the LOBBY state and waits for players.
+ *
+ * @param token - Authentication token to validate user access.
+ * @param quizid - Identifier for the quiz to create a session for.
+ * @param autoStartNum - Number of players required for the session to automatically start; must be 50 or less.
+ *
+ * @returns {object} - Contains the unique session ID for the newly created session.
+ * @throws {ErrorObject} - Throws errors for invalid token, quiz in trash, quiz without questions, or exceeding session limit.
+ */
 export function adminQuizSession(token: string, quizid: number, autoStartNum: number): object {
   const data = getData();
   const checkToken = validToken(token, data);
@@ -70,26 +79,16 @@ export function adminQuizSession(token: string, quizid: number, autoStartNum: nu
 }
 
 /**
- * Updates the session state of a quiz based on the provided action. This function ensures the action is applicable and makes changes to the state accordingly.
+ * Modifies a quiz session's state based on specified actions, verifying all inputs for validity.
  *
- * @param {string} token - Authentication token to validate user session.
- * @param {number} quizid - Unique identifier for the quiz whose session is being updated.
- * @param {number} sessionId - Unique identifier for the session within the quiz to be updated.
- * @param {Action} action - Action to be performed on the session. Valid actions are defined in the Action enum.
+ * @param token - Authentication token for user validation.
+ * @param quizid - Unique identifier for the target quiz.
+ * @param sessionId - Unique identifier for the specific quiz session.
+ * @param action - Desired action to execute, defined in the Action enum.
  *
- * @returns {object} - Returns an empty object upon successful update.
+ * @returns {object} - Returns an empty object upon a successful update.
  *
- * @throws {ErrorObject} - Errors may be thrown based on the following conditions:
- *   - Token is invalid or does not refer to a valid logged-in user session.
- *   - Quiz ID does not match any existing quizzes accessible by the token's user.
- *   - Session ID does not refer to a valid session within the specified quiz.
- *   - Action provided does not exist within the Action enum.
- *   - Action cannot be applied in the current state of the session, such as attempting to move to the next question when no more questions are available, or the session has ended.
- *   - Skipping countdown or moving to the next question in inappropriate session states.
- *
- * The function first validates the token and quiz ID. It then checks the validity of the session ID and the action.
- * If the action is valid, it updates the session state accordingly. For actions that influence timing (like skipping countdowns or moving to next questions),
- * it adjusts timers. If the session has reached its final state, it resets relevant session parameters. All updates are persisted to the data storage.
+ * @throws {ErrorObject} - Errors occur if the token, quizid, sessionId are invalid, the action is not in the Action enum, or the action is inappropriate for the current session state.
  */
 
 export function adminQuizSessionUpdate(token: string, quizid: number, sessionId: number, action: Action): object {
@@ -151,6 +150,16 @@ export function adminQuizSessionUpdate(token: string, quizid: number, sessionId:
   return { };
 }
 
+/**
+ * Retrieves lists of active and inactive sessions for a specific quiz, differentiated by whether the session state is 'END'.
+ *
+ * @param token - Authentication token to validate user access.
+ * @param quizid - Identifier for the quiz whose sessions are to be viewed.
+ *
+ * @returns {SessionsList} - Object containing arrays of active and inactive session IDs.
+ *
+ * @throws {ErrorObject} - Throws errors for invalid token or invalid quiz ID.
+ */
 export function adminViewQuizSessions(token: string, quizid: number): SessionsList {
   const data = getData();
   const checkToken = validToken(token, data);

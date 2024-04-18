@@ -1,7 +1,7 @@
 import { QuestionBody } from './interfaces';
 import {
   v1RequestClear, v1RequestAdminAuthRegister, v1RequestAdminQuizCreate, v1RequestAdminQuizQuestionCreate,
-  v1RequestAdminQuizSession, v1RequestAdminQuizSessionUpdate, requestAdminQuizRemove, v1RequestAdminViewQuizSessions
+  v1RequestAdminQuizSession, v1RequestAdminQuizSessionUpdate, v1RequestAdminQuizRemove, v1RequestAdminViewQuizSessions
 } from './requests';
 import HTTPError from 'http-errors';
 import { requestSleepSync } from './requests';
@@ -93,7 +93,7 @@ describe('V1 - Test adminQuizSession', () => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quiz = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
     v1RequestAdminQuizQuestionCreate(register.token as string, quiz.quizId as number, question);
-    requestAdminQuizRemove(register.token as string, quiz.quizId as number);
+    v1RequestAdminQuizRemove(register.token as string, quiz.quizId as number);
     expect(() => v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum)).toThrow(HTTPError[400]);
   });
 });

@@ -1,5 +1,5 @@
 import {
-  v1RequestAdminAuthRegister, v1RequestAdminQuizCreate, requestAdminQuizRemove, v1RequestClear,
+  v1RequestAdminAuthRegister, v1RequestAdminQuizCreate, v1RequestAdminQuizRemove, v1RequestClear,
   v1RequestAdminUserDetails, v1RequestAdminQuizList, v1RequestAdminQuizViewTrash, v1RequestAdminQuizSession,
   v1RequestAdminQuizQuestionCreate
 } from './requests';
@@ -58,7 +58,7 @@ describe('Iteration 3: Test "clear" function', () => {
   test('Resets trash list to empty', () => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
-    requestAdminQuizRemove(registered.token as string, quizId.quizId as number);
+    v1RequestAdminQuizRemove(registered.token as string, quizId.quizId as number);
     v1RequestClear();
     expect(() => v1RequestAdminQuizViewTrash(registered.token as string)).toThrow(HTTPError[401]);
   });

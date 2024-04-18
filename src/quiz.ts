@@ -1,6 +1,6 @@
 import { getData, setData } from './dataStore';
 import { type ErrorObject, type Quiz, type createQuizReturn, type QuizArray, type QuestionBody, type Question, type duplicateReturn, type createQuestionReturn, State } from './interfaces';
-import { isError, findQuiz, validQuestion, validQuizName, validQuizId, validToken, setupAnswers, validateThumbnail, updateQuestion } from './helper';
+import { findQuiz, validQuestion, validQuizName, validQuizId, validToken, setupAnswers, validateThumbnail, updateQuestion } from './helper';
 import httpError from 'http-errors';
 export const timers: ReturnType<typeof setTimeout>[] = [];
 
@@ -229,10 +229,8 @@ export function adminQuizNameUpdate(token: string, quizid: number, name: string)
   validQuizName(name);
 
   const existingQuiz = data.quizzes.find(quiz => quiz.name === name);
-  if (existingQuiz) {
-    if (checkToken.ownedQuizzes.find(quiz => quiz === existingQuiz.quizId)) {
-      throw httpError(400, 'Name is already used by the current logged in user for another quiz.');
-    }
+  if (checkToken.ownedQuizzes.find(quiz => quiz === existingQuiz?.quizId)) {
+    throw httpError(400, 'Name is already used by the current logged in user for another quiz.');
   }
   data.quizzes.find(quiz => quiz.quizId === quizid).name = name;
   setData(data);
@@ -258,50 +256,48 @@ export function adminQuizQuestionCreate(token: string, quizid: number, questionB
 
   const quiz = findQuiz(quizid, data);
 
-  if (quiz != null) {
-    validQuestion(questionBody, quiz as Quiz);
-    const validQuiz = quiz as Quiz;
-    if (version === 1) {
-      let newQuestion: Question = {
-        questionId: validQuiz.questionCounter,
-        duration: questionBody.duration,
-        question: questionBody.question,
-        points: questionBody.points,
-        answers: []
-      };
+  validQuestion(questionBody, quiz as Quiz);
+  const validQuiz = quiz as Quiz;
+  if (version === 1) {
+    let newQuestion: Question = {
+      questionId: validQuiz.questionCounter,
+      duration: questionBody.duration,
+      question: questionBody.question,
+      points: questionBody.points,
+      answers: []
+    };
 
-      newQuestion = setupAnswers(newQuestion, questionBody);
+    newQuestion = setupAnswers(newQuestion, questionBody);
 
-      validQuiz.questionCounter++;
+    validQuiz.questionCounter++;
 
-      validQuiz.timeLastEdited = Date.now();
+    validQuiz.timeLastEdited = Date.now();
 
-      validQuiz.questions.push(newQuestion);
+    validQuiz.questions.push(newQuestion);
 
-      setData(data);
-      return { questionId: newQuestion.questionId };
-    } else {
-      validateThumbnail(questionBody.thumbnailUrl);
+    setData(data);
+    return { questionId: newQuestion.questionId };
+  } else {
+    validateThumbnail(questionBody.thumbnailUrl);
 
-      let newQuestion: Question = {
-        questionId: validQuiz.questionCounter,
-        duration: questionBody.duration,
-        question: questionBody.question,
-        points: questionBody.points,
-        answers: [],
-        thumbnailUrl: questionBody.thumbnailUrl
-      };
-      newQuestion = setupAnswers(newQuestion, questionBody);
+    let newQuestion: Question = {
+      questionId: validQuiz.questionCounter,
+      duration: questionBody.duration,
+      question: questionBody.question,
+      points: questionBody.points,
+      answers: [],
+      thumbnailUrl: questionBody.thumbnailUrl
+    };
+    newQuestion = setupAnswers(newQuestion, questionBody);
 
-      validQuiz.questionCounter++;
+    validQuiz.questionCounter++;
 
-      validQuiz.timeLastEdited = Date.now();
+    validQuiz.timeLastEdited = Date.now();
 
-      validQuiz.questions.push(newQuestion);
+    validQuiz.questions.push(newQuestion);
 
-      setData(data);
-      return { questionId: newQuestion.questionId };
-    }
+    setData(data);
+    return { questionId: newQuestion.questionId };
   }
 }
 
@@ -434,6 +430,7 @@ export function adminQuizQuestionMove(token: string, quizid: number, questionid:
   * @returns { { error: }  } - Returns object when conditions fail
   * @returns { object } - returns an empty object question is updated.
 */
+
 export function adminQuizQuestionUpdate(token: string, quizid: number, questionid: number, questionBody: QuestionBody, version: number): object {
   const data = getData();
   const checkToken = validToken(token, data);
@@ -442,19 +439,17 @@ export function adminQuizQuestionUpdate(token: string, quizid: number, questioni
 
   const quiz = findQuiz(quizid, data);
 
-  if (quiz != null) {
-    validQuestion(questionBody, quiz as Quiz);
-    const validQuiz = quiz as Quiz;
-    const question = validQuiz.questions.find(question => question.questionId === questionid);
-    if (!question) {
-      throw httpError(400, 'Question Id does not refer to a valid question within this quiz.');
-    }
-    updateQuestion(question, questionBody, version);
-
-    validQuiz.timeLastEdited = Date.now();
-    setData(data);
-    return { };
+  validQuestion(questionBody, quiz as Quiz);
+  const validQuiz = quiz as Quiz;
+  const question = validQuiz.questions.find(question => question.questionId === questionid);
+  if (!question) {
+    throw httpError(400, 'Question Id does not refer to a valid question within this quiz.');
   }
+  updateQuestion(question, questionBody, version);
+
+  validQuiz.timeLastEdited = Date.now();
+  setData(data);
+  return { };
 }
 
 /**
@@ -463,7 +458,7 @@ export function adminQuizQuestionUpdate(token: string, quizid: number, questioni
  * @param {string} token - User ID of admin
  * @param {number} quizid - relevant quizID
  *
- * @returns {ErrorObject} - returns error object based on following conditions:
+ * @returns {object} - returns error object based on following conditions:
  *
  * Token is empty or invalid (does not refer to valid logged in user session)
  * Valid token is provided, but either the quiz ID is invalid, or the user does not own the quiz
@@ -471,23 +466,17 @@ export function adminQuizQuestionUpdate(token: string, quizid: number, questioni
  * @returns {object} - returns an empty object when a quiz is removed
  */
 
-export function adminQuizRemove(token: string, quizid: number): object | ErrorObject {
+export function adminQuizRemove(token: string, quizid: number, version: number): object {
   const data = getData();
   const quizIndex = data.quizzes.findIndex(quizzes => quizzes.quizId === quizid);
+
   const checkToken = validToken(token, data);
 
-  if (isError(checkToken)) {
-    return {
-      error: checkToken.error
-    };
-  }
+  validQuizId(quizid, checkToken, data);
 
-  const checkQuizId = validQuizId(quizid, checkToken, data);
-
-  if (isError(checkQuizId)) {
-    return {
-      error: checkQuizId.error
-    };
+  if (data.sessions.find(sessions => sessions.state !== State.END && sessions.metadata.quizId === quizid) &&
+  version === 2) {
+    throw httpError(400, 'All sessions assosciated to the quiz must not be active to delete.');
   }
 
   data.quizzes[quizIndex].timeLastEdited = Date.now();
@@ -533,16 +522,16 @@ export function adminQuizTransfer(token: string, quizid: number, userEmail: stri
   for (const quiz in user.ownedQuizzes) {
     const ownedQuiz = user.ownedQuizzes[quiz];
     const userQuiz = findQuiz(ownedQuiz, data);
-    if (tokenQuiz != null && userQuiz != null) {
-      if ((tokenQuiz as Quiz).name === (userQuiz as Quiz).name) {
-        throw httpError(400, 'Quiz ID refers to a quiz that has a name that is already used by the target user.');
-      }
+
+    if ((tokenQuiz as Quiz).name === (userQuiz as Quiz).name) {
+      throw httpError(400, 'Quiz ID refers to a quiz that has a name that is already used by the target user.');
     }
   }
 
   validQuizId(quizid, checkToken, data);
 
-  if (data.sessions.find(sessions => sessions.state !== State.END && sessions.metadata.quizId === quizid)) {
+  if (data.sessions.find(sessions => sessions.state !== State.END && sessions.metadata.quizId === quizid) &&
+  version === 2) {
     throw httpError(400, 'All sessions assosciated to the quiz must not be active to transfer.');
   }
 
@@ -550,7 +539,7 @@ export function adminQuizTransfer(token: string, quizid: number, userEmail: stri
 
   const ownedQuizIndex = checkToken.ownedQuizzes.indexOf(quizid);
 
-  if (ownedQuizIndex !== -1) { checkToken.ownedQuizzes.splice(ownedQuizIndex, 1); }
+  checkToken.ownedQuizzes.splice(ownedQuizIndex, 1);
 
   setData(data);
 
