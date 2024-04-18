@@ -490,6 +490,29 @@ export function adminQuizSession(token: string, quizid: number, autoStartNum: nu
   }
 }
 
+/**
+ * Updates the session state of a quiz based on the provided action. This function ensures the action is applicable and makes changes to the state accordingly.
+ *
+ * @param {string} token - Authentication token to validate user session.
+ * @param {number} quizid - Unique identifier for the quiz whose session is being updated.
+ * @param {number} sessionId - Unique identifier for the session within the quiz to be updated.
+ * @param {Action} action - Action to be performed on the session. Valid actions are defined in the Action enum.
+ *
+ * @returns {object} - Returns an empty object upon successful update.
+ *
+ * @throws {ErrorObject} - Errors may be thrown based on the following conditions:
+ *   - Token is invalid or does not refer to a valid logged-in user session.
+ *   - Quiz ID does not match any existing quizzes accessible by the token's user.
+ *   - Session ID does not refer to a valid session within the specified quiz.
+ *   - Action provided does not exist within the Action enum.
+ *   - Action cannot be applied in the current state of the session, such as attempting to move to the next question when no more questions are available, or the session has ended.
+ *   - Skipping countdown or moving to the next question in inappropriate session states.
+ *
+ * The function first validates the token and quiz ID. It then checks the validity of the session ID and the action.
+ * If the action is valid, it updates the session state accordingly. For actions that influence timing (like skipping countdowns or moving to next questions),
+ * it adjusts timers. If the session has reached its final state, it resets relevant session parameters. All updates are persisted to the data storage.
+ */
+
 export function adminQuizSessionUpdate(token: string, quizid: number, sessionId: number, action: Action): object {
   const data = getData();
   const checkToken = validToken(token, data);
