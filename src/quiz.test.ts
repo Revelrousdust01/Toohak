@@ -2652,7 +2652,7 @@ describe.only('V1 - Test adminQuizSessionUpdate', () => {
     const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
     v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'NEXT_QUESTION');
     v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'SKIP_COUNTDOWN');
-    sleepSync(3000);
+    sleepSync(1000);
     expect(v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, validActionEnum)).toMatchObject({ });
   });
 

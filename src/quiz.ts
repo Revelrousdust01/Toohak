@@ -521,7 +521,7 @@ export function adminQuizSessionUpdate(token: string, quizid: number, sessionId:
   if (action === Action.SKIP_COUNTDOWN) {
     timers.forEach(timer => clearTimeout(timer));
     timers = [];
-    
+
     sessionDetails.state = State.QUESTION_OPEN;
     setData(data);
 
