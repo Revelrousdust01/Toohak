@@ -339,3 +339,9 @@ export function requestSleepSync(ms: number) {
     // eslint-ignore-line
   }
 }
+
+export const v1RequestAdminViewQuizSessions = (token: string, quizid: number) => {
+  return requestHelper('GET',
+    `/v1/admin/quiz/${quizid}/sessions`,
+    { }, { token });
+};
