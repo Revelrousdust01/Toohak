@@ -114,7 +114,7 @@ describe('V1 - Test adminPlayerSubmission', () => {
     v1RequestAdminPlayerJoin(session.sessionId, playerName);
     v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'NEXT_QUESTION');
     v1RequestAdminQuizSessionUpdate(register.token as string, quiz.quizId as number, session.sessionId, 'SKIP_COUNTDOWN');
-    expect(() => v1RequestAdminPlayerSubmission(-10, 0, answerIds)).toThrow(HTTPError[400]);
+    expect(() => v1RequestAdminPlayerSubmission(-10, 1, answerIds)).toThrow(HTTPError[400]);
   });
 
   test('If question position is not valid for the session this player is in', () => {
@@ -135,7 +135,7 @@ describe('V1 - Test adminPlayerSubmission', () => {
     const session = v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum);
     const player = v1RequestAdminPlayerJoin(session.sessionId, playerName);
     v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'NEXT_QUESTION');
-    expect(() => v1RequestAdminPlayerSubmission(player.playerId, 0, answerIds)).toThrow(HTTPError[400]);
+    expect(() => v1RequestAdminPlayerSubmission(player.playerId, 1, answerIds)).toThrow(HTTPError[400]);
   });
 
   test('If session is not yet up to this question', () => {
@@ -146,7 +146,7 @@ describe('V1 - Test adminPlayerSubmission', () => {
     const player = v1RequestAdminPlayerJoin(session.sessionId, playerName);
     v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'NEXT_QUESTION');
     v1RequestAdminQuizSessionUpdate(register.token as string, quiz.quizId as number, session.sessionId, 'SKIP_COUNTDOWN');
-    expect(() => v1RequestAdminPlayerSubmission(player.playerId, 1, answerIds)).toThrow(HTTPError[400]);
+    expect(() => v1RequestAdminPlayerSubmission(player.playerId, 2, answerIds)).toThrow(HTTPError[400]);
   });
 
   test('Answer IDs are not valid for this particular question', () => {
@@ -157,7 +157,7 @@ describe('V1 - Test adminPlayerSubmission', () => {
     const player = v1RequestAdminPlayerJoin(session.sessionId, playerName);
     v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'NEXT_QUESTION');
     v1RequestAdminQuizSessionUpdate(register.token as string, quiz.quizId as number, session.sessionId, 'SKIP_COUNTDOWN');
-    expect(() => v1RequestAdminPlayerSubmission(player.playerId, 0, [10001, 10002])).toThrow(HTTPError[400]);
+    expect(() => v1RequestAdminPlayerSubmission(player.playerId, 1, [10001, 10002])).toThrow(HTTPError[400]);
   });
 
   test('There are duplicate answer IDs provided', () => {
@@ -168,7 +168,7 @@ describe('V1 - Test adminPlayerSubmission', () => {
     const player = v1RequestAdminPlayerJoin(session.sessionId, playerName);
     v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'NEXT_QUESTION');
     v1RequestAdminQuizSessionUpdate(register.token as string, quiz.quizId as number, session.sessionId, 'SKIP_COUNTDOWN');
-    expect(() => v1RequestAdminPlayerSubmission(player.playerId, 0, [1, 1])).toThrow(HTTPError[400]);
+    expect(() => v1RequestAdminPlayerSubmission(player.playerId, 1, [1, 1])).toThrow(HTTPError[400]);
   });
 
   test('Less than 1 answer ID was submitted', () => {
@@ -179,7 +179,7 @@ describe('V1 - Test adminPlayerSubmission', () => {
     const player = v1RequestAdminPlayerJoin(session.sessionId, playerName);
     v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'NEXT_QUESTION');
     v1RequestAdminQuizSessionUpdate(register.token as string, quiz.quizId as number, session.sessionId, 'SKIP_COUNTDOWN');
-    expect(() => v1RequestAdminPlayerSubmission(player.playerId, 0, [])).toThrow(HTTPError[400]);
+    expect(() => v1RequestAdminPlayerSubmission(player.playerId, 1, [])).toThrow(HTTPError[400]);
   });
 });
 
