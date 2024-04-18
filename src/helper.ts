@@ -122,7 +122,7 @@ export function validQuestion(questionBody: QuestionBody, quiz: Quiz): object | 
   }
   let counter = 0;
   for (const question of quiz.questions) {
-    counter = question.duration++;
+    counter += question.duration;
   }
   if (counter + questionBody.duration > 180) {
     throw httpError(400, 'The sum of the question durations in the quiz exceeds 3 minutes.');

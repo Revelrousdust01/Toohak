@@ -508,22 +508,22 @@ export function adminQuizSessionUpdate(token: string, quizid: number, sessionId:
     throw httpError(400, 'Session Id does not refer to a valid session within this quiz');
   }
 
-  const checkAction = validAction(sessionId, action, data)
+  const checkAction = validAction(sessionId, action, data);
   let currentState = sessionDetails.state;
+  console.log(currentState);
+  console.log('current quiz state^');
   if (!checkAction.valid || (sessionDetails.metadata.questions.length === sessionDetails.atQuestion 
     && (currentState === State.ANSWER_SHOW || currentState === State.QUESTION_CLOSE) 
     && action === Action.NEXT_QUESTION)){
-      throw httpError(400, 'Action cannot be applied in the current state');
+      throw httpError(400, `action: ${action} cannot be applied in the current state: ${currentState}`);
   }
-
-  sessionDetails.state = checkAction.state;
 
   if (action === Action.SKIP_COUNTDOWN) {
     timers.forEach(timer => clearTimeout(timer));
     timers = [];
-
+    console.log('cleared all timers');
+    sessionDetails.atQuestion = sessionDetails.atQuestion + 1;
     sessionDetails.state = State.QUESTION_OPEN;
-    setData(data);
 
     const newTimer = setTimeout(() => {
       sessionDetails.state = State.QUESTION_CLOSE;
@@ -537,15 +537,18 @@ export function adminQuizSessionUpdate(token: string, quizid: number, sessionId:
     timers.forEach(timer => clearTimeout(timer));
     timers = [];
     sessionDetails.atQuestion = sessionDetails.atQuestion + 1;
-    setData(data);
+
+    console.log('countdown timer started');
 
     timers.push(setTimeout(() => {
+      console.log('countdown timer fired');
       sessionDetails.state = State.QUESTION_OPEN;
-      setData(data);
       start = Math.floor(Date.now() / 1000);
+      
+      console.log('answer timer started');
       timers.push(setTimeout(() => {
+        console.log('answer timer fired');
       sessionDetails.state = State.QUESTION_CLOSE;
-      setData(data);
       }, sessionDetails.metadata.questions[sessionDetails.atQuestion - 1].duration * 1000));
     }, 3000));
    }
@@ -553,6 +556,8 @@ export function adminQuizSessionUpdate(token: string, quizid: number, sessionId:
   if (sessionDetails.state === State.FINAL_RESULTS || sessionDetails.state === State.END) {
     sessionDetails.atQuestion = 0;
   }
+
+  sessionDetails.state = checkAction.state;
   setData(data);
 
   return { }

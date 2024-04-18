@@ -14,13 +14,15 @@ export function clear(): object {
   for (const timer of timers) {
     clearTimeout(timer);
   }
-  currentState.users = [];
-  currentState.quizzes = [];
-  currentState.userSessions = [];
-  currentState.trash = [];
-  currentState.quizCounter = 1;
-  currentState.sessions = [];
-  setData(currentState);
+  
+  setData({
+    users: [],
+    quizzes: [],
+    userSessions: [],
+    trash: [],
+    quizCounter: 1,
+    sessions: []
+  });
 
   return {};
 }

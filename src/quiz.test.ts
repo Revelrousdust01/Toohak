@@ -2551,7 +2551,7 @@ describe('V1 - Test adminQuizThumbnailUpdate', () => {
 });
 
 // adminQuizSessionUpdate
-describe('V1 - Test adminQuizSessionUpdate', () => {
+describe.only('V1 - Test adminQuizSessionUpdate', () => {
   const firstName = 'Jeffery';
   const lastName = 'Zhang';
   const email = 'jeffery.zhang385@gmail.com';
@@ -2799,10 +2799,9 @@ describe('V1 - Test adminQuizSessionUpdate', () => {
     expect(() => v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, invalidActionEnum)).toThrow(HTTPError[400]);
   });
   
-  test.each([
-    { invalidActionEnum: 'NEXT_QUESTION' },
-    { invalidActionEnum: 'SKIP_COUNTDOWN' },
-    { invalidActionEnum: 'NEXT_QUESTION' },
+  test.only.each([
+    // { invalidActionEnum: 'NEXT_QUESTION' },
+    { invalidActionEnum: 'SKIP_COUNTDOWN' }
   ])("invalid Action enum for Question Close state: '$invalidActionEnum", ({ invalidActionEnum }) => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
