@@ -117,12 +117,6 @@ export interface ErrorObject {
     error: string;
 }
 
-export interface OldRequestHelperReturnType {
-    statusCode: number;
-    jsonBody?: Record<string, string | number>;
-    error?: string;
-}
-
 export interface Payload {
     [key: string]: unknown;
 }
