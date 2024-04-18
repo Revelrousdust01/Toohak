@@ -1,6 +1,7 @@
 import { getData, setData } from './dataStore';
 import httpError from 'http-errors';
 import { State } from './interfaces';
+import { start } from './session';
 
 /**
   * Creates a new Guest Player
@@ -33,4 +34,46 @@ export function adminPlayerJoin(sessionId: number, name: string) {
   setData(data);
 
   return { playerId: player.playerId };
+}
+
+export function adminPlayerSubmission(playerid: number, questionposition: number, answerIds: number[]) {
+  const data = getData();
+  const session = data.sessions.find(session => session.players.find(player => player.playerId === playerid));
+  if (!session) {
+    throw httpError(400, 'Player does not exist.');
+  }
+  if (session.metadata.numQuestions < questionposition || questionposition < 0) {
+    throw httpError(400, 'Question position is invalid.');
+  }
+  if (session.state !== State.QUESTION_OPEN) {
+    throw httpError(400, 'Session must make the question avaliable first.');
+  }
+  if (session.atQuestion - 1 !== questionposition) {
+    throw httpError(400, 'Session is not at this question yet.');
+  }
+  if (answerIds.length < 1) {
+    throw httpError(400, 'No answers have been submitted.');
+  }
+  if (!session.metadata.questions[questionposition].answers.find(answer => answerIds.find(answerid => answer.answerId === answerid))) {
+    throw httpError(400, 'Answer does not exist for this question.');
+  }
+  if (answerIds.some((item, index) => answerIds.includes(item, index + 1))) {
+    throw httpError(400, 'Duplicate answers have been submitted.');
+  }
+
+  const player = session.players.find(player => player.playerId === playerid);
+
+  const attempt = {
+    playerId: playerid,
+    playerName: player.playerName,
+    answers: answerIds,
+    points: session.metadata.questions[questionposition].points,
+    timeTaken: Math.floor(Date.now() / 1000) - start
+  };
+
+  session.metadata.questions[questionposition].attempts.push(attempt);
+
+  setData(data);
+
+  return { };
 }
