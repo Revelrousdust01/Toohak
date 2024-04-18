@@ -325,23 +325,20 @@ export function adminQuizQuestionDuplicate(token: string, quizid: number, questi
   const data = getData();
 
   const checkToken = validToken(token, data);
-  if (isError(checkToken)) {
-    return { error: 'Token is empty or invalid.' };
-  }
 
   const quiz = data.quizzes.find(quiz => quiz.quizId === quizid);
   if (!quiz) {
-    return { error: 'Quiz ID does not refer to a valid quiz.' };
+    throw httpError(403, 'Quiz ID does not refer to a valid quiz.');
   }
 
   if (!checkToken.ownedQuizzes.includes(quizid)) {
-    return { error: 'Quiz ID does not refer to a quiz that this user owns.' };
+    throw httpError(403, 'Quiz ID does not refer to a quiz that this user owns');
   }
 
   const questionIndex = quiz.questions.findIndex(question => question.questionId === questionid);
 
   if (questionIndex === -1) {
-    return { error: 'Question ID does not refer to a valid question within the quiz.' };
+    throw httpError(400, 'Question ID does not refer to a valid question within the quiz.');
   }
 
   const questionToDuplicate = { ...quiz.questions[questionIndex], questionId: quiz.questionCounter };
