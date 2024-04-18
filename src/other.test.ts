@@ -65,10 +65,10 @@ describe('Iteration 3: Test "clear" function', () => {
 
   test('Resets quiz counter to 1', () => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
+    v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
     v1RequestClear();
     const registered1 = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    expect(v1RequestAdminQuizCreate(registered1.token as string, quizName, quizDescription)).toMatchObject({quizId: expect.any(Number)});
+    expect(v1RequestAdminQuizCreate(registered1.token as string, quizName, quizDescription)).toMatchObject({ quizId: expect.any(Number) });
   });
 
   test('Resets user sessions list to empty', () => {
@@ -80,6 +80,6 @@ describe('Iteration 3: Test "clear" function', () => {
     const registered1 = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quizId1 = v1RequestAdminQuizCreate(registered1.token as string, quizName, quizDescription);
     v1RequestAdminQuizQuestionCreate(registered1.token as string, quizId1.quizId as number, question);
-    expect(v1RequestAdminQuizSession(registered1.token, quizId1.quizId, autoStartNum)).toMatchObject({sessionId: expect.any(Number)})
+    expect(v1RequestAdminQuizSession(registered1.token, quizId1.quizId, autoStartNum)).toMatchObject({ sessionId: expect.any(Number) });
   });
 });

@@ -1,5 +1,4 @@
-import { getData, setData } from './dataStore';
-import type { DataStore } from './interfaces';
+import { setData } from './dataStore';
 import { timers } from './quiz';
 
 /**
@@ -10,7 +9,9 @@ import { timers } from './quiz';
   * @returns {} - returns an empty object when resetting the application to the start
 */
 export function clear(): object {
-  const currentState: DataStore = getData();
+  for (const timer of timers) {
+    clearTimeout(timer);
+  }
 
   setData({
     users: [],

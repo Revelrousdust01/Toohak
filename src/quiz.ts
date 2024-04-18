@@ -1,7 +1,9 @@
 import { getData, setData } from './dataStore';
-import { type ErrorObject, type Quiz, type createQuizReturn, type QuizArray, type QuestionBody, type Question, type duplicateReturn, type createQuestionReturn, State } from './interfaces';
-import { isError, findQuiz, validQuestion, validQuizName, validQuizId, validToken, setupAnswers, validateThumbnail, updateQuestion } from './helper';
+import { type ErrorObject, type Quiz, type createQuizReturn, type QuizArray, type QuestionBody, type Question, type duplicateReturn, type createQuestionReturn, State, Action } from './interfaces';
+import { isError, findQuiz, validQuestion, validQuizName, validQuizId, validToken, setupAnswers, validateThumbnail, updateQuestion, validAction } from './helper';
 import httpError from 'http-errors';
+export let timers: ReturnType<typeof setTimeout>[] = [];
+
 /**
  * Given basic details about a new quiz, create one for the logged in user.
  *
@@ -65,6 +67,7 @@ export function adminQuizCreate(token: string, name: string, description: string
   *
   * @returns {object} - returns an empty object when a quiz description is updated
 */
+
 export function adminQuizDescriptionUpdate(token: string, quizid: number, description: string): ErrorObject | object {
   const data = getData();
 
@@ -246,6 +249,7 @@ export function adminQuizNameUpdate(token: string, quizid: number, name: string)
   * @returns { { error: }  } - Returns object when conditions fail
   * @returns { object } - returns an empty object question is updated.
 */
+
 export function adminQuizQuestionCreate(token: string, quizid: number, questionBody: QuestionBody, version: number): createQuestionReturn {
   const data = getData();
   const checkToken = validToken(token, data);
@@ -316,6 +320,7 @@ export function adminQuizQuestionCreate(token: string, quizid: number, questionB
  *
  * @returns {duplicateReturn} - returns the new question id when duplicated.
  */
+
 export function adminQuizQuestionDuplicate(token: string, quizid: number, questionid: number): duplicateReturn | ErrorObject {
   const data = getData();
 
@@ -358,6 +363,7 @@ export function adminQuizQuestionDuplicate(token: string, quizid: number, questi
   * @returns { { error: }  } - Returns object when conditions fail
   * @returns { object } - returns an empty object question is updated.
 */
+
 export function adminQuizQuestionDelete(token: string, quizid: number, questionid: number): object | ErrorObject {
   const data = getData();
   const checkToken = validToken(token, data);
@@ -482,6 +488,65 @@ export function adminQuizSession(token: string, quizid: number, autoStartNum: nu
       sessionId: newSessionId,
     };
   }
+}
+
+export function adminQuizSessionUpdate(token: string, quizid: number, sessionId: number, action: Action): object {
+  const data = getData();
+  const checkToken = validToken(token, data);
+  validQuizId(quizid, checkToken, data);
+
+  if (!Object.keys(Action).includes(action)) {
+    throw httpError(400, 'Invalid Action enum');
+  }
+
+  const sessionDetails = data.sessions.find(session => session.quizSessionId === sessionId);
+  if (!sessionDetails || sessionDetails.metadata.quizId !== quizid) {
+    throw httpError(400, 'Session Id does not refer to a valid session within this quiz');
+  }
+
+  const checkAction = validAction(sessionId, action, data);
+  const currentState = sessionDetails.state;
+  if (!checkAction.valid || (sessionDetails.metadata.questions.length === sessionDetails.atQuestion &&
+    (currentState === State.ANSWER_SHOW || currentState === State.QUESTION_CLOSE) &&
+    action === Action.NEXT_QUESTION)) {
+    throw httpError(400, `action: ${action} cannot be applied in the current state: ${currentState}`);
+  }
+
+  if (action === Action.SKIP_COUNTDOWN) {
+    timers.forEach(timer => clearTimeout(timer));
+    timers = [];
+    sessionDetails.state = State.QUESTION_OPEN;
+
+    const newTimer = setTimeout(() => {
+      sessionDetails.state = State.QUESTION_CLOSE;
+      setData(data);
+    }, sessionDetails.metadata.questions[sessionDetails.atQuestion - 1].duration * 1000);
+
+    timers.push(newTimer);
+  }
+
+  if (action === Action.NEXT_QUESTION) {
+    timers.forEach(timer => clearTimeout(timer));
+    timers = [];
+    sessionDetails.atQuestion = sessionDetails.atQuestion + 1;
+
+    timers.push(setTimeout(() => {
+      sessionDetails.state = State.QUESTION_OPEN;
+
+      timers.push(setTimeout(() => {
+        sessionDetails.state = State.QUESTION_CLOSE;
+      }, sessionDetails.metadata.questions[sessionDetails.atQuestion - 1].duration * 1000));
+    }, 3000));
+  }
+
+  if (sessionDetails.state === State.FINAL_RESULTS || sessionDetails.state === State.END) {
+    sessionDetails.atQuestion = 0;
+  }
+
+  sessionDetails.state = checkAction.state;
+  setData(data);
+
+  return { };
 }
 
 /**
@@ -670,6 +735,7 @@ export function adminQuizEmptyTrash(token: string, quizids: number[]): object | 
  *
  * @returns {object} - returns an empty object when quiz is restored
  */
+
 export function adminQuizRestore(token: string, quizid: number): object | ErrorObject {
   const data = getData();
 
