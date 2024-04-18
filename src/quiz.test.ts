@@ -1292,8 +1292,8 @@ describe('V1 - adminQuizQuestionDuplicate', () => {
     const quiz = v2RequestAdminQuizCreate(user.token as string, quizName, quizDescr);
     const question = v2RequestAdminQuizQuestionCreate(user.token as string,
       quiz.quizId as number, question1);
-    expect(v1RequestAdminQuizQuestionDuplicate(user.token as string, 
-      quiz.quizId as number, question.questionId as number)).toStrictEqual({ newQuestionId: expect.any(Number)});
+    expect(v1RequestAdminQuizQuestionDuplicate(user.token as string,
+      quiz.quizId as number, question.questionId as number)).toStrictEqual({ newQuestionId: expect.any(Number) });
   });
 
   test('Question Id does not refer to a valid question within this quiz', () => {
@@ -1306,7 +1306,7 @@ describe('V1 - adminQuizQuestionDuplicate', () => {
       quiz2.quizId as number, question2);
     const questionSecond = v2RequestAdminQuizQuestionCreate(user.token as string,
       quiz2.quizId as number, question1);
-    expect(() => v1RequestAdminQuizQuestionDuplicate(user.token as string, 
+    expect(() => v1RequestAdminQuizQuestionDuplicate(user.token as string,
       quiz.quizId as number, questionSecond.questionId as number)).toThrow(HTTPError[400]);
   });
 
@@ -1320,7 +1320,7 @@ describe('V1 - adminQuizQuestionDuplicate', () => {
     const quiz = v2RequestAdminQuizCreate(user.token as string, quizName, quizDescr);
     const question = v2RequestAdminQuizQuestionCreate(user.token as string,
       quiz.quizId as number, question1);
-    expect(() => v1RequestAdminQuizQuestionDuplicate(invalidToken, 
+    expect(() => v1RequestAdminQuizQuestionDuplicate(invalidToken,
       quiz.quizId as number, question.questionId as number)).toThrow(HTTPError[401]);
   });
 
@@ -1333,7 +1333,7 @@ describe('V1 - adminQuizQuestionDuplicate', () => {
     const newQuiz = v2RequestAdminQuizCreate(user.token as string, quizName, quizDescr);
     const question = v2RequestAdminQuizQuestionCreate(user.token as string,
       newQuiz.quizId as number, question1);
-    expect(() => v1RequestAdminQuizQuestionDuplicate(user.token as string, 
+    expect(() => v1RequestAdminQuizQuestionDuplicate(user.token as string,
       invalidQuizId, question.questionId as number)).toThrow(HTTPError[403]);
   });
 
@@ -1344,7 +1344,7 @@ describe('V1 - adminQuizQuestionDuplicate', () => {
       quiz.quizId as number, question1);
     const user2 = v1RequestAdminAuthRegister('cpolitis@student.unsw.edu.au',
       'ab123bweofljj4', 'Chris', 'Poopy');
-    expect(() => v1RequestAdminQuizQuestionDuplicate(user2.token as string, 
+    expect(() => v1RequestAdminQuizQuestionDuplicate(user2.token as string,
       quiz.quizId as number, question.questionId as number)).toThrow(HTTPError[403]);
   });
 });
@@ -1396,8 +1396,8 @@ describe('V2 - adminQuizQuestionDuplicate', () => {
     const quiz = v2RequestAdminQuizCreate(user.token as string, quizName, quizDescr);
     const question = v2RequestAdminQuizQuestionCreate(user.token as string,
       quiz.quizId as number, question1);
-    expect(v2RequestAdminQuizQuestionDuplicate(user.token as string, 
-      quiz.quizId as number, question.questionId as number)).toStrictEqual({ newQuestionId: expect.any(Number)});
+    expect(v2RequestAdminQuizQuestionDuplicate(user.token as string,
+      quiz.quizId as number, question.questionId as number)).toStrictEqual({ newQuestionId: expect.any(Number) });
   });
 
   test('Question Id does not refer to a valid question within this quiz', () => {
@@ -1410,7 +1410,7 @@ describe('V2 - adminQuizQuestionDuplicate', () => {
       quiz2.quizId as number, question2);
     const questionSecond = v2RequestAdminQuizQuestionCreate(user.token as string,
       quiz2.quizId as number, question1);
-    expect(() => v2RequestAdminQuizQuestionDuplicate(user.token as string, 
+    expect(() => v2RequestAdminQuizQuestionDuplicate(user.token as string,
       quiz.quizId as number, questionSecond.questionId as number)).toThrow(HTTPError[400]);
   });
 
@@ -1424,7 +1424,7 @@ describe('V2 - adminQuizQuestionDuplicate', () => {
     const quiz = v2RequestAdminQuizCreate(user.token as string, quizName, quizDescr);
     const question = v2RequestAdminQuizQuestionCreate(user.token as string,
       quiz.quizId as number, question1);
-    expect(() => v2RequestAdminQuizQuestionDuplicate(invalidToken, 
+    expect(() => v2RequestAdminQuizQuestionDuplicate(invalidToken,
       quiz.quizId as number, question.questionId as number)).toThrow(HTTPError[401]);
   });
 
@@ -1437,7 +1437,7 @@ describe('V2 - adminQuizQuestionDuplicate', () => {
     const newQuiz = v2RequestAdminQuizCreate(user.token as string, quizName, quizDescr);
     const question = v2RequestAdminQuizQuestionCreate(user.token as string,
       newQuiz.quizId as number, question1);
-    expect(() => v2RequestAdminQuizQuestionDuplicate(user.token as string, 
+    expect(() => v2RequestAdminQuizQuestionDuplicate(user.token as string,
       invalidQuizId, question.questionId as number)).toThrow(HTTPError[403]);
   });
 
@@ -1448,7 +1448,7 @@ describe('V2 - adminQuizQuestionDuplicate', () => {
       quiz.quizId as number, question1);
     const user2 = v1RequestAdminAuthRegister('cpolitis@student.unsw.edu.au',
       'ab123bweofljj4', 'Chris', 'Poopy');
-    expect(() => v2RequestAdminQuizQuestionDuplicate(user2.token as string, 
+    expect(() => v2RequestAdminQuizQuestionDuplicate(user2.token as string,
       quiz.quizId as number, question.questionId as number)).toThrow(HTTPError[403]);
   });
 });
