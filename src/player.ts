@@ -2,6 +2,7 @@ import { getData, setData } from './dataStore';
 import httpError from 'http-errors';
 import { State } from './interfaces';
 import { start } from './session';
+import { v1RequestAdminQuizSessionUpdate } from './requests'
 
 /**
   * Creates a new Guest Player
@@ -14,6 +15,7 @@ import { start } from './session';
 export function adminPlayerJoin(sessionId: number, name: string) {
   const data = getData();
   const session = data.sessions.find(session => session.quizSessionId === sessionId);
+
   if (!session) {
     throw httpError(400, 'Session Id does not refer to a valid session within this quiz.');
   }
@@ -29,9 +31,15 @@ export function adminPlayerJoin(sessionId: number, name: string) {
     playerName: name,
     playerScore: 0
   };
+  const autoStartNum = session.autoStartNum;
 
   session.players.push(player);
+
   setData(data);
+  
+  if (session.players.length === autoStartNum) {
+    v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId, 'NEXT_QUESTION');
+  }
 
   return { playerId: player.playerId };
 }
