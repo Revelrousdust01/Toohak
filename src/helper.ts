@@ -21,17 +21,6 @@ export function findQuiz(quizid: number, data: DataStore): object | Quiz {
 }
 
 /**
-  * Check whether object is of type ErrorObject or not:
-  *
-  * @param {unknown} object - Unknown Object
-  *
-  * @returns { } - Returns the error if it is of the same type.
-*/
-export function isError(object: unknown): object is ErrorObject {
-  return 'error' in (object as ErrorObject);
-}
-
-/**
   * Validates email of certain conditions:
   * - Email address is used by another user.
   * - Email does not satisfy this validator

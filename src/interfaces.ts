@@ -117,12 +117,6 @@ export interface ErrorObject {
     error: string;
 }
 
-export interface OldRequestHelperReturnType {
-    statusCode: number;
-    jsonBody?: Record<string, string | number>;
-    error?: string;
-}
-
 export interface Payload {
     [key: string]: unknown;
 }
@@ -167,7 +161,7 @@ export enum State {
     ANSWER_SHOW = 'ANSWER_SHOW',
     FINAL_RESULTS = 'FINAL_RESULTS',
     END = 'END'
-  }
+}
 
 export interface Message {
     playerId: number;
@@ -204,3 +198,8 @@ export type validActionType = {
     valid: boolean;
     state: State;
 };
+
+export interface SessionsList {
+    activeSessions: number[],
+    inactiveSessions: number[]
+}
