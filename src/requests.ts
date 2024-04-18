@@ -327,6 +327,12 @@ export const v1RequestAdminQuizSessionUpdate = (token: string, quizid: number, s
     { action: action }, { token });
 };
 
+export const v1RequestAdminPlayerJoin = (sessionId: number, name: string) => {
+  return requestHelper('POST',
+    '/v1/player/join',
+    { sessionId: sessionId, name: name });
+};
+
 export function requestSleepSync(ms: number) {
   const startTime = new Date().getTime();
   while (new Date().getTime() - startTime < ms) {

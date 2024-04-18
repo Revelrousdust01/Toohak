@@ -2810,6 +2810,7 @@ describe('V1 - Test adminQuizSessionUpdate', () => {
     const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
     v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'NEXT_QUESTION');
     requestSleepSync(3000);
+    requestSleepSync(1000);
     expect(v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, validActionEnum)).toMatchObject({ });
   });
 
