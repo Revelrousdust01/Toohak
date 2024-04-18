@@ -521,29 +521,32 @@ export function adminQuizSessionUpdate(token: string, quizid: number, sessionId:
   if (action === Action.SKIP_COUNTDOWN) {
     timers.forEach(timer => clearTimeout(timer));
     timers = [];
-   
+    
+    sessionDetails.state = State.QUESTION_OPEN;
+    setData(data);
+
     const newTimer = setTimeout(() => {
-       sessionDetails.state = State.QUESTION_OPEN;
-       setData(data);
+      sessionDetails.state = State.QUESTION_CLOSE;
+      setData(data);
     }, sessionDetails.metadata.questions[sessionDetails.atQuestion - 1].duration * 1000);
-   
+    
     timers.push(newTimer);
    }
 
-  if (sessionDetails.state === State.QUESTION_COUNTDOWN) {
+   if (sessionDetails.state === State.QUESTION_COUNTDOWN) {
     sessionDetails.atQuestion = sessionDetails.atQuestion + 1;
     setData(data);
+
     timers.push(setTimeout(() => {
       sessionDetails.state = State.QUESTION_OPEN;
       setData(data);
       start = Math.floor(Date.now() / 1000);
       timers.push(setTimeout(() => {
-        sessionDetails.state = State.QUESTION_CLOSE;
-        setData(data);
+      sessionDetails.state = State.QUESTION_CLOSE;
+      setData(data);
       }, sessionDetails.metadata.questions[sessionDetails.atQuestion - 1].duration * 1000));
     }, 3000));
-    setData(data);
-  }
+   }
 
   if (sessionDetails.state === State.FINAL_RESULTS || sessionDetails.state === State.END) {
     sessionDetails.atQuestion = 0;
