@@ -381,6 +381,12 @@ export const v1RequestAdminPlayerJoin = (sessionId: number, name: string) => {
     { sessionId: sessionId, name: name });
 };
 
+export const v1RequestAdminPlayerSubmission = (playerid: number, questionposition: number, answerIds: number[]) => {
+  return requestHelper('PUT',
+    `/v1/player/${playerid}/question/${questionposition}/answer`,
+    { answerIds: answerIds });
+};
+
 export function requestSleepSync(ms: number) {
   const startTime = new Date().getTime();
   while (new Date().getTime() - startTime < ms) {
