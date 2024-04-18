@@ -518,19 +518,17 @@ export function adminQuizSessionUpdate(token: string, quizid: number, sessionId:
 
   sessionDetails.state = checkAction.state;
 
-  if(action === Action.SKIP_COUNTDOWN){
-    for (const timer of timers) {
-      clearTimeout(timer);
-    }
-    timers.push(setTimeout(() => {
-      sessionDetails.state = State.QUESTION_OPEN;
-      setData(data);
-      start = Math.floor(Date.now() / 1000);
-      timers.push(setTimeout(() => {
-        sessionDetails.state = State.QUESTION_CLOSE;
-        setData(data);
-      }))}, sessionDetails.metadata.questions[sessionDetails.atQuestion - 1].duration * 1000));
-  }
+  if (action === Action.SKIP_COUNTDOWN) {
+    timers.forEach(timer => clearTimeout(timer));
+    timers = [];
+   
+    const newTimer = setTimeout(() => {
+       sessionDetails.state = State.QUESTION_OPEN;
+       setData(data);
+    }, sessionDetails.metadata.questions[sessionDetails.atQuestion - 1].duration * 1000);
+   
+    timers.push(newTimer);
+   }
 
   if (sessionDetails.state === State.QUESTION_COUNTDOWN) {
     sessionDetails.atQuestion = sessionDetails.atQuestion + 1;
