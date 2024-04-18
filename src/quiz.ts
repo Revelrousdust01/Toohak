@@ -229,10 +229,8 @@ export function adminQuizNameUpdate(token: string, quizid: number, name: string)
   validQuizName(name);
 
   const existingQuiz = data.quizzes.find(quiz => quiz.name === name);
-  if (existingQuiz) {
-    if (checkToken.ownedQuizzes.find(quiz => quiz === existingQuiz.quizId)) {
-      throw httpError(400, 'Name is already used by the current logged in user for another quiz.');
-    }
+  if (checkToken.ownedQuizzes.find(quiz => quiz === existingQuiz?.quizId)) {
+    throw httpError(400, 'Name is already used by the current logged in user for another quiz.');
   }
   data.quizzes.find(quiz => quiz.quizId === quizid).name = name;
   setData(data);
@@ -258,50 +256,49 @@ export function adminQuizQuestionCreate(token: string, quizid: number, questionB
 
   const quiz = findQuiz(quizid, data);
 
-  if (quiz != null) {
-    validQuestion(questionBody, quiz as Quiz);
-    const validQuiz = quiz as Quiz;
-    if (version === 1) {
-      let newQuestion: Question = {
-        questionId: validQuiz.questionCounter,
-        duration: questionBody.duration,
-        question: questionBody.question,
-        points: questionBody.points,
-        answers: []
-      };
 
-      newQuestion = setupAnswers(newQuestion, questionBody);
+  validQuestion(questionBody, quiz as Quiz);
+  const validQuiz = quiz as Quiz;
+  if (version === 1) {
+    let newQuestion: Question = {
+      questionId: validQuiz.questionCounter,
+      duration: questionBody.duration,
+      question: questionBody.question,
+      points: questionBody.points,
+      answers: []
+    };
 
-      validQuiz.questionCounter++;
+    newQuestion = setupAnswers(newQuestion, questionBody);
 
-      validQuiz.timeLastEdited = Date.now();
+    validQuiz.questionCounter++;
 
-      validQuiz.questions.push(newQuestion);
+    validQuiz.timeLastEdited = Date.now();
 
-      setData(data);
-      return { questionId: newQuestion.questionId };
-    } else {
-      validateThumbnail(questionBody.thumbnailUrl);
+    validQuiz.questions.push(newQuestion);
 
-      let newQuestion: Question = {
-        questionId: validQuiz.questionCounter,
-        duration: questionBody.duration,
-        question: questionBody.question,
-        points: questionBody.points,
-        answers: [],
-        thumbnailUrl: questionBody.thumbnailUrl
-      };
-      newQuestion = setupAnswers(newQuestion, questionBody);
+    setData(data);
+    return { questionId: newQuestion.questionId };
+  } else {
+    validateThumbnail(questionBody.thumbnailUrl);
 
-      validQuiz.questionCounter++;
+    let newQuestion: Question = {
+      questionId: validQuiz.questionCounter,
+      duration: questionBody.duration,
+      question: questionBody.question,
+      points: questionBody.points,
+      answers: [],
+      thumbnailUrl: questionBody.thumbnailUrl
+    };
+    newQuestion = setupAnswers(newQuestion, questionBody);
 
-      validQuiz.timeLastEdited = Date.now();
+    validQuiz.questionCounter++;
 
-      validQuiz.questions.push(newQuestion);
+    validQuiz.timeLastEdited = Date.now();
 
-      setData(data);
-      return { questionId: newQuestion.questionId };
-    }
+    validQuiz.questions.push(newQuestion);
+
+    setData(data);
+    return { questionId: newQuestion.questionId };
   }
 }
 
@@ -445,49 +442,46 @@ export function adminQuizSession(token: string, quizid: number, autoStartNum: nu
   const quiz = findQuiz(quizid, data);
 
   const newSessionId = Date.now() + Math.floor(Math.random() * 1000);
-  if (quiz !== null) {
-    const isQuiz = quiz as Quiz;
-    if (isQuiz.questions === null || isQuiz.questions.length === 0) {
-      throw httpError(400, 'Quiz does not have any questions.');
-    }
-    data.sessions.push({
-      metadata: {
-        quizId: quizid,
-        name: isQuiz.name,
-        timeCreated: isQuiz.timeCreated,
-        timeLastEdited: isQuiz.timeLastEdited,
-        description: isQuiz.description,
-        numQuestions: isQuiz.questionCounter,
-        questions: isQuiz.questions.map(question => {
-          return {
-            questionId: question.questionId,
-            question: question.question,
-            duration: question.duration,
-            points: question.points,
-            thumbnail: question.thumbnailUrl,
-            answers: question.answers,
-            averageAnswerTime: 0,
-            percentCorrect: 0,
-            attempts: []
-          };
-        }),
-        duration: isQuiz.duration,
-        thumbnail: isQuiz.thumbnailUrl
-      },
-      quizSessionId: newSessionId,
-      state: State.LOBBY,
-      autoStartNum: autoStartNum,
-      atQuestion: 0,
-      messages: [],
-      players: []
-    });
-
-    setData(data);
-
-    return {
-      sessionId: newSessionId,
-    };
+  const isQuiz = quiz as Quiz;
+  if (isQuiz.questions.length < 1) {
+    throw httpError(400, 'Quiz does not have any questions.');
   }
+  data.sessions.push({
+    metadata: {
+      quizId: quizid,
+      name: isQuiz.name,
+      timeCreated: isQuiz.timeCreated,
+      timeLastEdited: isQuiz.timeLastEdited,
+      description: isQuiz.description,
+      numQuestions: isQuiz.questionCounter,
+      questions: isQuiz.questions.map(question => {
+        return {
+          questionId: question.questionId,
+          question: question.question,
+          duration: question.duration,
+          points: question.points,
+          thumbnail: question.thumbnailUrl,
+          answers: question.answers,
+          averageAnswerTime: 0,
+          percentCorrect: 0,
+          attempts: []
+        };
+      }),
+      duration: isQuiz.duration,
+      thumbnail: isQuiz.thumbnailUrl
+    },
+    quizSessionId: newSessionId,
+    state: State.LOBBY,
+    autoStartNum: autoStartNum,
+    atQuestion: 0,
+    messages: [],
+    players: []
+  });
+  setData(data);
+
+  return {
+    sessionId: newSessionId,
+  };
 }
 
 /**
@@ -592,19 +586,17 @@ export function adminQuizQuestionUpdate(token: string, quizid: number, questioni
 
   const quiz = findQuiz(quizid, data);
 
-  if (quiz != null) {
-    validQuestion(questionBody, quiz as Quiz);
-    const validQuiz = quiz as Quiz;
-    const question = validQuiz.questions.find(question => question.questionId === questionid);
-    if (!question) {
-      throw httpError(400, 'Question Id does not refer to a valid question within this quiz.');
-    }
-    updateQuestion(question, questionBody, version);
-
-    validQuiz.timeLastEdited = Date.now();
-    setData(data);
-    return { };
+  validQuestion(questionBody, quiz as Quiz);
+  const validQuiz = quiz as Quiz;
+  const question = validQuiz.questions.find(question => question.questionId === questionid);
+  if (!question) {
+    throw httpError(400, 'Question Id does not refer to a valid question within this quiz.');
   }
+  updateQuestion(question, questionBody, version);
+
+  validQuiz.timeLastEdited = Date.now();
+  setData(data);
+  return { };
 }
 
 /**
@@ -676,10 +668,9 @@ export function adminQuizTransfer(token: string, quizid: number, userEmail: stri
   for (const quiz in user.ownedQuizzes) {
     const ownedQuiz = user.ownedQuizzes[quiz];
     const userQuiz = findQuiz(ownedQuiz, data);
-    if (tokenQuiz != null && userQuiz != null) {
-      if ((tokenQuiz as Quiz).name === (userQuiz as Quiz).name) {
-        throw httpError(400, 'Quiz ID refers to a quiz that has a name that is already used by the target user.');
-      }
+
+    if ((tokenQuiz as Quiz).name === (userQuiz as Quiz).name) {
+      throw httpError(400, 'Quiz ID refers to a quiz that has a name that is already used by the target user.');
     }
   }
 
@@ -693,7 +684,7 @@ export function adminQuizTransfer(token: string, quizid: number, userEmail: stri
 
   const ownedQuizIndex = checkToken.ownedQuizzes.indexOf(quizid);
 
-  if (ownedQuizIndex !== -1) { checkToken.ownedQuizzes.splice(ownedQuizIndex, 1); }
+  checkToken.ownedQuizzes.splice(ownedQuizIndex, 1); 
 
   setData(data);
 
