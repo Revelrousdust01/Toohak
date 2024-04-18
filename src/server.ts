@@ -23,6 +23,7 @@ import sui from 'swagger-ui-express';
 import fs from 'fs';
 import path from 'path';
 import process from 'process';
+import { adminPlayerJoin } from './player';
 
 // Set up web app
 const app = express();
@@ -365,6 +366,12 @@ app.post('/v2/admin/quiz', (req: Request, res: Response) => {
 app.delete('/v1/clear', (req: Request, res: Response) => {
   const response = clear();
 
+  res.json(response);
+});
+
+app.post('/v1/player/join', (req: Request, res: Response) => {
+  const { sessionId, name } = req.body;
+  const response = adminPlayerJoin(sessionId, name);
   res.json(response);
 });
 

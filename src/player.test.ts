@@ -1,16 +1,16 @@
-import { QuestionBody } from "./interfaces";
-import { requestClear, v1RequestAdminAuthRegister, v1RequestAdminPlayerJoin, v1RequestAdminQuizCreate, v1RequestAdminQuizQuestionCreate, v1RequestAdminQuizSession, v1RequestAdminQuizSessionUpdate } from "./requests";
+import { QuestionBody } from './interfaces';
+import { v1RequestClear, v1RequestAdminAuthRegister, v1RequestAdminPlayerJoin, v1RequestAdminQuizCreate, v1RequestAdminQuizQuestionCreate, v1RequestAdminQuizSession, v1RequestAdminQuizSessionUpdate } from './requests';
 import HTTPError from 'http-errors';
 beforeEach(() => {
-	requestClear();
+  v1RequestClear();
 });
 
 afterAll(() => {
-	requestClear();
+  v1RequestClear();
 });
 
 describe('V1 - Test adminQuizCreate', () => {
-	const playerName = 'Joe Mama'
+  const playerName = 'Joe Mama';
   const firstName = 'Christian';
   const lastName = 'Politis';
   const email = 'cpolitis@student.unsw.edu.au';
@@ -39,33 +39,32 @@ describe('V1 - Test adminQuizCreate', () => {
     const quiz = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
     v1RequestAdminQuizQuestionCreate(register.token as string, quiz.quizId as number, question);
     const session = v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum);
-		expect(v1RequestAdminPlayerJoin(session.sessionId, playerName)).toMatchObject({ sessionId: expect.any(Number) });
+    expect(v1RequestAdminPlayerJoin(session.sessionId, playerName)).toMatchObject({ playerId: expect.any(Number) });
   });
 
-	test('Name of user entered is not unique (compared to other users who have already joined', () => {
+  test('Name of user entered is not unique (compared to other users who have already joined)', () => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quiz = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
     v1RequestAdminQuizQuestionCreate(register.token as string, quiz.quizId as number, question);
     const session = v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum);
-		v1RequestAdminPlayerJoin(session.sessionId, playerName)
-		expect(() => v1RequestAdminPlayerJoin(session.sessionId, "Dankster")).toThrow(HTTPError[400]);
+    v1RequestAdminPlayerJoin(session.sessionId, playerName);
+    expect(() => v1RequestAdminPlayerJoin(session.sessionId, playerName)).toThrow(HTTPError[400]);
   });
 
-	test('Session Id does not refer to a valid session', () => {
+  test('Session Id does not refer to a valid session', () => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quiz = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
     v1RequestAdminQuizQuestionCreate(register.token as string, quiz.quizId as number, question);
     v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum);
-		expect(() => v1RequestAdminPlayerJoin(-1, playerName)).toThrow(HTTPError[400]);
+    expect(() => v1RequestAdminPlayerJoin(-1, playerName)).toThrow(HTTPError[400]);
   });
 
-	test('Session is not in LOBBY state', () => {
+  test('Session is not in LOBBY state', () => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quiz = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
     v1RequestAdminQuizQuestionCreate(register.token as string, quiz.quizId as number, question);
     const session = v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum);
-    v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'NEXT_QUESTION')
-		expect(() => v1RequestAdminPlayerJoin(session.sessionId, playerName)).toThrow(HTTPError[400]);
+    v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'NEXT_QUESTION');
+    expect(() => v1RequestAdminPlayerJoin(session.sessionId, playerName)).toThrow(HTTPError[400]);
   });
-
 });
