@@ -2,7 +2,7 @@ import { getData, setData } from './dataStore';
 import httpError from 'http-errors';
 import { State } from './interfaces';
 import { start } from './session';
-import { v1RequestAdminQuizSessionUpdate } from './requests'
+import { adminQuizSessionUpdate } from './session'
 
 /**
   * Creates a new Guest Player
@@ -38,7 +38,7 @@ export function adminPlayerJoin(sessionId: number, name: string) {
   setData(data);
   
   if (session.players.length === autoStartNum) {
-    v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId, 'NEXT_QUESTION');
+    adminQuizSessionUpdate(registered.token, quizId.quizId, sessionId, 'NEXT_QUESTION');
   }
 
   return { playerId: player.playerId };

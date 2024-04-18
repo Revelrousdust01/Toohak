@@ -141,7 +141,7 @@ describe('V1 - Test adminQuizSessionUpdate', () => {
     ],
   };
 
-  test('Quiz autostart from Lobby state', () => {
+  test.only('Quiz autostart from Lobby state', () => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
     v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question);
@@ -149,7 +149,7 @@ describe('V1 - Test adminQuizSessionUpdate', () => {
     v1RequestAdminPlayerJoin(sessionId.sessionId, "Leon");
     v1RequestAdminPlayerJoin(sessionId.sessionId, "Jeffery");
     v1RequestAdminPlayerJoin(sessionId.sessionId, "Samuel");
-    // somehow show that state is in countdown
+    expect(v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'SKIP_COUNTDOWN')).toMatchObject({ });
   });
 
   test.each([
