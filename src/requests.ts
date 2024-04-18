@@ -368,6 +368,12 @@ export const v1RequestAdminQuizSessionUpdate = (token: string, quizid: number, s
   return requestHelper('PUT',
     `/v1/admin/quiz/${quizid}/session/${sessionid}`,
     { action: action }, { token });
+}
+
+export const v1RequestAdminPlayerJoin = (sessionId: number, name: string) => {
+  return requestHelper('PUT',
+    '/v1/player/join',
+    { sessionId: sessionId, name: name });
 };
 
 export const requestClear = () => {
