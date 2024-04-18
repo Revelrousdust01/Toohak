@@ -1,7 +1,8 @@
 import { QuestionBody } from './interfaces';
 import {
   v1RequestClear, v1RequestAdminAuthRegister, v1RequestAdminQuizCreate, v1RequestAdminQuizQuestionCreate,
-  v1RequestAdminQuizSession, v1RequestAdminQuizSessionUpdate, v1RequestAdminQuizRemove, v1RequestAdminViewQuizSessions
+  v1RequestAdminQuizSession, v1RequestAdminQuizSessionUpdate, v1RequestAdminQuizRemove, v1RequestAdminViewQuizSessions,
+  v1RequestAdminPlayerJoin
 } from './requests';
 import HTTPError from 'http-errors';
 import { requestSleepSync } from './requests';
@@ -139,6 +140,17 @@ describe('V1 - Test adminQuizSessionUpdate', () => {
       }
     ],
   };
+
+  test('Quiz autostart from Lobby state', () => {
+    const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question);
+    const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
+    v1RequestAdminPlayerJoin(sessionId.sessionId, "Leon");
+    v1RequestAdminPlayerJoin(sessionId.sessionId, "Jeffery");
+    v1RequestAdminPlayerJoin(sessionId.sessionId, "Samuel");
+    // somehow show that state is in countdown
+  });
 
   test.each([
     { validActionEnum: 'END' },

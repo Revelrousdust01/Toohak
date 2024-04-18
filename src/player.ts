@@ -2,6 +2,7 @@ import { getData, setData } from './dataStore';
 import httpError from 'http-errors';
 import { State } from './interfaces';
 import { start } from './session';
+import { v1RequestAdminQuizSessionUpdate } from './requests'
 
 /**
   * Creates a new Guest Player
@@ -14,6 +15,7 @@ import { start } from './session';
 export function adminPlayerJoin(sessionId: number, name: string) {
   const data = getData();
   const session = data.sessions.find(session => session.quizSessionId === sessionId);
+
   if (!session) {
     throw httpError(400, 'Session Id does not refer to a valid session within this quiz.');
   }
@@ -29,9 +31,15 @@ export function adminPlayerJoin(sessionId: number, name: string) {
     playerName: name,
     playerScore: 0
   };
+  const autoStartNum = session.autoStartNum;
 
   session.players.push(player);
+
   setData(data);
+  
+  if (session.players.length === autoStartNum) {
+    v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId, 'NEXT_QUESTION');
+  }
 
   return { playerId: player.playerId };
 }
@@ -42,19 +50,19 @@ export function adminPlayerSubmission(playerid: number, questionposition: number
   if (!session) {
     throw httpError(400, 'Player does not exist.');
   }
-  if (session.metadata.numQuestions < questionposition || questionposition < 0) {
+  if (session.metadata.numQuestions < questionposition || questionposition < 1) {
     throw httpError(400, 'Question position is invalid.');
   }
   if (session.state !== State.QUESTION_OPEN) {
     throw httpError(400, 'Session must make the question avaliable first.');
   }
-  if (session.atQuestion - 1 !== questionposition) {
+  if (session.atQuestion !== questionposition) {
     throw httpError(400, 'Session is not at this question yet.');
   }
   if (answerIds.length < 1) {
     throw httpError(400, 'No answers have been submitted.');
   }
-  if (!session.metadata.questions[questionposition].answers.find(answer => answerIds.find(answerid => answer.answerId === answerid))) {
+  if (!session.metadata.questions[questionposition - 1].answers.find(answer => answerIds.find(answerid => answer.answerId === answerid))) {
     throw httpError(400, 'Answer does not exist for this question.');
   }
   if (answerIds.some((item, index) => answerIds.includes(item, index + 1))) {
@@ -67,11 +75,11 @@ export function adminPlayerSubmission(playerid: number, questionposition: number
     playerId: playerid,
     playerName: player.playerName,
     answers: answerIds,
-    points: session.metadata.questions[questionposition].points,
+    points: session.metadata.questions[questionposition - 1].points,
     timeTaken: Math.floor(Date.now() / 1000) - start
   };
 
-  session.metadata.questions[questionposition].attempts.push(attempt);
+  session.metadata.questions[questionposition - 1].attempts.push(attempt);
 
   setData(data);
 
