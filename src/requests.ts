@@ -230,7 +230,7 @@ export const v2RequestAdminQuizQuestionDuplicate = (token: string, quizid: numbe
   return requestHelper('POST',
     `/v2/admin/quiz/${quizid}/question/${questionid}/duplicate`,
     { }, { token });
-}
+};
 
 export const v1RequestAdminQuizQuestionDelete = (token: string, quizid: number, questionid: number) => {
   return requestHelper('DELETE',

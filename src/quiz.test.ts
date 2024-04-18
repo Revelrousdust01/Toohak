@@ -1256,7 +1256,8 @@ describe('V1 - adminQuizQuestionDuplicate', () => {
   const quizDescr2 = 'quiz about my mummy';
   const question1: QuestionBody = {
     question: 'Who is the glorious king?',
-    duration: 5,
+    duration: 1,
+    thumbnailUrl: 'http://google.com/some/image/path.jpg',
     points: 5,
     answers: [
       {
@@ -1271,7 +1272,8 @@ describe('V1 - adminQuizQuestionDuplicate', () => {
   };
   const question2: QuestionBody = {
     question: 'Who is Jo mama?',
-    duration: 5,
+    duration: 1,
+    thumbnailUrl: 'http://google.com/some/image/path.jpg',
     points: 5,
     answers: [
       {
@@ -1358,7 +1360,8 @@ describe('V2 - adminQuizQuestionDuplicate', () => {
   const quizDescr2 = 'quiz about my mummy';
   const question1: QuestionBody = {
     question: 'Who is the glorious king?',
-    duration: 5,
+    duration: 1,
+    thumbnailUrl: 'http://google.com/some/image/path.jpg',
     points: 5,
     answers: [
       {
@@ -1373,7 +1376,8 @@ describe('V2 - adminQuizQuestionDuplicate', () => {
   };
   const question2: QuestionBody = {
     question: 'Who is Jo mama?',
-    duration: 5,
+    duration: 1,
+    thumbnailUrl: 'http://google.com/some/image/path.jpg',
     points: 5,
     answers: [
       {
