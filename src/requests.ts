@@ -364,6 +364,11 @@ export const v1RequestAdminQuizThumbnailUpdate = (token: string, quizid: number,
     { imgUrl: imgUrl }, { token });
 };
 
+export const v1RequestClear = () => {
+  return requestHelper('DELETE', '/v1/clear',
+    { });
+};
+
 export const v1RequestAdminQuizSessionUpdate = (token: string, quizid: number, sessionid: number, action: string) => {
   return requestHelper('PUT',
     `/v1/admin/quiz/${quizid}/session/${sessionid}`,
@@ -374,10 +379,6 @@ export const v1RequestAdminPlayerJoin = (sessionId: number, name: string) => {
   return requestHelper('PUT',
     '/v1/player/join',
     { sessionId: sessionId, name: name });
-};
-
-export const requestClear = () => {
-  return oldRequestHelper('DELETE', '/v1/clear');
 };
 
 export function requestSleepSync(ms: number) {

@@ -1,7 +1,7 @@
 import {
   v1RequestAdminAuthRegister, v1RequestAdminQuizCreate, v2RequestAdminQuizCreate,
   v1RequestAdminQuizTransfer, v2RequestAdminQuizTransfer, v1RequestAdminQuizTrashEmpty, v2RequestAdminQuizTrashEmpty,
-  v1RequestAdminQuizList, v2RequestAdminQuizList, v1RequestAdminQuizInfo, v2RequestAdminQuizInfo, requestClear, v1RequestAdminQuizSession, v1RequestAdminQuizThumbnailUpdate,
+  v1RequestAdminQuizList, v2RequestAdminQuizList, v1RequestAdminQuizInfo, v2RequestAdminQuizInfo, v1RequestClear, v1RequestAdminQuizSession, v1RequestAdminQuizThumbnailUpdate,
   v1RequestAdminQuizDescriptionUpdate, v2RequestAdminQuizDescriptionUpdate, requestAdminQuizRemove, v1RequestAdminQuizNameUpdate, v2RequestAdminQuizNameUpdate,
   v1RequestAdminQuizSessionUpdate, v1RequestAdminQuizQuestionCreate, v2RequestAdminQuizQuestionCreate, v1RequestAdminQuizQuestionMove, v2RequestAdminQuizQuestionMove, v1RequestAdminQuizQuestionUpdate,
   v2RequestAdminQuizQuestionUpdate, v1RequestAdminQuizQuestionDelete, v2RequestAdminQuizQuestionDelete, v1RequestAdminQuizRestore, v2RequestAdminQuizRestore, v1RequestAdminQuizQuestionDuplicate, v2RequestAdminQuizQuestionDuplicate,
@@ -12,15 +12,15 @@ import HTTPError from 'http-errors';
 import { requestSleepSync } from './requests';
 
 beforeEach(() => {
-  requestClear();
+  v1RequestClear();
 });
 
 afterEach(() => {
-  requestClear();
+  v1RequestClear();
 });
 
 afterAll(() => {
-  requestClear();
+  v1RequestClear();
 });
 
 const ERROR: ErrorObject = { error: expect.any(String) };
