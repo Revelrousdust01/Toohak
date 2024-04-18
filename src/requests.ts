@@ -5,7 +5,7 @@ import { IncomingHttpHeaders } from 'http';
 import HTTPError from 'http-errors';
 
 const SERVER_URL = `${url}:${port}`;
-const TIMEOUT_MS = 10000;
+const TIMEOUT_MS = 15000;
 
 const requestHelper = (
   method: HttpVerb,
@@ -364,6 +364,19 @@ export const v1RequestAdminQuizThumbnailUpdate = (token: string, quizid: number,
     { imgUrl: imgUrl }, { token });
 };
 
+export const v1RequestAdminQuizSessionUpdate = (token: string, quizid: number, sessionid: number, action: string) => {
+  return requestHelper('PUT',
+    `/v1/admin/quiz/${quizid}/session/${sessionid}`,
+    { action: action }, { token });
+};
+
 export const requestClear = () => {
   return oldRequestHelper('DELETE', '/v1/clear');
 };
+
+export function requestSleepSync(ms: number) {
+  const startTime = new Date().getTime();
+  while (new Date().getTime() - startTime < ms) {
+    // eslint-ignore-line
+  }
+}
