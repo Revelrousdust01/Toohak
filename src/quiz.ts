@@ -534,6 +534,8 @@ export function adminQuizSessionUpdate(token: string, quizid: number, sessionId:
    }
 
    if (sessionDetails.state === State.QUESTION_COUNTDOWN) {
+    timers.forEach(timer => clearTimeout(timer));
+    timers = [];
     sessionDetails.atQuestion = sessionDetails.atQuestion + 1;
     setData(data);
 
