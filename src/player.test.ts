@@ -1,7 +1,10 @@
 import { QuestionBody } from './interfaces';
-import { v1RequestClear, v1RequestAdminAuthRegister, v1RequestAdminPlayerJoin, v1RequestAdminQuizCreate, v1RequestAdminQuizQuestionCreate, 
-  v1RequestAdminQuizSession, v1RequestAdminQuizSessionUpdate, v1RequestAdminPlayerSubmission, v1RequestAdminQuestionResult } from './requests';
+import {
+  v1RequestClear, v1RequestAdminAuthRegister, v1RequestAdminPlayerJoin, v1RequestAdminQuizCreate, v1RequestAdminQuizQuestionCreate,
+  v1RequestAdminQuizSession, v1RequestAdminQuizSessionUpdate, v1RequestAdminPlayerSubmission, v1RequestAdminQuestionResult
+} from './requests';
 import HTTPError from 'http-errors';
+import { requestSleepSync } from './requests';
 beforeEach(() => {
   v1RequestClear();
 });
@@ -96,7 +99,7 @@ describe('V1 - Test adminPlayerSubmission', () => {
     ]
   };
 
-  test.only('Valid inputs', () => {
+  test('Valid inputs', () => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quiz = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
     v1RequestAdminQuizQuestionCreate(register.token as string, quiz.quizId as number, question);
@@ -196,10 +199,9 @@ describe('V1 - Test adminQuestionResult', () => {
   const quizName = 'New Quiz';
   const quizDescription = 'This is a new quiz';
   const autoStartNum = 3;
-  // const answerIds = [0, 1];
   const question: QuestionBody = {
     question: 'Who is the Monarch of England?',
-    duration: 1,
+    duration: 2,
     points: 5,
     answers: [
       {
@@ -214,7 +216,7 @@ describe('V1 - Test adminQuestionResult', () => {
   };
   const question2: QuestionBody = {
     question: 'Who is the Monarch of England1?',
-    duration: 1,
+    duration: 2,
     points: 5,
     answers: [
       {
@@ -238,9 +240,10 @@ describe('V1 - Test adminQuestionResult', () => {
     const playerThree = v1RequestAdminPlayerJoin(sessionId.sessionId, player3);
     v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'NEXT_QUESTION'); // remove once autostartnum is implemented
     v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'SKIP_COUNTDOWN');
-    v1RequestAdminPlayerSubmission(playerOne.playerId, 1, [0]);
+    requestSleepSync(1000);
+    v1RequestAdminPlayerSubmission(playerOne.playerId, 1, [1, 0]);
     v1RequestAdminPlayerSubmission(playerTwo.playerId, 1, [0]);
-    v1RequestAdminPlayerSubmission(playerThree.playerId, 1, [0]);
+    v1RequestAdminPlayerSubmission(playerThree.playerId, 1, [1, 0]);
     v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'GO_TO_ANSWER');
     expect(v1RequestAdminQuestionResult(playerOne.playerId, 1)).toMatchObject(
       {
@@ -253,7 +256,7 @@ describe('V1 - Test adminQuestionResult', () => {
         averageAnswerTime: expect.any(Number),
         percentCorrect: expect.any(Number)
       }
-    )
+    );
   });
 
   test('Valid inputs for all incorrect for question 1', () => {
@@ -266,8 +269,9 @@ describe('V1 - Test adminQuestionResult', () => {
     const playerThree = v1RequestAdminPlayerJoin(sessionId.sessionId, player3);
     v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'NEXT_QUESTION'); // remove once autostartnum is implemented
     v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'SKIP_COUNTDOWN');
+    requestSleepSync(1000);
     v1RequestAdminPlayerSubmission(playerOne.playerId, 1, [1]);
-    v1RequestAdminPlayerSubmission(playerTwo.playerId, 1, [1]);
+    v1RequestAdminPlayerSubmission(playerTwo.playerId, 1, [0, 1]);
     v1RequestAdminPlayerSubmission(playerThree.playerId, 1, [1]);
     v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'GO_TO_ANSWER');
     expect(v1RequestAdminQuestionResult(playerTwo.playerId, 1)).toMatchObject(
@@ -278,7 +282,7 @@ describe('V1 - Test adminQuestionResult', () => {
         averageAnswerTime: expect.any(Number),
         percentCorrect: expect.any(Number)
       }
-    )
+    );
   });
 
   test('Valid inputs for mixed correct/incorrect for question 1', () => {
@@ -291,9 +295,10 @@ describe('V1 - Test adminQuestionResult', () => {
     const playerThree = v1RequestAdminPlayerJoin(sessionId.sessionId, player3);
     v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'NEXT_QUESTION'); // remove once autostartnum is implemented
     v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'SKIP_COUNTDOWN');
+    requestSleepSync(1000);
     v1RequestAdminPlayerSubmission(playerOne.playerId, 1, [0]);
     v1RequestAdminPlayerSubmission(playerTwo.playerId, 1, [1]);
-    v1RequestAdminPlayerSubmission(playerThree.playerId, 1, [0]);
+    v1RequestAdminPlayerSubmission(playerThree.playerId, 1, [1, 0]);
     v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'GO_TO_ANSWER');
     expect(v1RequestAdminQuestionResult(playerThree.playerId, 1)).toMatchObject(
       {
@@ -305,7 +310,7 @@ describe('V1 - Test adminQuestionResult', () => {
         averageAnswerTime: expect.any(Number),
         percentCorrect: expect.any(Number)
       }
-    )
+    );
   });
 
   test('Valid inputs for multiple questions and testing NEXT_QUESTION action', () => {
@@ -317,7 +322,11 @@ describe('V1 - Test adminQuestionResult', () => {
     const playerOne = v1RequestAdminPlayerJoin(sessionId.sessionId, player1);
     v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'NEXT_QUESTION');
     v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'SKIP_COUNTDOWN');
-    v1RequestAdminPlayerSubmission(playerOne.playerId, 2, [0]);
+    v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'GO_TO_ANSWER');
+    v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'NEXT_QUESTION');
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'SKIP_COUNTDOWN');
+    requestSleepSync(1000);
+    v1RequestAdminPlayerSubmission(playerOne.playerId, 2, [1, 0]);
     v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'GO_TO_ANSWER');
     expect(v1RequestAdminQuestionResult(playerOne.playerId, 2)).toMatchObject(
       {
@@ -328,7 +337,7 @@ describe('V1 - Test adminQuestionResult', () => {
         averageAnswerTime: expect.any(Number),
         percentCorrect: expect.any(Number)
       }
-    )
+    );
   });
 
   test('If player ID does not exist', () => {
@@ -352,7 +361,7 @@ describe('V1 - Test adminQuestionResult', () => {
     const playerOne = v1RequestAdminPlayerJoin(sessionId.sessionId, player1);
     v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'NEXT_QUESTION');
     v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'SKIP_COUNTDOWN');
-    v1RequestAdminPlayerSubmission(playerOne.playerId, 1, [0]);
+    v1RequestAdminPlayerSubmission(playerOne.playerId, 1, [1, 0]);
     v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'GO_TO_ANSWER');
     expect(() => v1RequestAdminQuestionResult(playerOne.playerId, -10)).toThrow(HTTPError[400]);
   });
@@ -377,7 +386,7 @@ describe('V1 - Test adminQuestionResult', () => {
     const playerOne = v1RequestAdminPlayerJoin(sessionId.sessionId, player1);
     v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'NEXT_QUESTION');
     v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'SKIP_COUNTDOWN');
-    v1RequestAdminPlayerSubmission(playerOne.playerId, 1, [0]);
+    v1RequestAdminPlayerSubmission(playerOne.playerId, 1, [1, 0]);
     v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'GO_TO_ANSWER');
     expect(() => v1RequestAdminQuestionResult(playerOne.playerId, 2)).toThrow(HTTPError[400]);
   });
