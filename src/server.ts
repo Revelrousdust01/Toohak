@@ -13,6 +13,7 @@ import {
   adminQuizSession, adminQuizSessionUpdate, adminViewQuizSessions, adminQuizSessionStatus
 } from './session';
 import { clear } from './other';
+import { createClient } from '@vercel/kv';
 import express, { json, Request, Response } from 'express';
 import { echo } from './newecho';
 import morgan from 'morgan';
@@ -378,16 +379,16 @@ app.get('/v1/player/:playerid/chat', (req: Request, res: Response) => {
 });
 
 // When using vercel
-// app.get('/data', async (req: Request, res: Response) => {
-//   const data = await database.hgetall("data:names");
-//   res.status(200).json(data);
-// });
+app.get('/data', async (req: Request, res: Response) => {
+  const data = await database.hgetall("data:names");
+  res.status(200).json(data);
+});
 
-// app.put('/data', async (req: Request, res: Response) => {
-//   const { data } = req.body;
-//   await database.hset("data:names", { data });
-//   return res.status(200).json({});
-// });
+app.put('/data', async (req: Request, res: Response) => {
+  const { data } = req.body;
+  await database.hset("data:names", { data });
+  return res.status(200).json({});
+});
 
 // ====================================================================
 //  ================= WORK IS DONE ABOVE THIS LINE ===================
@@ -426,12 +427,12 @@ process.on('SIGINT', () => {
 
 // Replace this with your API_URL
 // E.g. https://large-poodle-44208.kv.vercel-storage.com
-// const KV_REST_API_URL="https://tough-hawk-39034.upstash.io";
-// // Replace this with your API_TOKEN
-// // E.g. AaywASQgOWE4MTVkN2UtODZh...
-// const KV_REST_API_TOKEN="AZh6ASQgMTkzMTQyNTEtMGYzYy00ZWEwLWI4NWUtMWI0ZGZhODE5MWEwNGU3MmQ5MjE5YTQ0NDg1ODg4NDllYzgxYjBmMzhlMWQ=";
+const KV_REST_API_URL="https://tough-hawk-39034.upstash.io";
+// Replace this with your API_TOKEN
+// E.g. AaywASQgOWE4MTVkN2UtODZh...
+const KV_REST_API_TOKEN="AZh6ASQgMTkzMTQyNTEtMGYzYy00ZWEwLWI4NWUtMWI0ZGZhODE5MWEwNGU3MmQ5MjE5YTQ0NDg1ODg4NDllYzgxYjBmMzhlMWQ=";
 
-// const database = createClient({
-//   url: KV_REST_API_URL,
-//   token: KV_REST_API_TOKEN,
-// });
+const database = createClient({
+  url: KV_REST_API_URL,
+  token: KV_REST_API_TOKEN,
+});
