@@ -130,10 +130,7 @@ export function adminGuestPlayerStatus(playerid: number): PlayerStatus {
 
 export function adminQuestionResult(playerid: number, questionposition: number) {
   const data = getData();
-  const session = data.sessions.find(session => session.players.find(player => player.playerId === playerid));
-  if (!session) {
-    throw httpError(400, 'Player does not exist.');
-  }
+  const session = validPlayer(playerid, data);
   if (session.metadata.numQuestions < questionposition || questionposition < 1) {
     throw httpError(400, 'Question position is invalid.');
   }
