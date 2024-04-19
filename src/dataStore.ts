@@ -37,7 +37,6 @@ Example usage
 
 // Using Vercel
 function setData(newData: DataStore) {
-  console.log(newData);
   requestHelper('PUT', '/data', { data: newData });
 }
 
