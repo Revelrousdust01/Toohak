@@ -42,7 +42,7 @@ function setData(newData: DataStore) {
   requestHelper('PUT', '/data', { data: newData });
 }
 
-const getData = (): DataStore => {
+function loadData(): DataStore{
   try {
     const res = requestHelper('GET', '/data', {});
     return res.data;
@@ -58,7 +58,14 @@ const getData = (): DataStore => {
   }
 };
 
-// function getData(): DataStore {
+let data = loadData();
+
+function getData(): DataStore {
+  return data;
+}
+
+
+// function loadData(): DataStore {
 //   const data = fs.readFileSync('./database.json');
 //   return JSON.parse(data.toString());
 // }
@@ -69,7 +76,6 @@ const getData = (): DataStore => {
 //   const jsonstr = JSON.stringify(newData);
 //   fs.writeFileSync('./database.json', jsonstr);
 // }
-
 
 export { getData, setData };
 export type { DataStore };
