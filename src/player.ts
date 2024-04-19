@@ -1,7 +1,8 @@
 import { getData, setData } from './dataStore';
 import httpError from 'http-errors';
 import { State } from './interfaces';
-import { start } from './session';
+import { start, setStart } from './session';
+export let startTimer: ReturnType<typeof setTimeout>[] = [];
 
 /**
   * Creates a new Guest Player
@@ -14,6 +15,7 @@ import { start } from './session';
 export function adminPlayerJoin(sessionId: number, name: string) {
   const data = getData();
   const session = data.sessions.find(session => session.quizSessionId === sessionId);
+
   if (!session) {
     throw httpError(400, 'Session Id does not refer to a valid session within this quiz.');
   }
@@ -29,8 +31,27 @@ export function adminPlayerJoin(sessionId: number, name: string) {
     playerName: name,
     playerScore: 0
   };
+  const autoStartNum = session.autoStartNum;
 
   session.players.push(player);
+
+  setData(data);
+
+  if (session.players.length === autoStartNum) {
+    session.state = State.QUESTION_COUNTDOWN;
+    startTimer.forEach(timer => clearTimeout(timer));
+    startTimer = [];
+    session.atQuestion = session.atQuestion + 1;
+
+    startTimer.push(setTimeout(() => {
+      session.state = State.QUESTION_OPEN;
+      setStart(Math.floor(Date.now() / 1000));
+      startTimer.push(setTimeout(() => {
+        session.state = State.QUESTION_CLOSE;
+      }, session.metadata.questions[session.atQuestion - 1].duration * 1000));
+    }, 3000));
+  }
+
   setData(data);
 
   return { playerId: player.playerId };
