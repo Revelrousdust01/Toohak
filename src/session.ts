@@ -1,7 +1,7 @@
 import { getData, setData } from './dataStore';
 import { findQuiz, validQuizId, validToken, validAction } from './helper';
 import httpError from 'http-errors';
-import { type Quiz, type SessionsList, Action, State } from './interfaces';
+import { type Quiz, type SessionsList, Action, State, SessionStatus } from './interfaces';
 export let timers: ReturnType<typeof setTimeout>[] = [];
 export let start: number;
 /**
@@ -142,7 +142,7 @@ export function adminQuizSessionUpdate(token: string, quizid: number, sessionId:
     }, 3000));
   }
 
-  if (sessionDetails.state === State.FINAL_RESULTS || sessionDetails.state === State.END) {
+  if (action === Action.GO_TO_FINAL_RESULTS || action === Action.END) {
     sessionDetails.atQuestion = 0;
   }
 
@@ -150,6 +150,14 @@ export function adminQuizSessionUpdate(token: string, quizid: number, sessionId:
   setData(data);
 
   return { };
+}
+
+export function setStart(newValue: number) {
+  start = newValue;
+}
+
+export function resetStart() {
+  start = 0;
 }
 
 /**
@@ -177,5 +185,76 @@ export function adminViewQuizSessions(token: string, quizid: number): SessionsLi
   return {
     activeSessions: activeSessions,
     inactiveSessions: inactiveSessions
+  };
+}
+
+/**
+ * Get the status of a particular quiz session
+ * @param token - Authentication token to validate user access.
+ * @param quizid - Identifier for the quiz whose sessions are to be viewed.
+ * @param sessionid - Unique identifier for the specific quiz session.
+ *
+ * @returns {SessionStatus} - Object containing arrays of Session info and status of a particular session.
+ *
+ * @throws {ErrorObject} -Throw errors for invalid token, invalid sessionId, invalid quizid.
+ */
+export function adminQuizSessionStatus(token: string, quizid: number, sessionid: number): SessionStatus {
+  const data = getData();
+
+  const checkToken = validToken(token, data);
+  validQuizId(quizid, checkToken, data);
+
+  const sessionDetails = data.sessions.find(session => session.quizSessionId === sessionid);
+  if (!sessionDetails || sessionDetails.metadata.quizId !== quizid) {
+    throw httpError(400, 'Session Id does not refer to a valid session within this quiz');
+  }
+
+  const quiz = findQuiz(quizid, data);
+  const validQuiz = quiz as Quiz;
+
+  const foundPlayers = [];
+  for (const players of sessionDetails.players) {
+    foundPlayers.push(players.playerName);
+  }
+
+  const quizQuestions = [];
+  const foundAnswers = [];
+
+  for (const questions of validQuiz.questions) {
+    for (const seekAnswers of questions.answers) {
+      const answers = {
+        answerId: seekAnswers.answerId,
+        answer: seekAnswers.answer,
+        colour: seekAnswers.colour,
+        correct: seekAnswers.correct
+      };
+      foundAnswers.push(answers);
+    }
+    const foundQuestion = {
+      questionId: questions.questionId,
+      question: questions.question,
+      duration: questions.duration,
+      thumbnailUrl: questions.thumbnailUrl,
+      points: questions.points,
+      answers: foundAnswers
+    };
+    quizQuestions.push(foundQuestion);
+  }
+
+  return {
+    state: sessionDetails.state,
+    atQuestion: sessionDetails.atQuestion,
+    players: foundPlayers,
+    metadata: {
+      quizId: quizid,
+      name: validQuiz.name,
+      timeCreated: validQuiz.timeCreated,
+      timeLastEdited: validQuiz.timeLastEdited,
+      description: validQuiz.description,
+      numQuestions: validQuiz.questionCounter - 1,
+      questions: quizQuestions,
+      duration: validQuiz.duration,
+      thumbnailUrl: validQuiz.thumbnailUrl
+    }
   };
 }

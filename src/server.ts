@@ -10,7 +10,7 @@ import {
   adminQuizThumbnailUpdate
 } from './quiz';
 import {
-  adminQuizSession, adminQuizSessionUpdate, adminViewQuizSessions
+  adminQuizSession, adminQuizSessionUpdate, adminViewQuizSessions, adminQuizSessionStatus
 } from './session';
 // import { createClient } from '@vercel/kv';
 import { clear } from './other';
@@ -360,6 +360,13 @@ app.post('/v2/admin/quiz', (req: Request, res: Response) => {
   const { name, description } = req.body;
   const token = req.headers.token as string;
   const response = adminQuizCreate(token, name, description);
+
+  res.json(response);
+});
+
+app.get('/v1/admin/quiz/:quizid/session/:sessionid', (req: Request, res: Response) => {
+  const token = req.headers.token as string;
+  const response = adminQuizSessionStatus(token, parseInt(req.params.quizid), parseInt(req.params.sessionid));
 
   res.json(response);
 });
