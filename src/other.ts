@@ -13,6 +13,9 @@ export function clear(): object {
   for (const timer of timers) {
     clearTimeout(timer);
   }
+  for (const timer of startTimer) {
+    clearTimeout(timer);
+  }
 
   setData({
     users: [],

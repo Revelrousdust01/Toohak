@@ -1,5 +1,5 @@
 import { QuestionBody } from './interfaces';
-import { v1RequestClear, v1RequestAdminAuthRegister, v1RequestAdminPlayerJoin, v1RequestAdminQuizCreate, v1RequestAdminQuizQuestionCreate, v1RequestAdminQuizSession, v1RequestAdminQuizSessionUpdate, v1RequestAdminPlayerSubmission } from './requests';
+import { v1RequestClear, v1RequestAdminAuthRegister, v1RequestAdminPlayerJoin, v1RequestAdminQuizCreate, v1RequestAdminQuizQuestionCreate, v1RequestAdminQuizSession, v1RequestAdminQuizSessionUpdate, v1RequestAdminPlayerSubmission, v1RequestAdminQuizSessionStatus, requestSleepSync } from './requests';
 import HTTPError from 'http-errors';
 beforeEach(() => {
   v1RequestClear();
@@ -66,6 +66,21 @@ describe('V1 - Test adminPlayerJoin', () => {
     const session = v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum);
     v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'NEXT_QUESTION');
     expect(() => v1RequestAdminPlayerJoin(session.sessionId, playerName)).toThrow(HTTPError[400]);
+  });
+
+  test('Quiz autostart from Lobby state', () => {
+    const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = v1RequestAdminQuizCreate(registered.token, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(registered.token, quizId.quizId, question);
+    const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
+    v1RequestAdminPlayerJoin(sessionId.sessionId, "Leon");
+    v1RequestAdminPlayerJoin(sessionId.sessionId, "Jeffery");
+    v1RequestAdminPlayerJoin(sessionId.sessionId, "Samuel");
+    expect(v1RequestAdminQuizSessionStatus(registered.token, quizId.quizId, sessionId.sessionId).state).toStrictEqual('QUESTION_COUNTDOWN');
+    requestSleepSync(3000);
+    expect(v1RequestAdminQuizSessionStatus(registered.token, quizId.quizId, sessionId.sessionId).state).toStrictEqual('QUESTION_OPEN');
+    requestSleepSync(1000);
+    expect(v1RequestAdminQuizSessionStatus(registered.token, quizId.quizId, sessionId.sessionId).state).toStrictEqual('QUESTION_CLOSE');
   });
 });
 
