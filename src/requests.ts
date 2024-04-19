@@ -1,6 +1,6 @@
 import { port, url } from './config.json';
 import request, { HttpVerb } from 'sync-request-curl';
-import type { QuestionBody, Payload, DataStore } from './interfaces';
+import type { QuestionBody, Payload } from './interfaces';
 import { IncomingHttpHeaders } from 'http';
 import HTTPError from 'http-errors';
 
