@@ -389,16 +389,16 @@ app.put('/v1/player/:playerid/question/:questionposition/answer', (req: Request,
 });
 
 //When using vercel
-app.get('/data', async (req: Request, res: Response) => {
-  const data = await database.hgetall("data:names");
-  res.status(200).json(data);
-});
+// app.get('/data', async (req: Request, res: Response) => {
+//   const data = await database.hgetall("data:names");
+//   res.status(200).json(data);
+// });
 
-app.put('/data', async (req: Request, res: Response) => {
-  const { data } = req.body;
-  await database.hset("data:names", { data });
-  return res.status(200).json({});
-});
+// app.put('/data', async (req: Request, res: Response) => {
+//   const { data } = req.body;
+//   await database.hset("data:names", { data });
+//   return res.status(200).json({});
+// });
 
 // ====================================================================
 //  ================= WORK IS DONE ABOVE THIS LINE ===================
@@ -433,16 +433,16 @@ process.on('SIGINT', () => {
   server.close(() => console.log('Shutting down server gracefully.'));
 });
 
-// When using vercel
+// // When using vercel
 
-// Replace this with your API_URL
-// E.g. https://large-poodle-44208.kv.vercel-storage.com
-const KV_REST_API_URL="https://lasting-chow-51033.upstash.io";
-// Replace this with your API_TOKEN
-// E.g. AaywASQgOWE4MTVkN2UtODZh...
-const KV_REST_API_TOKEN="AcdZASQgMjRjMjBhZWYtZWY2Ni00MGViLThlMzgtMTMxNWJkYjI5OTM1MWM5YzhmZTc0YWQ2NDYxODgyMGIyNmJlMjQ0ZTQ0OTY=";
+// // Replace this with your API_URL
+// // E.g. https://large-poodle-44208.kv.vercel-storage.com
+// const KV_REST_API_URL="https://lasting-chow-51033.upstash.io";
+// // Replace this with your API_TOKEN
+// // E.g. AaywASQgOWE4MTVkN2UtODZh...
+// const KV_REST_API_TOKEN="AcdZASQgMjRjMjBhZWYtZWY2Ni00MGViLThlMzgtMTMxNWJkYjI5OTM1MWM5YzhmZTc0YWQ2NDYxODgyMGIyNmJlMjQ0ZTQ0OTY=";
 
-const database = createClient({
-  url: KV_REST_API_URL,
-  token: KV_REST_API_TOKEN,
-});
+// const database = createClient({
+//   url: KV_REST_API_URL,
+//   token: KV_REST_API_TOKEN,
+// });
