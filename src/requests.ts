@@ -339,6 +339,12 @@ export const v1RequestAdminPlayerSubmission = (playerid: number, questionpositio
     { answerIds: answerIds });
 };
 
+export const v1RequestAdminQuizSessionStatus = (token: string, quizid: number, sessionid: number) => {
+  return requestHelper('GET',
+    `/v1/admin/quiz/${quizid}/session/${sessionid}`,
+    { }, { token });
+};
+
 export function requestSleepSync(ms: number) {
   const startTime = new Date().getTime();
   while (new Date().getTime() - startTime < ms) {
