@@ -1,5 +1,7 @@
 import { setData } from './dataStore';
 import { timers } from './session';
+import { startTimer } from './player';
+
 
 /**
   * Reset the state of the application back to the start.
@@ -10,6 +12,9 @@ import { timers } from './session';
 */
 export function clear(): object {
   for (const timer of timers) {
+    clearTimeout(timer);
+  }
+  for (const timer of startTimer) {
     clearTimeout(timer);
   }
 

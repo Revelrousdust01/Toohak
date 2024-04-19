@@ -1,8 +1,8 @@
 import { QuestionBody } from './interfaces';
 import {
-  v1RequestClear, v1RequestAdminAuthRegister, v1RequestAdminQuizCreate, v1RequestAdminQuizQuestionCreate,
-  v1RequestAdminQuizSession, v1RequestAdminQuizSessionUpdate, v1RequestAdminQuizRemove, v1RequestAdminViewQuizSessions,
-  v1RequestAdminPlayerJoin
+  v1RequestClear, v1RequestAdminAuthRegister, v1RequestAdminQuizCreate, v2RequestAdminQuizCreate, v1RequestAdminQuizQuestionCreate, v2RequestAdminQuizQuestionCreate,
+  v1RequestAdminQuizSession, v1RequestAdminQuizSessionUpdate, v1RequestAdminQuizRemove, v1RequestAdminViewQuizSessions, v1RequestAdminQuizThumbnailUpdate,
+  v1RequestAdminPlayerJoin, v1RequestAdminQuizSessionStatus
 } from './requests';
 import HTTPError from 'http-errors';
 import { requestSleepSync } from './requests';
@@ -141,15 +141,19 @@ describe('V1 - Test adminQuizSessionUpdate', () => {
     ],
   };
 
-  test.only('Quiz autostart from Lobby state', () => {
+  test('Quiz autostart from Lobby state', () => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
-    v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question);
+    const quizId = v1RequestAdminQuizCreate(registered.token, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(registered.token, quizId.quizId, question);
     const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
     v1RequestAdminPlayerJoin(sessionId.sessionId, "Leon");
     v1RequestAdminPlayerJoin(sessionId.sessionId, "Jeffery");
     v1RequestAdminPlayerJoin(sessionId.sessionId, "Samuel");
-    expect(v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'SKIP_COUNTDOWN')).toMatchObject({ });
+    expect(v1RequestAdminQuizSessionStatus(registered.token, quizId.quizId, sessionId.sessionId).state).toStrictEqual('QUESTION_COUNTDOWN');
+    requestSleepSync(3000);
+    expect(v1RequestAdminQuizSessionStatus(registered.token, quizId.quizId, sessionId.sessionId).state).toStrictEqual('QUESTION_OPEN');
+    requestSleepSync(1000);
+    expect(v1RequestAdminQuizSessionStatus(registered.token, quizId.quizId, sessionId.sessionId).state).toStrictEqual('QUESTION_CLOSE');
   });
 
   test.each([
@@ -539,5 +543,428 @@ describe('V1 - Test adminViewQuizSessions', () => {
     v1RequestAdminQuizSession(user.token, quizId.quizId, autoStartNum);
     const user2 = v1RequestAdminAuthRegister('bob.smith@gmail.com', 'a1234567', 'Smith', 'Bob');
     expect(() => v1RequestAdminViewQuizSessions(user2.token, quizId.quizId)).toThrow(HTTPError[403]);
+  });
+});
+
+// adminQuizSessionStatus
+describe('V1 - Test adminQuizSessionStatus', () => {
+  const firstName = 'Samuel';
+  const lastName = 'Huang';
+  const email = 'shuang@student.unsw.edu.au';
+  const password = 'a1b2c3d4e5f6';
+  const quizName = 'You are my sunshine';
+  const quizDescription = 'My only sunshine';
+  const autoStartNum = 3;
+  const playerName = 'THESUN';
+  const question1: QuestionBody = {
+    question: 'Who is my sunshine?',
+    duration: 1,
+    thumbnailUrl: 'http://google.com/some/image/path.jpg',
+    points: 5,
+    answers: [
+      {
+        answer: 'Lebron James',
+        correct: true
+      },
+      {
+        answer: 'Christian Politis',
+        correct: false
+      }
+    ]
+  };
+
+  test('Lobby State', () => {
+    const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = v2RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
+    v2RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question1);
+    v1RequestAdminQuizThumbnailUpdate(registered.token as string, quizId.quizId as number, 'http://google.com/some/image/path.jpg');
+    const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
+    v1RequestAdminPlayerJoin(sessionId.sessionId, playerName);
+    expect(v1RequestAdminQuizSessionStatus(registered.token, quizId.quizId, sessionId.sessionId)).toMatchObject({
+      state: 'LOBBY',
+      atQuestion: 0,
+      players: [
+        expect.any(String)
+      ],
+      metadata: {
+        quizId: expect.any(Number),
+        name: expect.any(String),
+        timeCreated: expect.any(Number),
+        timeLastEdited: expect.any(Number),
+        description: expect.any(String),
+        numQuestions: 1,
+        questions: [
+          {
+            questionId: expect.any(Number),
+            question: expect.any(String),
+            duration: expect.any(Number),
+            thumbnailUrl: expect.any(String),
+            points: expect.any(Number),
+            answers: [
+              {
+                answerId: expect.any(Number),
+                answer: expect.any(String),
+                colour: expect.any(String),
+                correct: expect.any(Boolean)
+              },
+              {
+                answerId: expect.any(Number),
+                answer: expect.any(String),
+                colour: expect.any(String),
+                correct: expect.any(Boolean)
+              }
+            ]
+          }
+        ],
+        duration: expect.any(Number),
+        thumbnailUrl: expect.any(String),
+      }
+    });
+  });
+
+  test('Question Countdown State', () => {
+    const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = v2RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
+    v2RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question1);
+    v1RequestAdminQuizThumbnailUpdate(registered.token as string, quizId.quizId as number, 'http://google.com/some/image/path.jpg');
+    const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
+    v1RequestAdminPlayerJoin(sessionId.sessionId, playerName);
+    v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'NEXT_QUESTION');
+    expect(v1RequestAdminQuizSessionStatus(registered.token, quizId.quizId, sessionId.sessionId)).toMatchObject({
+      state: 'QUESTION_COUNTDOWN',
+      atQuestion: 1,
+      players: [
+        expect.any(String)
+      ],
+      metadata: {
+        quizId: expect.any(Number),
+        name: expect.any(String),
+        timeCreated: expect.any(Number),
+        timeLastEdited: expect.any(Number),
+        description: expect.any(String),
+        numQuestions: 1,
+        questions: [
+          {
+            questionId: expect.any(Number),
+            question: expect.any(String),
+            duration: expect.any(Number),
+            thumbnailUrl: expect.any(String),
+            points: expect.any(Number),
+            answers: [
+              {
+                answerId: expect.any(Number),
+                answer: expect.any(String),
+                colour: expect.any(String),
+                correct: expect.any(Boolean)
+              },
+              {
+                answerId: expect.any(Number),
+                answer: expect.any(String),
+                colour: expect.any(String),
+                correct: expect.any(Boolean)
+              }
+            ]
+          }
+        ],
+        duration: expect.any(Number),
+        thumbnailUrl: expect.any(String)
+      }
+    });
+  });
+
+  test('Question Open State', () => {
+    const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = v2RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
+    v2RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question1);
+    v1RequestAdminQuizThumbnailUpdate(registered.token as string, quizId.quizId as number, 'http://google.com/some/image/path.jpg');
+    const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
+    v1RequestAdminPlayerJoin(sessionId.sessionId, playerName);
+    v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'NEXT_QUESTION');
+    v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'SKIP_COUNTDOWN');
+    expect(v1RequestAdminQuizSessionStatus(registered.token, quizId.quizId, sessionId.sessionId)).toMatchObject({
+      state: 'QUESTION_OPEN',
+      atQuestion: 1,
+      players: [
+        expect.any(String)
+      ],
+      metadata: {
+        quizId: expect.any(Number),
+        name: expect.any(String),
+        timeCreated: expect.any(Number),
+        timeLastEdited: expect.any(Number),
+        description: expect.any(String),
+        numQuestions: 1,
+        questions: [
+          {
+            questionId: expect.any(Number),
+            question: expect.any(String),
+            duration: expect.any(Number),
+            thumbnailUrl: expect.any(String),
+            points: expect.any(Number),
+            answers: [
+              {
+                answerId: expect.any(Number),
+                answer: expect.any(String),
+                colour: expect.any(String),
+                correct: expect.any(Boolean)
+              },
+              {
+                answerId: expect.any(Number),
+                answer: expect.any(String),
+                colour: expect.any(String),
+                correct: expect.any(Boolean)
+              }
+            ]
+          }
+        ],
+        duration: expect.any(Number),
+        thumbnailUrl: expect.any(String)
+      }
+    });
+  });
+
+  test('Question Close State', () => {
+    const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = v2RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
+    v2RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question1);
+    v1RequestAdminQuizThumbnailUpdate(registered.token as string, quizId.quizId as number, 'http://google.com/some/image/path.jpg');
+    const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
+    v1RequestAdminPlayerJoin(sessionId.sessionId, playerName);
+    v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'NEXT_QUESTION');
+    v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'SKIP_COUNTDOWN');
+    requestSleepSync(1000);
+    expect(v1RequestAdminQuizSessionStatus(registered.token, quizId.quizId, sessionId.sessionId)).toMatchObject({
+      state: 'QUESTION_CLOSE',
+      atQuestion: 1,
+      players: [
+        expect.any(String)
+      ],
+      metadata: {
+        quizId: expect.any(Number),
+        name: expect.any(String),
+        timeCreated: expect.any(Number),
+        timeLastEdited: expect.any(Number),
+        description: expect.any(String),
+        numQuestions: 1,
+        questions: [
+          {
+            questionId: expect.any(Number),
+            question: expect.any(String),
+            duration: expect.any(Number),
+            thumbnailUrl: expect.any(String),
+            points: expect.any(Number),
+            answers: [
+              {
+                answerId: expect.any(Number),
+                answer: expect.any(String),
+                colour: expect.any(String),
+                correct: expect.any(Boolean)
+              },
+              {
+                answerId: expect.any(Number),
+                answer: expect.any(String),
+                colour: expect.any(String),
+                correct: expect.any(Boolean)
+              }
+            ]
+          }
+        ],
+        duration: expect.any(Number),
+        thumbnailUrl: expect.any(String)
+      }
+    });
+  });
+
+  test('Final Results State', () => {
+    const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = v2RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
+    v2RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question1);
+    v1RequestAdminQuizThumbnailUpdate(registered.token as string, quizId.quizId as number, 'http://google.com/some/image/path.jpg');
+    const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
+    v1RequestAdminPlayerJoin(sessionId.sessionId, playerName);
+    v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'NEXT_QUESTION');
+    v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'SKIP_COUNTDOWN');
+    requestSleepSync(1000);
+    v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'GO_TO_FINAL_RESULTS');
+    expect(v1RequestAdminQuizSessionStatus(registered.token, quizId.quizId, sessionId.sessionId)).toMatchObject({
+      state: 'FINAL_RESULTS',
+      atQuestion: 0,
+      players: [
+        expect.any(String)
+      ],
+      metadata: {
+        quizId: expect.any(Number),
+        name: expect.any(String),
+        timeCreated: expect.any(Number),
+        timeLastEdited: expect.any(Number),
+        description: expect.any(String),
+        numQuestions: 1,
+        questions: [
+          {
+            questionId: expect.any(Number),
+            question: expect.any(String),
+            duration: expect.any(Number),
+            thumbnailUrl: expect.any(String),
+            points: expect.any(Number),
+            answers: [
+              {
+                answerId: expect.any(Number),
+                answer: expect.any(String),
+                colour: expect.any(String),
+                correct: expect.any(Boolean)
+              },
+              {
+                answerId: expect.any(Number),
+                answer: expect.any(String),
+                colour: expect.any(String),
+                correct: expect.any(Boolean)
+              }
+            ]
+          }
+        ],
+        duration: expect.any(Number),
+        thumbnailUrl: expect.any(String)
+      }
+    });
+  });
+
+  test('Answer Show State', () => {
+    const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = v2RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
+    v2RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question1);
+    v1RequestAdminQuizThumbnailUpdate(registered.token as string, quizId.quizId as number, 'http://google.com/some/image/path.jpg');
+    const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
+    v1RequestAdminPlayerJoin(sessionId.sessionId, playerName);
+    v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'NEXT_QUESTION');
+    v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'SKIP_COUNTDOWN');
+    v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'GO_TO_ANSWER');
+    expect(v1RequestAdminQuizSessionStatus(registered.token, quizId.quizId, sessionId.sessionId)).toMatchObject({
+      state: 'ANSWER_SHOW',
+      atQuestion: 1,
+      players: [
+        expect.any(String)
+      ],
+      metadata: {
+        quizId: expect.any(Number),
+        name: expect.any(String),
+        timeCreated: expect.any(Number),
+        timeLastEdited: expect.any(Number),
+        description: expect.any(String),
+        numQuestions: 1,
+        questions: [
+          {
+            questionId: expect.any(Number),
+            question: expect.any(String),
+            duration: expect.any(Number),
+            thumbnailUrl: expect.any(String),
+            points: expect.any(Number),
+            answers: [
+              {
+                answerId: expect.any(Number),
+                answer: expect.any(String),
+                colour: expect.any(String),
+                correct: expect.any(Boolean)
+              },
+              {
+                answerId: expect.any(Number),
+                answer: expect.any(String),
+                colour: expect.any(String),
+                correct: expect.any(Boolean)
+              }
+            ]
+          }
+        ],
+        duration: expect.any(Number),
+        thumbnailUrl: expect.any(String)
+      }
+    });
+  });
+
+  test('End State', () => {
+    const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = v2RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
+    v2RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question1);
+    v1RequestAdminQuizThumbnailUpdate(registered.token as string, quizId.quizId as number, 'http://google.com/some/image/path.jpg');
+    const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
+    v1RequestAdminPlayerJoin(sessionId.sessionId, playerName);
+    v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'NEXT_QUESTION');
+    v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'SKIP_COUNTDOWN');
+    requestSleepSync(1000);
+    v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'GO_TO_FINAL_RESULTS');
+    v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'END');
+    expect(v1RequestAdminQuizSessionStatus(registered.token, quizId.quizId, sessionId.sessionId)).toMatchObject({
+      state: 'END',
+      atQuestion: 0,
+      players: [
+        expect.any(String)
+      ],
+      metadata: {
+        quizId: expect.any(Number),
+        name: expect.any(String),
+        timeCreated: expect.any(Number),
+        timeLastEdited: expect.any(Number),
+        description: expect.any(String),
+        numQuestions: 1,
+        questions: [
+          {
+            questionId: expect.any(Number),
+            question: expect.any(String),
+            duration: expect.any(Number),
+            thumbnailUrl: expect.any(String),
+            points: expect.any(Number),
+            answers: [
+              {
+                answerId: expect.any(Number),
+                answer: expect.any(String),
+                colour: expect.any(String),
+                correct: expect.any(Boolean)
+              },
+              {
+                answerId: expect.any(Number),
+                answer: expect.any(String),
+                colour: expect.any(String),
+                correct: expect.any(Boolean)
+              }
+            ]
+          }
+        ],
+        duration: expect.any(Number),
+        thumbnailUrl: expect.any(String)
+      }
+    });
+  });
+
+  test.each([
+    { invalidSessionId: -1 },
+    { invalidSessionId: 0 },
+    { invalidSessionId: null },
+  ])('Session Id does not refer to a valid session within this quiz', ({ invalidSessionId }) => {
+    const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = v2RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
+    v2RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question1);
+    v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
+    expect(() => v1RequestAdminQuizSessionStatus(registered.token, quizId.quizId as number, invalidSessionId)).toThrow(HTTPError[400]);
+  });
+
+  test.each([
+    { invalidToken: '' },
+    { invalidToken: '123' },
+    { invalidToken: 'b77d409a-10cd-4a47-8e94-b0cd0ab50aa1' },
+    { invalidToken: 'abc' },
+  ])("Invalid Token: '$invalidToken", ({ invalidToken }) => {
+    const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question1);
+    const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
+    expect(() => v1RequestAdminQuizSessionStatus(invalidToken, quizId.quizId, sessionId.sessionId)).toThrow(HTTPError[401]);
+  });
+
+  test('QuizId does not refer to a quiz that this user owns', () => {
+    const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question1);
+    const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
+    const registered2 = v1RequestAdminAuthRegister('bob.smith@gmail.com', 'a1234567', 'Smith', 'Bob');
+    expect(() => v1RequestAdminQuizSessionStatus(registered2.token as string, quizId.quizId, sessionId.sessionId)).toThrow(HTTPError[403]);
   });
 });

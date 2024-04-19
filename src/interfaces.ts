@@ -47,6 +47,23 @@ export interface QuestionBody {
     thumbnailUrl?: string
 }
 
+export interface SessionStatus {
+  state: State,
+  atQuestion: number,
+  players: string[]
+  metadata: {
+    quizId: number,
+    name: string,
+    timeCreated: number,
+    timeLastEdited: number,
+    description: string,
+    numQuestions: number,
+    questions: Question[];
+    duration: number,
+    thumbnailUrl: string
+  }
+}
+
 export interface Quiz {
     quizId: number,
     description: string,
