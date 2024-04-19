@@ -1,4 +1,3 @@
-import { string } from 'yaml/dist/schema/common/string';
 import { QuestionBody } from './interfaces';
 import {
   v1RequestClear, v1RequestAdminAuthRegister, v1RequestAdminPlayerJoin,
@@ -262,7 +261,6 @@ describe('V1 - Test playerSessionMessage', () => {
   });
 });
 
-
 describe('V1 - Test adminReturnSessionMessages', () => {
   const firstName = 'Christian';
   const lastName = 'Politis';
@@ -296,8 +294,8 @@ describe('V1 - Test adminReturnSessionMessages', () => {
     v1RequestAdminQuizQuestionCreate(user.token, quizId.quizId, question);
     const session = v1RequestAdminQuizSession(user.token, quizId.quizId, autoStartNum);
     const player = v1RequestAdminPlayerJoin(session.sessionId, playerName);
-    v1RequestPlayerSendMessage(player.playerId, message)
-    v1RequestPlayerSendMessage(player.playerId, secondMessage)
+    v1RequestPlayerSendMessage(player.playerId, message);
+    v1RequestPlayerSendMessage(player.playerId, secondMessage);
     expect(v1RequestPlayerSessionMessages(player.playerId)).toMatchObject({
       messages: [{
         messageBody: message,
@@ -320,8 +318,8 @@ describe('V1 - Test adminReturnSessionMessages', () => {
     v1RequestAdminQuizQuestionCreate(user.token, quizId.quizId, question);
     const session = v1RequestAdminQuizSession(user.token, quizId.quizId, autoStartNum);
     const player = v1RequestAdminPlayerJoin(session.sessionId, playerName);
-    v1RequestPlayerSendMessage(player.playerId, message)
-    v1RequestPlayerSendMessage(player.playerId, secondMessage)
+    v1RequestPlayerSendMessage(player.playerId, message);
+    v1RequestPlayerSendMessage(player.playerId, secondMessage);
     expect(() => v1RequestPlayerSessionMessages(-20)).toThrow(HTTPError[400]);
   });
 });

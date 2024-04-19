@@ -364,7 +364,7 @@ export const v1RequestPlayerSendMessage = (playerid: number, messageBody: string
     { messageBody: messageBody });
 };
 
-export const v1RequestPlayerSessionMessage = (playerid: number) => {
+export const v1RequestPlayerSessionMessages = (playerid: number) => {
   return requestHelper('GET',
     `/v1/player/${playerid}/chat`,
     { playerid: playerid });
