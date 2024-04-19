@@ -1,7 +1,7 @@
 import { getData, setData } from './dataStore';
 import { findQuiz, validQuizId, validToken, validAction } from './helper';
 import httpError from 'http-errors';
-import { type Quiz, type SessionsList, Action, State, SessionStatus, ErrorObject } from './interfaces';
+import { type Quiz, type SessionsList, Action, State, SessionStatus } from './interfaces';
 export let timers: ReturnType<typeof setTimeout>[] = [];
 export let start: number;
 /**
@@ -190,7 +190,7 @@ export function adminViewQuizSessions(token: string, quizid: number): SessionsLi
  *
  * @throws {ErrorObject} -Throw errors for invalid token, invalid sessionId, invalid quizid.
  */
-export function adminQuizSessionStatus(token: string, quizid: number, sessionid: number): ErrorObject | SessionStatus {
+export function adminQuizSessionStatus(token: string, quizid: number, sessionid: number): SessionStatus {
   const data = getData();
 
   const checkToken = validToken(token, data);
