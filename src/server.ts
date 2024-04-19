@@ -12,6 +12,7 @@ import {
 import {
   adminQuizSession, adminQuizSessionUpdate, adminViewQuizSessions, adminQuizSessionStatus
 } from './session';
+// import { createClient } from '@vercel/kv';
 import { clear } from './other';
 import express, { json, Request, Response } from 'express';
 import { echo } from './newecho';
@@ -400,6 +401,18 @@ app.post('/v1/player/:playerid/chat', (req: Request, res: Response) => {
   res.json(response);
 });
 
+// When using vercel
+// app.get('/data', async (req: Request, res: Response) => {
+//   const data = await database.hgetall("data:names");
+//   res.status(200).json(data);
+// });
+
+// app.put('/data', async (req: Request, res: Response) => {
+//   const { data } = req.body;
+//   await database.hset("data:names", { data });
+//   return res.status(200).json({});
+// });
+
 // ====================================================================
 //  ================= WORK IS DONE ABOVE THIS LINE ===================
 // ====================================================================
@@ -432,3 +445,17 @@ const server = app.listen(PORT, HOST, () => {
 process.on('SIGINT', () => {
   server.close(() => console.log('Shutting down server gracefully.'));
 });
+
+// When using vercel
+
+// Replace this with your API_URL
+// E.g. https://large-poodle-44208.kv.vercel-storage.com
+// const KV_REST_API_URL="https://tough-hawk-39034.upstash.io";
+// // Replace this with your API_TOKEN
+// // E.g. AaywASQgOWE4MTVkN2UtODZh...
+// const KV_REST_API_TOKEN="AZh6ASQgMTkzMTQyNTEtMGYzYy00ZWEwLWI4NWUtMWI0ZGZhODE5MWEwNGU3MmQ5MjE5YTQ0NDg1ODg4NDllYzgxYjBmMzhlMWQ=";
+
+// const database = createClient({
+//   url: KV_REST_API_URL,
+//   token: KV_REST_API_TOKEN,
+// });
