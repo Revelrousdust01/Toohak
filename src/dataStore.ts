@@ -1,8 +1,23 @@
 // YOU SHOULD MODIFY THIS OBJECT BELOW ONLY
 import fs from 'fs';
 import type { DataStore } from './interfaces';
-import { requestGetData, requestSendData } from './requests';
-export const DEPLOYED_URL = 'https://1531-24t1-w16a-crunchie.vercel.app';
+import request, { HttpVerb } from 'sync-request';
+
+const DEPLOYED_URL = "https://1531-24t1-w16a-crunchie.vercel.app/docs/"
+
+const requestHelper = (method: HttpVerb, path: string, payload: object) => {
+  let json = {};
+  let qs = {};
+  if (['POST', 'DELETE'].includes(method)) {
+    qs = payload;
+  } else {
+    json = payload;
+  }
+
+  const res = request(method, DEPLOYED_URL + path, { qs, json, timeout: 20000 });
+  return JSON.parse(res.body.toString());
+};
+
 // YOU SHOULD MODIFY THIS OBJECT ABOVE ONLY
 
 // YOU SHOULDNT NEED TO MODIFY THE FUNCTIONS BELOW IN ITERATION 1
@@ -22,27 +37,43 @@ Example usage
 */
 
 // Use get() to access the data
-// let data = loadData();
+let data = loadData();
 
 function getData(): DataStore {
-  return requestGetData();
-  //return data;
+  return data;
 }
 
-// If we want to readfrom to a local db
 // function loadData(): DataStore {
 //   const data = fs.readFileSync('./database.json');
 //   return JSON.parse(data.toString());
 // }
 
-// Use set(newData) to pass in the entire data object, with modifications made
-function setData(newData: DataStore) {
-  requestSendData(newData)
+// // Use set(newData) to pass in the entire data object, with modifications made
+// function setData(newData: DataStore) {
+//   data = newData;
+//   const jsonstr = JSON.stringify(newData);
+//   fs.writeFileSync('./database.json', jsonstr);
+// }
 
-  // Uncomment for local db
-  // data = newData;
-  // const jsonstr = JSON.stringify(newData);
-  // fs.writeFileSync('./database.json', jsonstr);
+// Using Vercel
+function setData(newData: DataStore) {
+  requestHelper('PUT', '/_data', { data: newData });
+}
+
+function loadData(): DataStore {
+  try {
+    const response = requestHelper('GET', '/_data', {});
+    return response.data;
+  } catch (err) {
+    return {
+      users: [],
+      quizzes: [],
+      sessions: [],
+      trash: [],
+      userSessions: [],
+      quizCounter: 1
+    }
+  }
 }
 
 export { getData, setData };

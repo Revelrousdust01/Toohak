@@ -1,13 +1,10 @@
 import { port, url } from './config.json';
-import request, { HttpVerb } from 'sync-request';
+import request, { HttpVerb } from 'sync-request-curl';
 import type { QuestionBody, Payload, DataStore } from './interfaces';
 import { IncomingHttpHeaders } from 'http';
 import HTTPError from 'http-errors';
-import { DEPLOYED_URL } from './dataStore';
-//import request, { HttpVerb } from 'sync-request-curl';
 
-//To run local
-//const SERVER_URL = `${url}:${port}`;
+const SERVER_URL = `${url}:${port}`;
 const TIMEOUT_MS = 15000;
 
 /**
@@ -29,8 +26,8 @@ const requestHelper = (
     json = payload;
   }
 
-  const url = DEPLOYED_URL + path;
-  const res = request(method, DEPLOYED_URL, { qs, json, headers, timeout: TIMEOUT_MS });
+  const url = SERVER_URL + path;
+  const res = request(method, url, { qs, json, headers, timeout: TIMEOUT_MS });
 
   let responseBody;
   try {
@@ -56,7 +53,7 @@ const requestHelper = (
     case 401: // UNAUTHORIZED
       throw HTTPError(res.statusCode, errorMessage);
     case 404: // NOT_FOUND
-      throw HTTPError(res.statusCode, `Cannot find '${DEPLOYED_URL}' [${method}]\nReason: ${errorMessage}\n\nHint: Check that your server.ts have the correct path AND method`);
+      throw HTTPError(res.statusCode, `Cannot find '${url}' [${method}]\nReason: ${errorMessage}\n\nHint: Check that your server.ts have the correct path AND method`);
     case 500: // INTERNAL_SERVER_ERROR
       throw HTTPError(res.statusCode, errorMessage + '\n\nHint: Your server crashed. Check the server log!\n');
     default:
@@ -354,16 +351,3 @@ export const v1RequestAdminViewQuizSessions = (token: string, quizid: number) =>
     `/v1/admin/quiz/${quizid}/sessions`,
     { }, { token });
 };
-
-
-export const requestGetData = () => {
-  return requestHelper('GET',
-  `/data`,
-  { }, { });
-}
-
-export const requestSendData = (newData: DataStore) => {
-  return requestHelper('PUT',
-  `/data`,
-  {data: newData }, { });
-}
