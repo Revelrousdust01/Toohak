@@ -241,6 +241,10 @@ describe('V1 - Test adminQuestionResult', () => {
       {
         answer: 'Prince Charless1',
         correct: false
+      },
+      {
+        answer: 'Prince Charless2',
+        correct: true
       }
     ],
   };
@@ -325,6 +329,33 @@ describe('V1 - Test adminQuestionResult', () => {
     );
   });
 
+  test('Valid inputs for multiple correct answers', () => {
+    const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
+    const questionId = v1RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question2);
+    const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
+    const playerOne = v1RequestAdminPlayerJoin(sessionId.sessionId, player1);
+    const playerTwo = v1RequestAdminPlayerJoin(sessionId.sessionId, player2);
+    const playerThree = v1RequestAdminPlayerJoin(sessionId.sessionId, player3);
+    v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'SKIP_COUNTDOWN');
+    requestSleepSync(1000);
+    v1RequestAdminPlayerSubmission(playerOne.playerId, 1, [1, 0, 2]);
+    v1RequestAdminPlayerSubmission(playerTwo.playerId, 1, [2, 0, 1]);
+    v1RequestAdminPlayerSubmission(playerThree.playerId, 1, [1, 2, 0]);
+    v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'GO_TO_ANSWER');
+    expect(v1RequestAdminQuestionResult(playerOne.playerId, 1)).toMatchObject(
+      {
+        questionId: questionId.questionId,
+        playersCorrectList: [
+          'player1',
+          'player3'
+        ],
+        averageAnswerTime: expect.any(Number),
+        percentCorrect: expect.any(Number)
+      }
+    );
+  });
+
   test('Valid inputs for multiple questions and testing NEXT_QUESTION action', () => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quizId = v1RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
@@ -338,7 +369,7 @@ describe('V1 - Test adminQuestionResult', () => {
     v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'NEXT_QUESTION');
     v1RequestAdminQuizSessionUpdate(registered.token as string, quizId.quizId as number, sessionId.sessionId, 'SKIP_COUNTDOWN');
     requestSleepSync(1000);
-    v1RequestAdminPlayerSubmission(playerOne.playerId, 2, [1, 0]);
+    v1RequestAdminPlayerSubmission(playerOne.playerId, 2, [2, 0]);
     v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'GO_TO_ANSWER');
     expect(v1RequestAdminQuestionResult(playerOne.playerId, 2)).toMatchObject(
       {

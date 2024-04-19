@@ -129,17 +129,23 @@ export function adminQuestionResult(playerid: number, questionposition: number) 
   }
 
   const question = session.metadata.questions[questionposition - 1];
+
   let totalTime = 0;
   for (const attempt of question.attempts) {
     totalTime += attempt.timeTaken;
   }
 
+  const correctAnswers = question.answers.filter(answer => answer.correct === true);
+
   const correctPlayers: string[] = [];
 
   question.attempts.forEach(attempt => {
-    const lastAnswerId = attempt.answers[attempt.answers.length - 1];
-    const answerIsCorrect = question.answers.some(answer => answer.answerId === lastAnswerId && answer.correct);
-    if (answerIsCorrect) {
+    const lastNAnswers = attempt.answers.slice(-correctAnswers.length);
+    const allAnswersCorrect = lastNAnswers.every(answerId =>
+      question.answers.some(ans => ans.answerId === answerId && ans.correct)
+    );
+
+    if (allAnswersCorrect) {
       const player = session.players.find(p => p.playerId === attempt.playerId);
       correctPlayers.push(player.playerName);
     }

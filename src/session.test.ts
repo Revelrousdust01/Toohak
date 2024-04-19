@@ -468,6 +468,7 @@ describe('V1 - Test adminQuizSessionUpdate', () => {
   });
 });
 
+// adminViewQuizSessions
 describe('V1 - Test adminViewQuizSessions', () => {
   const firstName = 'Christian';
   const lastName = 'Politis';
