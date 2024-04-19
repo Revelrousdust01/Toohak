@@ -1,7 +1,8 @@
 import { getData, setData } from './dataStore';
 import httpError from 'http-errors';
-import { State } from './interfaces';
+import { State, PlayerStatus } from './interfaces';
 import { start, setStart } from './session';
+import { validPlayer } from './helper';
 export let startTimer: ReturnType<typeof setTimeout>[] = [];
 
 /**
@@ -59,10 +60,7 @@ export function adminPlayerJoin(sessionId: number, name: string) {
 
 export function adminPlayerSubmission(playerid: number, questionposition: number, answerIds: number[]) {
   const data = getData();
-  const session = data.sessions.find(session => session.players.find(player => player.playerId === playerid));
-  if (!session) {
-    throw httpError(400, 'Player does not exist.');
-  }
+  const session = validPlayer(playerid, data);
   if (session.metadata.numQuestions < questionposition || questionposition < 1) {
     throw httpError(400, 'Question position is invalid.');
   }
@@ -101,6 +99,24 @@ export function adminPlayerSubmission(playerid: number, questionposition: number
 }
 
 /**
+ * Get the status of a guest player that has already joined a session
+ *
+ * @param playerid
+ *
+ * @return {PlayerStatus} - returns an object containing player status
+ */
+export function adminGuestPlayerStatus(playerid: number): PlayerStatus {
+  const data = getData();
+  const session = validPlayer(playerid, data);
+
+  return {
+    state: session.state,
+    numQuestions: session.metadata.numQuestions,
+    atQuestion: session.atQuestion
+  };
+}
+
+/**
  * Retrieves and calculates results for a specific question within a quiz session.
  *
  * @param {number} playerid - ID of the player requesting the results.
@@ -114,10 +130,7 @@ export function adminPlayerSubmission(playerid: number, questionposition: number
 
 export function adminQuestionResult(playerid: number, questionposition: number) {
   const data = getData();
-  const session = data.sessions.find(session => session.players.find(player => player.playerId === playerid));
-  if (!session) {
-    throw httpError(400, 'Player does not exist.');
-  }
+  const session = validPlayer(playerid, data);
   if (session.metadata.numQuestions < questionposition || questionposition < 1) {
     throw httpError(400, 'Question position is invalid.');
   }
@@ -171,11 +184,7 @@ export function adminQuestionResult(playerid: number, questionposition: number) 
 export function playerSendMessage(playerid: number, messageBody: string) {
   const data = getData();
 
-  const session = data.sessions.find(session => session.players.some(player => player.playerId === playerid));
-
-  if (!session) {
-    throw httpError(400, 'Player ID does not refer to a valid player in any session.');
-  }
+  const session = validPlayer(playerid, data);
   if (messageBody.length < 1 || messageBody.length > 100) {
     throw httpError(400, 'Message body must be between 1 and 100 characters.');
   }

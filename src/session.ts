@@ -253,7 +253,7 @@ export function adminQuizSessionStatus(token: string, quizid: number, sessionid:
       timeCreated: validQuiz.timeCreated,
       timeLastEdited: validQuiz.timeLastEdited,
       description: validQuiz.description,
-      numQuestions: validQuiz.questionCounter - 1,
+      numQuestions: validQuiz.questionCounter,
       questions: quizQuestions,
       duration: validQuiz.duration,
       thumbnailUrl: validQuiz.thumbnailUrl

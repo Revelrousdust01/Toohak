@@ -339,6 +339,12 @@ export const v1RequestAdminPlayerSubmission = (playerid: number, questionpositio
     { answerIds: answerIds });
 };
 
+export const v1RequestAdminGuestPlayerStatus = (playerid: number) => {
+  return requestHelper('GET',
+    `/v1/player/${playerid}`,
+    { });
+};
+
 export const v1RequestAdminQuestionResult = (playerid: number, questionposition: number) => {
   return requestHelper('GET',
     `/v1/player/${playerid}/question/${questionposition}/results`,

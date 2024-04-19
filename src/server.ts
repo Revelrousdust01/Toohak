@@ -12,7 +12,9 @@ import {
 import {
   adminQuizSession, adminQuizSessionUpdate, adminViewQuizSessions, adminQuizSessionStatus
 } from './session';
-// import { createClient } from '@vercel/kv';
+import {
+  adminPlayerJoin, adminPlayerSubmission, adminGuestPlayerStatus, playerSendMessage, playerSessionMessages, adminQuestionResult
+} from './player';
 import { clear } from './other';
 import express, { json, Request, Response } from 'express';
 import { echo } from './newecho';
@@ -25,7 +27,6 @@ import sui from 'swagger-ui-express';
 import fs from 'fs';
 import path from 'path';
 import process from 'process';
-import { adminPlayerJoin, adminPlayerSubmission, adminQuestionResult, playerSendMessage, playerSessionMessages } from './player';
 
 // Set up web app
 const app = express();
@@ -323,6 +324,13 @@ app.post('/v2/admin/quiz', (req: Request, res: Response) => {
 app.get('/v1/admin/quiz/:quizid/session/:sessionid', (req: Request, res: Response) => {
   const token = req.headers.token as string;
   const response = adminQuizSessionStatus(token, parseInt(req.params.quizid), parseInt(req.params.sessionid));
+
+  res.json(response);
+});
+
+app.get('/v1/player/:playerid', (req: Request, res: Response) => {
+  const response = adminGuestPlayerStatus(parseInt(req.params.playerid));
+  console.log(response);
 
   res.json(response);
 });
