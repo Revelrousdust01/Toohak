@@ -1,8 +1,7 @@
 import { getData, setData } from './dataStore';
 import httpError from 'http-errors';
 import { State } from './interfaces';
-import { start } from './session';
-import { adminQuizSessionUpdate } from './session'
+import { start, setStart } from './session';
 export let startTimer: ReturnType<typeof setTimeout>[] = [];
 
 /**
@@ -37,7 +36,7 @@ export function adminPlayerJoin(sessionId: number, name: string) {
   session.players.push(player);
 
   setData(data);
-  
+
   if (session.players.length === autoStartNum) {
     session.state = State.QUESTION_COUNTDOWN;
     startTimer.forEach(timer => clearTimeout(timer));
@@ -46,7 +45,7 @@ export function adminPlayerJoin(sessionId: number, name: string) {
 
     startTimer.push(setTimeout(() => {
       session.state = State.QUESTION_OPEN;
-      start = Math.floor(Date.now() / 1000);
+      setStart(Math.floor(Date.now() / 1000));
       startTimer.push(setTimeout(() => {
         session.state = State.QUESTION_CLOSE;
       }, session.metadata.questions[session.atQuestion - 1].duration * 1000));
@@ -54,7 +53,7 @@ export function adminPlayerJoin(sessionId: number, name: string) {
   }
 
   setData(data);
-  
+
   return { playerId: player.playerId };
 }
 

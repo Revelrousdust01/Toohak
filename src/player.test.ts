@@ -73,9 +73,9 @@ describe('V1 - Test adminPlayerJoin', () => {
     const quizId = v1RequestAdminQuizCreate(registered.token, quizName, quizDescription);
     v1RequestAdminQuizQuestionCreate(registered.token, quizId.quizId, question);
     const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
-    v1RequestAdminPlayerJoin(sessionId.sessionId, "Leon");
-    v1RequestAdminPlayerJoin(sessionId.sessionId, "Jeffery");
-    v1RequestAdminPlayerJoin(sessionId.sessionId, "Samuel");
+    v1RequestAdminPlayerJoin(sessionId.sessionId, 'Leon');
+    v1RequestAdminPlayerJoin(sessionId.sessionId, 'Jeffery');
+    v1RequestAdminPlayerJoin(sessionId.sessionId, 'Samuel');
     expect(v1RequestAdminQuizSessionStatus(registered.token, quizId.quizId, sessionId.sessionId).state).toStrictEqual('QUESTION_COUNTDOWN');
     requestSleepSync(3000);
     expect(v1RequestAdminQuizSessionStatus(registered.token, quizId.quizId, sessionId.sessionId).state).toStrictEqual('QUESTION_OPEN');

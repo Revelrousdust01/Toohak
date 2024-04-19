@@ -1,5 +1,5 @@
 import { setData } from './dataStore';
-import { timers } from './session';
+import { timers, resetStart } from './session';
 import { startTimer } from './player';
 
 /**
@@ -16,6 +16,7 @@ export function clear(): object {
   for (const timer of startTimer) {
     clearTimeout(timer);
   }
+  resetStart();
 
   setData({
     users: [],
