@@ -135,3 +135,33 @@ export function playerSendMessage(playerid: number, messageBody: string) {
 
   return {};
 }
+
+/**
+ * Sends a chat message to all players in the session.
+ *
+ * @param {number} playerid - ID of the player sending the message.
+ *
+ * @returns {Message[]} - Returns an array of all the messages
+ *
+ * @throws {HttpError} - Throws error if validation fails.
+ */
+
+export function playerSessionMessages(playerid: number) {
+  const data = getData();
+
+  const session = data.sessions.find(session => session.players.some(player => player.playerId === playerid));
+
+  if (!session) {
+    throw httpError(400, 'Player ID does not refer to a valid player in any session.');
+  }
+  return {
+    messages: session.messages.filter(message => message.playerId === playerid).map(message => {
+      return {
+        messageBody: message.messageBody,
+        playerId: message.playerId,
+        playerName: message.playerName,
+        timeSent: Math.round(message.timeSent / 1000) * 1000
+      };
+    })
+  };
+}
