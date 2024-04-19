@@ -41,7 +41,7 @@ export function adminQuizCreate(token: string, name: string, description: string
 
   const newQuiz: Quiz = {
     quizId: quizId,
-    questionCounter: 1,
+    questionCounter: 0,
     description: description,
     duration: 0,
     name: name,
@@ -288,6 +288,7 @@ export function adminQuizQuestionCreate(token: string, quizid: number, questionB
       answers: [],
       thumbnailUrl: questionBody.thumbnailUrl
     };
+
     newQuestion = setupAnswers(newQuestion, questionBody);
 
     validQuiz.questionCounter++;

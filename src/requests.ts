@@ -339,6 +339,18 @@ export const v1RequestAdminPlayerSubmission = (playerid: number, questionpositio
     { answerIds: answerIds });
 };
 
+export const v1RequestAdminGuestPlayerStatus = (playerid: number) => {
+  return requestHelper('GET',
+    `/v1/player/${playerid}`,
+    { });
+};
+
+export const v1RequestAdminQuestionResult = (playerid: number, questionposition: number) => {
+  return requestHelper('GET',
+    `/v1/player/${playerid}/question/${questionposition}/results`,
+    { });
+};
+
 export const v1RequestAdminQuizSessionStatus = (token: string, quizid: number, sessionid: number) => {
   return requestHelper('GET',
     `/v1/admin/quiz/${quizid}/session/${sessionid}`,
@@ -368,4 +380,10 @@ export const v1RequestPlayerQuestionInformation = (playerid: number, questionpos
   return requestHelper('GET',
     `/v1/player/${playerid}/question/${questionposition}`,
     { });
+};
+
+export const v1RequestPlayerSessionMessages = (playerid: number) => {
+  return requestHelper('GET',
+    `/v1/player/${playerid}/chat`,
+    { playerid: playerid });
 };

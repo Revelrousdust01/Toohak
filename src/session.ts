@@ -4,6 +4,7 @@ import httpError from 'http-errors';
 import { type Quiz, type SessionsList, Action, State, SessionStatus } from './interfaces';
 export let timers: ReturnType<typeof setTimeout>[] = [];
 export let start: number;
+
 /**
  * Creates a new quiz session if conditions permit, including session count and quiz validation. The session starts in the LOBBY state and waits for players.
  *
@@ -14,6 +15,7 @@ export let start: number;
  * @returns {object} - Contains the unique session ID for the newly created session.
  * @throws {ErrorObject} - Throws errors for invalid token, quiz in trash, quiz without questions, or exceeding session limit.
  */
+
 export function adminQuizSession(token: string, quizid: number, autoStartNum: number): object {
   const data = getData();
   const checkToken = validToken(token, data);
@@ -251,7 +253,7 @@ export function adminQuizSessionStatus(token: string, quizid: number, sessionid:
       timeCreated: validQuiz.timeCreated,
       timeLastEdited: validQuiz.timeLastEdited,
       description: validQuiz.description,
-      numQuestions: validQuiz.questionCounter - 1,
+      numQuestions: validQuiz.questionCounter,
       questions: quizQuestions,
       duration: validQuiz.duration,
       thumbnailUrl: validQuiz.thumbnailUrl
