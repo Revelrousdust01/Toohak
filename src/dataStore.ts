@@ -1,22 +1,22 @@
 // YOU SHOULD MODIFY THIS OBJECT BELOW ONLY
 import fs from 'fs';
 import type { DataStore } from './interfaces';
-// import request, { HttpVerb } from 'sync-request';
+import request, { HttpVerb } from 'sync-request';
 
-// const DEPLOYED_URL = "https://1531-24t1-w16a-crunchie.vercel.app/docs/"
+const DEPLOYED_URL = "https://1531-24t1-w16a-crunchie.vercel.app/docs/"
 
-// const requestHelper = (method: HttpVerb, path: string, payload: object) => {
-//   let json = {};
-//   let qs = {};
-//   if (['POST', 'DELETE'].includes(method)) {
-//     qs = payload;
-//   } else {
-//     json = payload;
-//   }
+const requestHelper = (method: HttpVerb, path: string, payload: object) => {
+  let json = {};
+  let qs = {};
+  if (['POST', 'DELETE'].includes(method)) {
+    qs = payload;
+  } else {
+    json = payload;
+  }
 
-//   const res = request(method, DEPLOYED_URL + path, { qs, json, timeout: 20000 });
-//   return JSON.parse(res.body.toString());
-// };
+  const res = request(method, DEPLOYED_URL + path, { qs, json, timeout: 20000 });
+  return JSON.parse(res.body.toString());
+};
 
 // YOU SHOULD MODIFY THIS OBJECT ABOVE ONLY
 
@@ -43,38 +43,39 @@ function getData(): DataStore {
   return data;
 }
 
-function loadData(): DataStore {
-  const data = fs.readFileSync('./database.json');
-  return JSON.parse(data.toString());
-}
+// function loadData(): DataStore {
+//   const data = fs.readFileSync('./database.json');
+//   return JSON.parse(data.toString());
+// }
 
 // // Use set(newData) to pass in the entire data object, with modifications made
-function setData(newData: DataStore) {
-  data = newData;
-  const jsonstr = JSON.stringify(newData);
-  fs.writeFileSync('./database.json', jsonstr);
-}
+// function setData(newData: DataStore) {
+//   data = newData;
+//   const jsonstr = JSON.stringify(newData);
+//   fs.writeFileSync('./database.json', jsonstr);
+// }
 
 // Using Vercel
-// function setData(newData: DataStore) {
-//   requestHelper('PUT', '/_data', { data: newData });
-// }
+function setData(newData: DataStore) {
+  console.log(newData);
+  requestHelper('PUT', '/data', { data: newData });
+}
 
-// function loadData(): DataStore {
-//   try {
-//     const response = requestHelper('GET', '/_data', {});
-//     return response.data;
-//   } catch (err) {
-//     return {
-//       users: [],
-//       quizzes: [],
-//       sessions: [],
-//       trash: [],
-//       userSessions: [],
-//       quizCounter: 1
-//     }
-//   }
-// }
+function loadData(): DataStore {
+  try {
+    const response = requestHelper('GET', '/_data', {});
+    return response.data;
+  } catch (err) {
+    return {
+      users: [],
+      quizzes: [],
+      sessions: [],
+      trash: [],
+      userSessions: [],
+      quizCounter: 1
+    }
+  }
+}
 
 export { getData, setData };
 export type { DataStore };
