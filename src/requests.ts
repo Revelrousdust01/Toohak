@@ -362,4 +362,4 @@ export const v1RequestPlayerSendMessage = (playerid: number, messageBody: string
   return requestHelper('POST',
     `/v1/player/${playerid}/chat`,
     { messageBody: messageBody });
-}
+};

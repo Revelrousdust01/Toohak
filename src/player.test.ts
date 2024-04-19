@@ -1,8 +1,9 @@
 import { QuestionBody } from './interfaces';
-import { v1RequestClear, v1RequestAdminAuthRegister, v1RequestAdminPlayerJoin, 
-  v1RequestAdminQuizCreate, v1RequestAdminQuizQuestionCreate, v1RequestAdminQuizSession, 
-  v1RequestAdminQuizSessionUpdate, v1RequestAdminPlayerSubmission, v1RequestAdminQuizSessionStatus, 
-  requestSleepSync, v1PlayerSendMessage 
+import {
+  v1RequestClear, v1RequestAdminAuthRegister, v1RequestAdminPlayerJoin,
+  v1RequestAdminQuizCreate, v1RequestAdminQuizQuestionCreate, v1RequestAdminQuizSession,
+  v1RequestAdminQuizSessionUpdate, v1RequestAdminPlayerSubmission, v1RequestAdminQuizSessionStatus,
+  requestSleepSync, v1RequestPlayerSendMessage
 } from './requests';
 import HTTPError from 'http-errors';
 beforeEach(() => {
@@ -211,7 +212,7 @@ describe('V1 - Test playerSendMessage', () => {
   const quizName = 'New Quiz';
   const quizDescription = 'This is a new quiz';
   const autoStartNum = 3;
-  const message = 'Hello everyone! Nice to chat.'
+  const message = 'Hello everyone! Nice to chat.';
   const question: QuestionBody = {
     question: 'Who is the Monarch of England?',
     duration: 1,
@@ -233,8 +234,8 @@ describe('V1 - Test playerSendMessage', () => {
     const quiz = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
     v1RequestAdminQuizQuestionCreate(register.token as string, quiz.quizId as number, question);
     const session = v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum);
-    player = v1RequestAdminPlayerJoin(session.sessionId, playerName);
-    expect(v1PlayerSendMessage(player.playerId, message)).toMatchObject({});
+    const player = v1RequestAdminPlayerJoin(session.sessionId, playerName);
+    expect(v1RequestPlayerSendMessage(player.playerId, message)).toMatchObject({});
   });
 
   test('If player ID does not exist', () => {
@@ -243,19 +244,18 @@ describe('V1 - Test playerSendMessage', () => {
     v1RequestAdminQuizQuestionCreate(register.token as string, quiz.quizId as number, question);
     const session = v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum);
     v1RequestAdminPlayerJoin(session.sessionId, playerName);
-    expect(() => v1PlayerSendMessage(-10, message)).toThrow(HTTPError[400]);
+    expect(() => v1RequestPlayerSendMessage(-10, message)).toThrow(HTTPError[400]);
   });
-  
+
   test.each([
     { invalidMessage: '' },
     { invalidMessage: 'A'.repeat(101) },
   ])("Quiz name is less than 1 character or more than 100 characters: '$invalidMessage'", ({ invalidMessage }) => {
-    const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quiz = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
     v1RequestAdminQuizQuestionCreate(register.token as string, quiz.quizId as number, question);
     const session = v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum);
-    v1RequestAdminPlayerJoin(session.sessionId, playerName);
-    expect(() => v1PlayerSendMessage(player.playerId, invalidMessage)).toThrow(HTTPError[400]);
+    const player = v1RequestAdminPlayerJoin(session.sessionId, playerName);
+    expect(() => v1RequestPlayerSendMessage(player.playerId, invalidMessage)).toThrow(HTTPError[400]);
   });
 });

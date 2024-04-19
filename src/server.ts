@@ -394,11 +394,11 @@ app.put('/v1/player/:playerid/question/:questionposition/answer', (req: Request,
   res.json(response);
 });
 
-app.post('v1/player/:playerid/chat', (req: Request, res: Response) => {
+app.post('/v1/player/:playerid/chat', (req: Request, res: Response) => {
   const { messageBody } = req.body;
   const response = playerSendMessage(parseInt(req.params.playerid), messageBody);
   res.json(response);
-})
+});
 
 // ====================================================================
 //  ================= WORK IS DONE ABOVE THIS LINE ===================
