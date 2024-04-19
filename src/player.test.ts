@@ -1,9 +1,9 @@
-import { QuestionBody, Question } from './interfaces';
+import { QuestionBody } from './interfaces';
 import {
   v1RequestClear, v1RequestAdminAuthRegister, v1RequestAdminPlayerJoin,
-  v1RequestAdminQuizCreate, v1RequestAdminQuizQuestionCreate, v1RequestAdminQuizSession,
+  v1RequestAdminQuizCreate, v1RequestAdminQuizQuestionCreate, v2RequestAdminQuizQuestionCreate, v1RequestAdminQuizSession,
   v1RequestAdminQuizSessionUpdate, v1RequestAdminPlayerSubmission, v1RequestAdminQuizSessionStatus,
-  requestSleepSync, v1RequestPlayerSendMessage
+  requestSleepSync, v1RequestPlayerSendMessage, v1RequestPlayerQuestionInformation, v2RequestAdminQuizCreate
 } from './requests';
 import HTTPError from 'http-errors';
 beforeEach(() => {
@@ -289,25 +289,31 @@ describe('V1 - Test playerQuestionInformation', () => {
   test('Valid inputs', () => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quiz = v1RequestAdminQuizCreate(register.token, quizName, quizDescription);
-    const question = v1RequestAdminQuizQuestionCreate(register.token, quiz.quizId, question);
+    const newQuestion = v2RequestAdminQuizQuestionCreate(register.token, quiz.quizId, question);
     const session = v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum);
     const player = v1RequestAdminPlayerJoin(session.sessionId, playerName);
     v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'NEXT_QUESTION');
     v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'SKIP_COUNTDOWN');
-    expect(v1RequestPlayerQuestionInformation(player.playerId, 1)).toMatchObject({
-      questionId: question.questionId,
-      question: expect.any(String),
-      duration: expect.any(Number),
-      thumbnailUrl: expect.any(String),
-      points: expect.any(Number),
-      answers: [
-        {
-          answerId: expect.any(Number),
-          answer: expect.any(String),
-          colour: expect.any(String)
-        }
-      ]
-    });
+    expect(v1RequestPlayerQuestionInformation(player.playerId, 1)).toMatchObject(
+      {
+        questionId: newQuestion.questionId,
+        question: expect.any(String),
+        duration: expect.any(Number),
+        thumbnailUrl: expect.any(String),
+        points: expect.any(Number),
+        answers: [
+          {
+            answerId: expect.any(Number),
+            answer: expect.any(String),
+            colour: expect.any(String)
+          },
+          {
+            answerId: expect.any(Number),
+            answer: expect.any(String),
+            colour: expect.any(String)
+          }
+        ]
+      });
   });
 
   test('If player ID does not exist', () => {
@@ -340,14 +346,14 @@ describe('V1 - Test playerQuestionInformation', () => {
     const player = v1RequestAdminPlayerJoin(session.sessionId, playerName);
     v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'NEXT_QUESTION');
     v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'SKIP_COUNTDOWN');
-    expect(() => v1RequestPlayerQuestionInformation(player.playerId, 1)).toThrow(HTTPError[400]);
+    expect(() => v1RequestPlayerQuestionInformation(player.playerId, 4)).toThrow(HTTPError[400]);
   });
 
   test('Session is in LOBBY state', () => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quizId = v2RequestAdminQuizCreate(registered.token, quizName, quizDescription);
     v1RequestAdminQuizQuestionCreate(registered.token, quizId.quizId, question);
-    const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
+    const session = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
     const player = v1RequestAdminPlayerJoin(session.sessionId, playerName);
     expect(() => v1RequestPlayerQuestionInformation(player.playerId, 1)).toThrow(HTTPError[400]);
   });
@@ -356,9 +362,9 @@ describe('V1 - Test playerQuestionInformation', () => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quizId = v2RequestAdminQuizCreate(registered.token, quizName, quizDescription);
     v1RequestAdminQuizQuestionCreate(registered.token, quizId.quizId, question);
-    const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
+    const session = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
     const player = v1RequestAdminPlayerJoin(session.sessionId, playerName);
-    v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'END');
+    v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, session.sessionId, 'END');
     expect(() => v1RequestPlayerQuestionInformation(player.playerId, 1)).toThrow(HTTPError[400]);
   });
 
@@ -366,9 +372,9 @@ describe('V1 - Test playerQuestionInformation', () => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quizId = v2RequestAdminQuizCreate(registered.token, quizName, quizDescription);
     v1RequestAdminQuizQuestionCreate(registered.token, quizId.quizId, question);
-    const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
+    const session = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
     const player = v1RequestAdminPlayerJoin(session.sessionId, playerName);
-    v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'NEXT_QUESTION');
+    v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, session.sessionId, 'NEXT_QUESTION');
     expect(() => v1RequestPlayerQuestionInformation(player.playerId, 1)).toThrow(HTTPError[400]);
   });
 });

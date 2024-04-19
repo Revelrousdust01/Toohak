@@ -364,7 +364,7 @@ export const v1RequestPlayerSendMessage = (playerid: number, messageBody: string
     { messageBody: messageBody });
 };
 
-export const v1RequestPlayerQuestionInformation = (playerid: number, messageBody: string) => {
+export const v1RequestPlayerQuestionInformation = (playerid: number, questionposition: number) => {
   return requestHelper('GET',
     `/v1/player/${playerid}/question/${questionposition}`,
     { });

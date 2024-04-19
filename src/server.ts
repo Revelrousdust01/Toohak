@@ -24,7 +24,7 @@ import sui from 'swagger-ui-express';
 import fs from 'fs';
 import path from 'path';
 import process from 'process';
-import { adminPlayerJoin, adminPlayerSubmission, playerSendMessage,playerQuestionInformation } from './player';
+import { adminPlayerJoin, adminPlayerSubmission, playerSendMessage, playerQuestionInformation } from './player';
 
 // Set up web app
 const app = express();
