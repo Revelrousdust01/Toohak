@@ -98,3 +98,40 @@ export function adminPlayerSubmission(playerid: number, questionposition: number
 
   return { };
 }
+
+/**
+ * Sends a chat message to all players in the session.
+ *
+ * @param {number} playerid - ID of the player sending the message.
+ * @param {string} messageBody - The chat message content.
+ *
+ * @returns {object} - An empty object when message is sent.
+ *
+ * @throws {HttpError} - Throws error if validation fails.
+ */
+
+export function playerSendMessage(playerid: number, messageBody: string) {
+  const data = getData();
+
+  const session = data.sessions.find(session => session.players.some(player => player.playerId === playerid));
+
+  if (!session) {
+    throw httpError(400, 'Player ID does not refer to a valid player in any session.');
+  }
+  if (messageBody.length < 1 || messageBody.length > 100) {
+    throw httpError(400, 'Message body must be between 1 and 100 characters.');
+  }
+
+  const player = session.players.find(player => player.playerId === playerid);
+
+  session.messages.push({
+    playerId: playerid,
+    messageBody: messageBody,
+    playerName: player.playerName,
+    timeSent: Date.now()
+  });
+
+  setData(data);
+
+  return {};
+}
