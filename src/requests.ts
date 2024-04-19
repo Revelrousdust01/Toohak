@@ -3,9 +3,11 @@ import request, { HttpVerb } from 'sync-request';
 import type { QuestionBody, Payload, DataStore } from './interfaces';
 import { IncomingHttpHeaders } from 'http';
 import HTTPError from 'http-errors';
+import { DEPLOYED_URL } from './dataStore';
 //import request, { HttpVerb } from 'sync-request-curl';
 
-const SERVER_URL = `${url}:${port}`;
+//To run local
+//const SERVER_URL = `${url}:${port}`;
 const TIMEOUT_MS = 15000;
 
 /**
@@ -27,8 +29,8 @@ const requestHelper = (
     json = payload;
   }
 
-  const url = SERVER_URL + path;
-  const res = request(method, url, { qs, json, headers, timeout: TIMEOUT_MS });
+  const url = DEPLOYED_URL + path;
+  const res = request(method, DEPLOYED_URL, { qs, json, headers, timeout: TIMEOUT_MS });
 
   let responseBody;
   try {
@@ -54,7 +56,7 @@ const requestHelper = (
     case 401: // UNAUTHORIZED
       throw HTTPError(res.statusCode, errorMessage);
     case 404: // NOT_FOUND
-      throw HTTPError(res.statusCode, `Cannot find '${url}' [${method}]\nReason: ${errorMessage}\n\nHint: Check that your server.ts have the correct path AND method`);
+      throw HTTPError(res.statusCode, `Cannot find '${DEPLOYED_URL}' [${method}]\nReason: ${errorMessage}\n\nHint: Check that your server.ts have the correct path AND method`);
     case 500: // INTERNAL_SERVER_ERROR
       throw HTTPError(res.statusCode, errorMessage + '\n\nHint: Your server crashed. Check the server log!\n');
     default:

@@ -2,7 +2,7 @@
 import fs from 'fs';
 import type { DataStore } from './interfaces';
 import { requestGetData, requestSendData } from './requests';
-
+export const DEPLOYED_URL = 'https://1531-24t1-w16a-crunchie.vercel.app';
 // YOU SHOULD MODIFY THIS OBJECT ABOVE ONLY
 
 // YOU SHOULDNT NEED TO MODIFY THE FUNCTIONS BELOW IN ITERATION 1
