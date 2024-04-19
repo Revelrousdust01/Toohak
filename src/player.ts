@@ -1,8 +1,9 @@
 import { getData, setData } from './dataStore';
 import httpError from 'http-errors';
 import { State, PlayerStatus } from './interfaces';
-import { start } from './session';
+import { start, setStart } from './session';
 import { validPlayer } from './helper';
+export let startTimer: ReturnType<typeof setTimeout>[] = [];
 
 /**
   * Creates a new Guest Player
@@ -15,6 +16,7 @@ import { validPlayer } from './helper';
 export function adminPlayerJoin(sessionId: number, name: string) {
   const data = getData();
   const session = data.sessions.find(session => session.quizSessionId === sessionId);
+
   if (!session) {
     throw httpError(400, 'Session Id does not refer to a valid session within this quiz.');
   }
@@ -30,8 +32,27 @@ export function adminPlayerJoin(sessionId: number, name: string) {
     playerName: name,
     playerScore: 0
   };
+  const autoStartNum = session.autoStartNum;
 
   session.players.push(player);
+
+  setData(data);
+
+  if (session.players.length === autoStartNum) {
+    session.state = State.QUESTION_COUNTDOWN;
+    startTimer.forEach(timer => clearTimeout(timer));
+    startTimer = [];
+    session.atQuestion = session.atQuestion + 1;
+
+    startTimer.push(setTimeout(() => {
+      session.state = State.QUESTION_OPEN;
+      setStart(Math.floor(Date.now() / 1000));
+      startTimer.push(setTimeout(() => {
+        session.state = State.QUESTION_CLOSE;
+      }, session.metadata.questions[session.atQuestion - 1].duration * 1000));
+    }, 3000));
+  }
+
   setData(data);
 
   return { playerId: player.playerId };
@@ -92,4 +113,37 @@ export function adminGuestPlayerStatus(playerid: number): PlayerStatus {
     numQuestions: session.metadata.numQuestions,
     atQuestion: session.atQuestion
   };
+}
+
+/**
+ * Sends a chat message to all players in the session.
+ *
+ * @param {number} playerid - ID of the player sending the message.
+ * @param {string} messageBody - The chat message content.
+ *
+ * @returns {object} - An empty object when message is sent.
+ *
+ * @throws {HttpError} - Throws error if validation fails.
+ */
+
+export function playerSendMessage(playerid: number, messageBody: string) {
+  const data = getData();
+
+  const session = validPlayer(playerid, data);
+  if (messageBody.length < 1 || messageBody.length > 100) {
+    throw httpError(400, 'Message body must be between 1 and 100 characters.');
+  }
+
+  const player = session.players.find(player => player.playerId === playerid);
+
+  session.messages.push({
+    playerId: playerid,
+    messageBody: messageBody,
+    playerName: player.playerName,
+    timeSent: Date.now()
+  });
+
+  setData(data);
+
+  return {};
 }

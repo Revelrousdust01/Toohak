@@ -152,6 +152,14 @@ export function adminQuizSessionUpdate(token: string, quizid: number, sessionId:
   return { };
 }
 
+export function setStart(newValue: number) {
+  start = newValue;
+}
+
+export function resetStart() {
+  start = 0;
+}
+
 /**
  * Retrieves lists of active and inactive sessions for a specific quiz, differentiated by whether the session state is 'END'.
  *
