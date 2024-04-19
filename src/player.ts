@@ -140,8 +140,8 @@ export function adminQuestionResult(playerid: number, questionposition: number) 
   const correctPlayers: string[] = [];
 
   question.attempts.forEach(attempt => {
-    const lastNAnswers = attempt.answers.slice(-correctAnswers.length);
-    const allAnswersCorrect = lastNAnswers.every(answerId =>
+    const lastAnswers = attempt.answers.slice(-correctAnswers.length);
+    const allAnswersCorrect = lastAnswers.every(answerId =>
       question.answers.some(ans => ans.answerId === answerId && ans.correct)
     );
 
