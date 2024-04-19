@@ -63,7 +63,7 @@ function setData(newData: DataStore) {
 
 function loadData(): DataStore {
   try {
-    const response = requestHelper('GET', '/_data', {});
+    const response = requestHelper('GET', '/data', {});
     return response.data;
   } catch (err) {
     return {
