@@ -4,7 +4,6 @@ import type { DataStore } from './interfaces';
 import request, { HttpVerb } from 'sync-request';
 
 const DEPLOYED_URL = "https://1531-24t1-w16a-crunchie.vercel.app/docs/"
-
 const requestHelper = (method: HttpVerb, path: string, payload: object) => {
   let json = {};
   let qs = {};
@@ -14,8 +13,8 @@ const requestHelper = (method: HttpVerb, path: string, payload: object) => {
     json = payload;
   }
 
-  const res = request(method, DEPLOYED_URL + path, { qs, json, timeout: 20000 });
-  return JSON.parse(res.body.toString());
+  const response = request(method, DEPLOYED_URL + path, { qs, json, timeout: 20000 });
+  return JSON.parse(response.body.toString());
 };
 
 
@@ -43,12 +42,11 @@ function setData(newData: DataStore) {
   requestHelper('PUT', '/data', { data: newData });
 }
 
-const loadData = (): DataStore => {
+const getData = (): DataStore => {
   try {
-    const response = requestHelper('GET', '/data', {});
-    return response.data;
-  } catch (err) {
-    console.log('test');
+    const res = requestHelper('GET', '/data', {});
+    return res.data;
+  } catch (e) {
     return {
       users: [],
       quizzes: [],
@@ -56,17 +54,11 @@ const loadData = (): DataStore => {
       trash: [],
       userSessions: [],
       quizCounter: 1
-    }
+    };
   }
-}
+};
 
-let data = loadData();
-
-function getData(): DataStore {
-  return data;
-}
-
-// function loadData(): DataStore {
+// function getData(): DataStore {
 //   const data = fs.readFileSync('./database.json');
 //   return JSON.parse(data.toString());
 // }
