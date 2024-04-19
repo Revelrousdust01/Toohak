@@ -437,10 +437,10 @@ process.on('SIGINT', () => {
 
 // Replace this with your API_URL
 // E.g. https://large-poodle-44208.kv.vercel-storage.com
-const KV_REST_API_URL="https://lasting-chow-51033.upstash.io";
+const KV_REST_API_URL="https://tough-hawk-39034.upstash.io";
 // Replace this with your API_TOKEN
 // E.g. AaywASQgOWE4MTVkN2UtODZh...
-const KV_REST_API_TOKEN="AcdZASQgMjRjMjBhZWYtZWY2Ni00MGViLThlMzgtMTMxNWJkYjI5OTM1MWM5YzhmZTc0YWQ2NDYxODgyMGIyNmJlMjQ0ZTQ0OTY=";
+const KV_REST_API_TOKEN="AZh6ASQgMTkzMTQyNTEtMGYzYy00ZWEwLWI4NWUtMWI0ZGZhODE5MWEwNGU3MmQ5MjE5YTQ0NDg1ODg4NDllYzgxYjBmMzhlMWQ=";
 
 const database = createClient({
   url: KV_REST_API_URL,
