@@ -1,1 +1,1 @@
-{"users":[{"userId":1,"email":"hayden.smith11@unsw.edu.au","nameFirst":"Hayden","nameLast":"Smith","numFailedPasswordsSinceLastLogin":0,"numSuccessfulLogins":1,"oldPasswords":[],"ownedQuizzes":[],"password":"ba6eb01f22ec8e58265aeb1cb0c0e6f1ea9bfffc4a92f11bfb9bc34f12c05605"}],"quizzes":[],"userSessions":[{"userId":1,"sessionId":"34ae2deb-5b52-7e29-f1e0-9c5b6110369c"}],"trash":[],"quizCounter":1,"sessions":[]}
+{"users":[],"quizzes":[],"userSessions":[],"trash":[],"quizCounter":1,"sessions":[]}
