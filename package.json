@@ -10,16 +10,19 @@
         "posttest": "npm run cleanup-sync-request || true"
     },
     "dependencies": {
+        "@vercel/kv": "^1.0.1",
         "cors": "^2.8.5",
         "express": "^4.18.0",
+        "guid-typescript": "^1.0.9",
         "http-errors": "^2.0.0",
         "middleware-http-errors": "^0.1.2",
-        "guid-typescript": "^1.0.9",
         "morgan": "^1.10.0",
         "rewire": "^6.0.0",
+        "sync-request": "^6.1.0",
         "ts-node": "^10.7.0",
         "typescript": "^4.6.3",
-        "validator": "^13.11.0"
+        "validator": "^13.11.0",
+        "vercel": "^34.1.1"
     },
     "devDependencies": {
         "@types/cors": "^2.8.12",

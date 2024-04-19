@@ -288,6 +288,7 @@ export function adminQuizQuestionCreate(token: string, quizid: number, questionB
       answers: [],
       thumbnailUrl: questionBody.thumbnailUrl
     };
+
     newQuestion = setupAnswers(newQuestion, questionBody);
 
     validQuiz.questionCounter++;
