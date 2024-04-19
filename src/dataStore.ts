@@ -18,6 +18,7 @@ const requestHelper = (method: HttpVerb, path: string, payload: object) => {
   return JSON.parse(res.body.toString());
 };
 
+
 // YOU SHOULD MODIFY THIS OBJECT ABOVE ONLY
 
 // YOU SHOULDNT NEED TO MODIFY THE FUNCTIONS BELOW IN ITERATION 1
@@ -36,7 +37,29 @@ Example usage
     setData(store)
 */
 
-// Use get() to access the data
+// Using Vercel
+function setData(newData: DataStore) {
+  console.log(newData);
+  requestHelper('PUT', '/data', { data: newData });
+}
+
+const loadData = (): DataStore => {
+  try {
+    const response = requestHelper('GET', '/data', {});
+    return response.data;
+  } catch (err) {
+    console.log('test');
+    return {
+      users: [],
+      quizzes: [],
+      sessions: [],
+      trash: [],
+      userSessions: [],
+      quizCounter: 1
+    }
+  }
+}
+
 let data = loadData();
 
 function getData(): DataStore {
@@ -55,27 +78,6 @@ function getData(): DataStore {
 //   fs.writeFileSync('./database.json', jsonstr);
 // }
 
-// Using Vercel
-function setData(newData: DataStore) {
-  console.log(newData);
-  requestHelper('PUT', '/data', { data: newData });
-}
-
-function loadData(): DataStore {
-  try {
-    const response = requestHelper('GET', '/data', {});
-    return response.data;
-  } catch (err) {
-    return {
-      users: [],
-      quizzes: [],
-      sessions: [],
-      trash: [],
-      userSessions: [],
-      quizCounter: 1
-    }
-  }
-}
 
 export { getData, setData };
 export type { DataStore };
