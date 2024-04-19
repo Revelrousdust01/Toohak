@@ -1,8 +1,9 @@
 import { port, url } from './config.json';
-import request, { HttpVerb } from 'sync-request-curl';
-import type { QuestionBody, Payload } from './interfaces';
+import request, { HttpVerb } from 'sync-request';
+import type { QuestionBody, Payload, DataStore } from './interfaces';
 import { IncomingHttpHeaders } from 'http';
 import HTTPError from 'http-errors';
+//import request, { HttpVerb } from 'sync-request-curl';
 
 const SERVER_URL = `${url}:${port}`;
 const TIMEOUT_MS = 15000;
@@ -351,3 +352,16 @@ export const v1RequestAdminViewQuizSessions = (token: string, quizid: number) =>
     `/v1/admin/quiz/${quizid}/sessions`,
     { }, { token });
 };
+
+
+export const requestGetData = () => {
+  return requestHelper('GET',
+  `/data`,
+  { }, { });
+}
+
+export const requestSendData = (newData: DataStore) => {
+  return requestHelper('PUT',
+  `/data`,
+  {data: newData }, { });
+}

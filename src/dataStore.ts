@@ -1,6 +1,7 @@
 // YOU SHOULD MODIFY THIS OBJECT BELOW ONLY
 import fs from 'fs';
 import type { DataStore } from './interfaces';
+import { requestGetData, requestSendData } from './requests';
 
 // YOU SHOULD MODIFY THIS OBJECT ABOVE ONLY
 
@@ -21,22 +22,27 @@ Example usage
 */
 
 // Use get() to access the data
-let data = loadData();
+// let data = loadData();
 
 function getData(): DataStore {
-  return data;
+  return requestGetData();
+  //return data;
 }
 
-function loadData(): DataStore {
-  const data = fs.readFileSync('./database.json');
-  return JSON.parse(data.toString());
-}
+// If we want to readfrom to a local db
+// function loadData(): DataStore {
+//   const data = fs.readFileSync('./database.json');
+//   return JSON.parse(data.toString());
+// }
 
 // Use set(newData) to pass in the entire data object, with modifications made
 function setData(newData: DataStore) {
-  data = newData;
-  const jsonstr = JSON.stringify(newData);
-  fs.writeFileSync('./database.json', jsonstr);
+  requestSendData(newData)
+
+  // Uncomment for local db
+  // data = newData;
+  // const jsonstr = JSON.stringify(newData);
+  // fs.writeFileSync('./database.json', jsonstr);
 }
 
 export { getData, setData };
