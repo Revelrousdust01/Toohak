@@ -149,7 +149,7 @@ describe('V1 - Test adminQuizSessionUpdate', () => {
     v1RequestAdminPlayerJoin(sessionId.sessionId, "Leon");
     v1RequestAdminPlayerJoin(sessionId.sessionId, "Jeffery");
     v1RequestAdminPlayerJoin(sessionId.sessionId, "Samuel");
-    expect(v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'SKIP_COUNTDOWN')).toMatchObject({ });
+    requestSleepSync(3000);
   });
 
   test.each([

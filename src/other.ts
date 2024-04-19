@@ -1,5 +1,6 @@
 import { setData } from './dataStore';
 import { timers } from './session';
+import { startTimer } from './player';
 
 /**
   * Reset the state of the application back to the start.

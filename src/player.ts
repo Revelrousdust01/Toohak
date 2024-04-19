@@ -3,6 +3,8 @@ import httpError from 'http-errors';
 import { State } from './interfaces';
 import { start } from './session';
 import { adminQuizSessionUpdate } from './session'
+export let startTimer: ReturnType<typeof setTimeout>[] = [];
+
 
 /**
   * Creates a new Guest Player
@@ -34,13 +36,27 @@ export function adminPlayerJoin(sessionId: number, name: string) {
   const autoStartNum = session.autoStartNum;
 
   session.players.push(player);
+  if (session.players.length === autoStartNum) {
+    session.state = State.COUNTDOWN;
+    console.log('hi')
+    startTimer.forEach(timer => clearTimeout(timer));
+    console.log('hihi')
+    startTimer = [];
+    session.atQuestion = session.atQuestion + 1;
+
+    startTimer.push(setTimeout(() => {
+      console.log('hihihi')
+      session.state = State.QUESTION_OPEN;
+      start = Math.floor(Date.now() / 1000);
+
+      startTimer.push(setTimeout(() => {
+        session.state = State.QUESTION_CLOSE;
+      }, session.metadata.questions[session.atQuestion - 1].duration * 1000));
+    }, 3000));
+  }
 
   setData(data);
   
-  if (session.players.length === autoStartNum) {
-    adminQuizSessionUpdate(registered.token, quizId.quizId, sessionId, 'NEXT_QUESTION');
-  }
-
   return { playerId: player.playerId };
 }
 
