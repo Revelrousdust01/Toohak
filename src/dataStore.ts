@@ -17,7 +17,6 @@ import type { DataStore } from './interfaces';
 //   return JSON.parse(response.body.toString());
 // };
 
-
 // YOU SHOULD MODIFY THIS OBJECT ABOVE ONLY
 
 // YOU SHOULDNT NEED TO MODIFY THE FUNCTIONS BELOW IN ITERATION 1
@@ -63,7 +62,6 @@ let data = loadData();
 function getData(): DataStore {
   return data;
 }
-
 
 function loadData(): DataStore {
   const data = fs.readFileSync('./database.json');

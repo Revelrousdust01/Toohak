@@ -12,7 +12,7 @@ import {
 import {
   adminQuizSession, adminQuizSessionUpdate, adminViewQuizSessions
 } from './session';
-import { createClient } from '@vercel/kv';
+// import { createClient } from '@vercel/kv';
 import { clear } from './other';
 import express, { json, Request, Response } from 'express';
 import { echo } from './newecho';
@@ -388,7 +388,7 @@ app.put('/v1/player/:playerid/question/:questionposition/answer', (req: Request,
   res.json(response);
 });
 
-//When using vercel
+// When using vercel
 // app.get('/data', async (req: Request, res: Response) => {
 //   const data = await database.hgetall("data:names");
 //   res.status(200).json(data);
