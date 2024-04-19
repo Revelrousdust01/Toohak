@@ -1,9 +1,9 @@
 // YOU SHOULD MODIFY THIS OBJECT BELOW ONLY
 import fs from 'fs';
 import type { DataStore } from './interfaces';
-import request, { HttpVerb } from 'sync-request';
+// import request, { HttpVerb } from 'sync-request';
 
-//const DEPLOYED_URL = "https://1531-24t1-h16a-crunchie.vercel.app"
+// const DEPLOYED_URL = "https://1531-24t1-h16a-crunchie.vercel.app"
 // const requestHelper = (method: HttpVerb, path: string, payload: object) => {
 //   let json = {};
 //   let qs = {};
