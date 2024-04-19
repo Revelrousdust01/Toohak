@@ -1,9 +1,11 @@
+import { string } from 'yaml/dist/schema/common/string';
 import { QuestionBody } from './interfaces';
 import {
   v1RequestClear, v1RequestAdminAuthRegister, v1RequestAdminPlayerJoin,
   v1RequestAdminQuizCreate, v1RequestAdminQuizQuestionCreate, v1RequestAdminQuizSession,
   v1RequestAdminQuizSessionUpdate, v1RequestAdminPlayerSubmission, v1RequestAdminQuizSessionStatus,
-  requestSleepSync, v1RequestPlayerSendMessage
+  requestSleepSync, v1RequestPlayerSendMessage,
+  v1RequestPlayerSessionMessages
 } from './requests';
 import HTTPError from 'http-errors';
 beforeEach(() => {
@@ -203,7 +205,7 @@ describe('V1 - Test adminPlayerSubmission', () => {
   });
 });
 
-describe('V1 - Test playerSendMessage', () => {
+describe('V1 - Test playerSessionMessage', () => {
   const playerName = 'Joe Mama';
   const firstName = 'Christian';
   const lastName = 'Politis';
@@ -257,5 +259,69 @@ describe('V1 - Test playerSendMessage', () => {
     const session = v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum);
     const player = v1RequestAdminPlayerJoin(session.sessionId, playerName);
     expect(() => v1RequestPlayerSendMessage(player.playerId, invalidMessage)).toThrow(HTTPError[400]);
+  });
+});
+
+
+describe('V1 - Test adminReturnSessionMessages', () => {
+  const firstName = 'Christian';
+  const lastName = 'Politis';
+  const email = 'cpolitis@student.unsw.edu.au';
+  const password = 'a1b2c3d4e5f6';
+  const quizName = 'New Quiz 1';
+  const quizDescription = 'This is the first new quiz';
+  const autoStartNum = 3;
+  const message = 'Hello everyone! Nice to chat.';
+  const secondMessage = 'Hello everyone! Nice to chat...';
+  const playerName = 'Joe Mama';
+  const question: QuestionBody = {
+    question: 'Who is the Monarch of England?',
+    duration: 1,
+    points: 5,
+    answers: [
+      {
+        answer: 'Prince Charles',
+        correct: true
+      },
+      {
+        answer: 'Prince Charless',
+        correct: false
+      }
+    ]
+  };
+
+  test('Valid inputs', () => {
+    const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = v1RequestAdminQuizCreate(user.token, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(user.token, quizId.quizId, question);
+    const session = v1RequestAdminQuizSession(user.token, quizId.quizId, autoStartNum);
+    const player = v1RequestAdminPlayerJoin(session.sessionId, playerName);
+    v1RequestPlayerSendMessage(player.playerId, message)
+    v1RequestPlayerSendMessage(player.playerId, secondMessage)
+    expect(v1RequestPlayerSessionMessages(player.playerId)).toMatchObject({
+      messages: [{
+        messageBody: message,
+        playerId: player.playerId,
+        playerName: playerName,
+        timeSent: expect.any(Number)
+      },
+      {
+        messageBody: secondMessage,
+        playerId: player.playerId,
+        playerName: playerName,
+        timeSent: expect.any(Number)
+      }]
+    });
+  });
+
+  test('If player ID does not exist', () => {
+    const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = v1RequestAdminQuizCreate(user.token, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(user.token, quizId.quizId, question);
+    const session = v1RequestAdminQuizSession(user.token, quizId.quizId, autoStartNum);
+    const player = v1RequestAdminPlayerJoin(session.sessionId, playerName);
+    v1RequestPlayerSendMessage(player.playerId, message)
+    v1RequestPlayerSendMessage(player.playerId, secondMessage)
+    expect(() => v1RequestPlayerSessionMessages(-20)).toThrow(HTTPError[400]);
   });
 });
