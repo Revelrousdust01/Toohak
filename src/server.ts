@@ -10,8 +10,9 @@ import {
   adminQuizThumbnailUpdate
 } from './quiz';
 import {
-  adminQuizSession, adminQuizSessionUpdate, adminViewQuizSessions
+  adminQuizSession, adminQuizSessionUpdate, adminViewQuizSessions, adminQuizSessionStatus
 } from './session';
+// import { createClient } from '@vercel/kv';
 import { clear } from './other';
 import express, { json, Request, Response } from 'express';
 import { echo } from './newecho';
@@ -24,7 +25,7 @@ import sui from 'swagger-ui-express';
 import fs from 'fs';
 import path from 'path';
 import process from 'process';
-import { adminPlayerJoin, adminPlayerSubmission, adminQuestionResult } from './player';
+import { adminPlayerJoin, adminPlayerSubmission, adminQuestionResult, playerSendMessage } from './player';
 
 // Set up web app
 const app = express();
@@ -319,6 +320,13 @@ app.post('/v2/admin/quiz', (req: Request, res: Response) => {
   res.json(response);
 });
 
+app.get('/v1/admin/quiz/:quizid/session/:sessionid', (req: Request, res: Response) => {
+  const token = req.headers.token as string;
+  const response = adminQuizSessionStatus(token, parseInt(req.params.quizid), parseInt(req.params.sessionid));
+
+  res.json(response);
+});
+
 app.delete('/v1/clear', (req: Request, res: Response) => {
   const response = clear();
   res.json(response);
@@ -346,6 +354,24 @@ app.get('/v1/player/:playerid/question/:questionposition/results', (req: Request
   const response = adminQuestionResult(parseInt(req.params.playerid), parseInt(req.params.questionposition));
   res.json(response);
 });
+
+app.post('/v1/player/:playerid/chat', (req: Request, res: Response) => {
+  const { messageBody } = req.body;
+  const response = playerSendMessage(parseInt(req.params.playerid), messageBody);
+  res.json(response);
+});
+
+// When using vercel
+// app.get('/data', async (req: Request, res: Response) => {
+//   const data = await database.hgetall("data:names");
+//   res.status(200).json(data);
+// });
+
+// app.put('/data', async (req: Request, res: Response) => {
+//   const { data } = req.body;
+//   await database.hset("data:names", { data });
+//   return res.status(200).json({});
+// });
 
 // ====================================================================
 //  ================= WORK IS DONE ABOVE THIS LINE ===================
@@ -379,3 +405,17 @@ const server = app.listen(PORT, HOST, () => {
 process.on('SIGINT', () => {
   server.close(() => console.log('Shutting down server gracefully.'));
 });
+
+// When using vercel
+
+// Replace this with your API_URL
+// E.g. https://large-poodle-44208.kv.vercel-storage.com
+// const KV_REST_API_URL="https://tough-hawk-39034.upstash.io";
+// // Replace this with your API_TOKEN
+// // E.g. AaywASQgOWE4MTVkN2UtODZh...
+// const KV_REST_API_TOKEN="AZh6ASQgMTkzMTQyNTEtMGYzYy00ZWEwLWI4NWUtMWI0ZGZhODE5MWEwNGU3MmQ5MjE5YTQ0NDg1ODg4NDllYzgxYjBmMzhlMWQ=";
+
+// const database = createClient({
+//   url: KV_REST_API_URL,
+//   token: KV_REST_API_TOKEN,
+// });

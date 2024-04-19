@@ -1,7 +1,8 @@
 import { getData, setData } from './dataStore';
 import httpError from 'http-errors';
 import { State } from './interfaces';
-import { start } from './session';
+import { start, setStart } from './session';
+export let startTimer: ReturnType<typeof setTimeout>[] = [];
 
 /**
   * Creates a new Guest Player
@@ -30,8 +31,27 @@ export function adminPlayerJoin(sessionId: number, name: string) {
     playerName: name,
     playerScore: 0
   };
+  const autoStartNum = session.autoStartNum;
 
   session.players.push(player);
+
+  setData(data);
+
+  if (session.players.length === autoStartNum) {
+    session.state = State.QUESTION_COUNTDOWN;
+    startTimer.forEach(timer => clearTimeout(timer));
+    startTimer = [];
+    session.atQuestion = session.atQuestion + 1;
+
+    startTimer.push(setTimeout(() => {
+      session.state = State.QUESTION_OPEN;
+      setStart(Math.floor(Date.now() / 1000));
+      startTimer.push(setTimeout(() => {
+        session.state = State.QUESTION_CLOSE;
+      }, session.metadata.questions[session.atQuestion - 1].duration * 1000));
+    }, 3000));
+  }
+
   setData(data);
 
   return { playerId: player.playerId };
@@ -40,7 +60,6 @@ export function adminPlayerJoin(sessionId: number, name: string) {
 export function adminPlayerSubmission(playerid: number, questionposition: number, answerIds: number[]) {
   const data = getData();
   const session = data.sessions.find(session => session.players.find(player => player.playerId === playerid));
-  // console.log(session.metadata.questions.find(question => question.questionId === questionposition));
   if (!session) {
     throw httpError(400, 'Player does not exist.');
   }
@@ -81,6 +100,18 @@ export function adminPlayerSubmission(playerid: number, questionposition: number
   return { };
 }
 
+/**
+ * Retrieves and calculates results for a specific question within a quiz session.
+ *
+ * @param {number} playerid - ID of the player requesting the results.
+ * @param {number} questionposition - The position of the question within the quiz session.
+ *
+ * @returns {object} - Returns details including question ID, a list of players who answered the last question correctly,
+ * average time taken to answer, and the percentage of correct answers.
+ *
+ * @throws {HttpError} - Throws error if validation fails.
+ */
+
 export function adminQuestionResult(playerid: number, questionposition: number) {
   const data = getData();
   const session = data.sessions.find(session => session.players.find(player => player.playerId === playerid));
@@ -110,7 +141,7 @@ export function adminQuestionResult(playerid: number, questionposition: number) 
     const answerIsCorrect = question.answers.some(answer => answer.answerId === lastAnswerId && answer.correct);
     if (answerIsCorrect) {
       const player = session.players.find(p => p.playerId === attempt.playerId);
-        correctPlayers.push(player.playerName);
+      correctPlayers.push(player.playerName);
     }
   });
 
@@ -124,4 +155,41 @@ export function adminQuestionResult(playerid: number, questionposition: number) 
     averageAnswerTime: question.averageAnswerTime,
     percentCorrect: question.percentCorrect
   };
+}
+
+/**
+ * Sends a chat message to all players in the session.
+ *
+ * @param {number} playerid - ID of the player sending the message.
+ * @param {string} messageBody - The chat message content.
+ *
+ * @returns {object} - An empty object when message is sent.
+ *
+ * @throws {HttpError} - Throws error if validation fails.
+ */
+
+export function playerSendMessage(playerid: number, messageBody: string) {
+  const data = getData();
+
+  const session = data.sessions.find(session => session.players.some(player => player.playerId === playerid));
+
+  if (!session) {
+    throw httpError(400, 'Player ID does not refer to a valid player in any session.');
+  }
+  if (messageBody.length < 1 || messageBody.length > 100) {
+    throw httpError(400, 'Message body must be between 1 and 100 characters.');
+  }
+
+  const player = session.players.find(player => player.playerId === playerid);
+
+  session.messages.push({
+    playerId: playerid,
+    messageBody: messageBody,
+    playerName: player.playerName,
+    timeSent: Date.now()
+  });
+
+  setData(data);
+
+  return {};
 }
