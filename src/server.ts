@@ -13,7 +13,7 @@ import {
   adminQuizSession, adminQuizSessionUpdate, adminViewQuizSessions, adminQuizSessionStatus
 } from './session';
 import {
-  adminPlayerJoin, adminPlayerSubmission, adminGuestPlayerStatus
+  adminPlayerJoin, adminPlayerSubmission, adminGuestPlayerStatus, playerSendMessage
 } from './player';
 import { clear } from './other';
 import express, { json, Request, Response } from 'express';
@@ -27,7 +27,6 @@ import sui from 'swagger-ui-express';
 import fs from 'fs';
 import path from 'path';
 import process from 'process';
-import { adminPlayerJoin, adminPlayerSubmission, playerSendMessage } from './player';
 
 // Set up web app
 const app = express();

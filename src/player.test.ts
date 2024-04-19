@@ -1,7 +1,7 @@
 import { QuestionBody } from './interfaces';
 import {
   v1RequestClear, v1RequestAdminAuthRegister, v1RequestAdminPlayerJoin,
-  v1RequestAdminQuizCreate, v2RequestAdminQuizQuestionCreate, v1RequestAdminQuizQuestionCreate, v1RequestAdminQuizSession,
+  v1RequestAdminQuizCreate, v2RequestAdminQuizCreate, v2RequestAdminQuizQuestionCreate, v1RequestAdminQuizQuestionCreate, v1RequestAdminQuizSession,
   v1RequestAdminQuizSessionUpdate, v1RequestAdminPlayerSubmission, v1RequestAdminQuizSessionStatus, v1RequestAdminGuestPlayerStatus,
   v1RequestAdminQuizThumbnailUpdate, requestSleepSync, v1RequestPlayerSendMessage
 } from './requests';
@@ -116,6 +116,21 @@ describe('V1 - Test adminPlayerSubmission', () => {
       }
     ]
   };
+  const question2: QuestionBody = {
+    question: 'Who is my sunshine?',
+    duration: 1,
+    points: 5,
+    answers: [
+      {
+        answer: 'Prince Charles',
+        correct: true
+      },
+      {
+        answer: 'Prince Charless',
+        correct: false
+      }
+    ]
+  };
 
   test('Valid inputs', () => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
@@ -164,6 +179,7 @@ describe('V1 - Test adminPlayerSubmission', () => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quiz = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
     v1RequestAdminQuizQuestionCreate(register.token as string, quiz.quizId as number, question);
+    v1RequestAdminQuizQuestionCreate(register.token as string, quiz.quizId as number, question2);
     const session = v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum);
     const player = v1RequestAdminPlayerJoin(session.sessionId, playerName);
     v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'NEXT_QUESTION');
@@ -326,7 +342,7 @@ describe('V1 - Test adminGuestPlayerStatus', () => {
     expect(() => v1RequestAdminGuestPlayerStatus(invalidPlayerId)).toThrow(HTTPError[400]);
   });
 });
-    
+
 describe('V1 - Test playerSendMessage', () => {
   const playerName = 'Joe Mama';
   const firstName = 'Christian';
