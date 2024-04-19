@@ -25,7 +25,7 @@ import sui from 'swagger-ui-express';
 import fs from 'fs';
 import path from 'path';
 import process from 'process';
-import { adminPlayerJoin, adminPlayerSubmission, adminQuestionResult, playerSendMessage } from './player';
+import { adminPlayerJoin, adminPlayerSubmission, adminQuestionResult, playerSendMessage, playerSessionMessages } from './player';
 
 // Set up web app
 const app = express();
@@ -358,6 +358,11 @@ app.get('/v1/player/:playerid/question/:questionposition/results', (req: Request
 app.post('/v1/player/:playerid/chat', (req: Request, res: Response) => {
   const { messageBody } = req.body;
   const response = playerSendMessage(parseInt(req.params.playerid), messageBody);
+  res.json(response);
+});
+
+app.get('/v1/player/:playerid/chat', (req: Request, res: Response) => {
+  const response = playerSessionMessages(parseInt(req.params.playerid));
   res.json(response);
 });
 
