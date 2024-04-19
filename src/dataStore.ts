@@ -12,7 +12,6 @@ const requestHelper = (method: HttpVerb, path: string, payload: object) => {
   } else {
     json = payload;
   }
-
   const response = request(method, DEPLOYED_URL + path, { qs, json, timeout: 20000 });
   return JSON.parse(response.body.toString());
 };
@@ -61,6 +60,11 @@ let data = loadData();
 function getData(): DataStore {
   return data;
 }
+
+// function loadData(): DataStore {
+//   const data = fs.readFileSync('./database.json');
+//   return JSON.parse(data.toString());
+// }
 
 // function loadData(): DataStore {
 //   const data = fs.readFileSync('./database.json');

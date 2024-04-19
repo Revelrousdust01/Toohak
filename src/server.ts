@@ -433,7 +433,7 @@ process.on('SIGINT', () => {
   server.close(() => console.log('Shutting down server gracefully.'));
 });
 
-// // When using vercel
+// When using vercel
 
 // Replace this with your API_URL
 // E.g. https://large-poodle-44208.kv.vercel-storage.com
