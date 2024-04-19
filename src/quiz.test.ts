@@ -1581,7 +1581,7 @@ describe('V1 - Test adminQuizQuestionDelete', () => {
 
   test.each([
     { invalidQuestionId: null },
-    { invalidQuestionId: 0 },
+    { invalidQuestionId: -1 },
     { invalidQuestionId: 150 },
   ])("Question ID does not refer to a valid question within the quiz. '$invalidQuestionId'", ({ invalidQuestionId }) => {
     const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);
@@ -1649,7 +1649,7 @@ describe('V2 - Test adminQuizQuestionDelete', () => {
 
   test.each([
     { invalidQuestionId: null },
-    { invalidQuestionId: 0 },
+    { invalidQuestionId: -1 },
     { invalidQuestionId: 150 },
   ])("Question ID does not refer to a valid question within the quiz. '$invalidQuestionId'", ({ invalidQuestionId }) => {
     const user = v1RequestAdminAuthRegister(email, password, lastName, firstName);

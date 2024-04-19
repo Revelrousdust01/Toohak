@@ -339,6 +339,24 @@ export const v1RequestAdminPlayerSubmission = (playerid: number, questionpositio
     { answerIds: answerIds });
 };
 
+export const v1RequestAdminGuestPlayerStatus = (playerid: number) => {
+  return requestHelper('GET',
+    `/v1/player/${playerid}`,
+    { });
+};
+
+export const v1RequestAdminQuestionResult = (playerid: number, questionposition: number) => {
+  return requestHelper('GET',
+    `/v1/player/${playerid}/question/${questionposition}/results`,
+    { });
+};
+
+export const v1RequestAdminQuizSessionStatus = (token: string, quizid: number, sessionid: number) => {
+  return requestHelper('GET',
+    `/v1/admin/quiz/${quizid}/session/${sessionid}`,
+    { }, { token });
+};
+
 export function requestSleepSync(ms: number) {
   const startTime = new Date().getTime();
   while (new Date().getTime() - startTime < ms) {
@@ -350,4 +368,22 @@ export const v1RequestAdminViewQuizSessions = (token: string, quizid: number) =>
   return requestHelper('GET',
     `/v1/admin/quiz/${quizid}/sessions`,
     { }, { token });
+};
+
+export const v1RequestPlayerSendMessage = (playerid: number, messageBody: string) => {
+  return requestHelper('POST',
+    `/v1/player/${playerid}/chat`,
+    { messageBody: messageBody });
+};
+
+export const v1RequestPlayerQuestionInformation = (playerid: number, questionposition: number) => {
+  return requestHelper('GET',
+    `/v1/player/${playerid}/question/${questionposition}`,
+    { });
+};
+
+export const v1RequestPlayerSessionMessages = (playerid: number) => {
+  return requestHelper('GET',
+    `/v1/player/${playerid}/chat`,
+    { playerid: playerid });
 };

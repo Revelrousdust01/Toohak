@@ -47,6 +47,23 @@ export interface QuestionBody {
     thumbnailUrl?: string
 }
 
+export interface SessionStatus {
+  state: State,
+  atQuestion: number,
+  players: string[]
+  metadata: {
+    quizId: number,
+    name: string,
+    timeCreated: number,
+    timeLastEdited: number,
+    description: string,
+    numQuestions: number,
+    questions: Question[];
+    duration: number,
+    thumbnailUrl: string
+  }
+}
+
 export interface Quiz {
     quizId: number,
     description: string,
@@ -57,6 +74,18 @@ export interface Quiz {
     timeLastEdited: number,
     questionCounter: number,
     questions: Question[]
+}
+
+export interface QuizSession {
+  quizId: number;
+  name: string;
+  timeCreated: number;
+  timeLastEdited: number;
+  description: string;
+  numQuestions: number;
+  questions: QuizQuestionSession[];
+  duration: number;
+  thumbnail: string;
 }
 
 export interface QuizArray {
@@ -117,6 +146,10 @@ export interface ErrorObject {
     error: string;
 }
 
+export interface SessionId {
+    sessionId: number;
+}
+
 export interface Payload {
     [key: string]: unknown;
 }
@@ -141,18 +174,6 @@ export interface QuizQuestionSession {
     attempts: Attempt[];
 }
 
-export interface QuizSession {
-    quizId: number;
-    name: string;
-    timeCreated: number;
-    timeLastEdited: number;
-    description: string;
-    numQuestions: number;
-    questions: QuizQuestionSession[];
-    duration: number;
-    thumbnail: string;
-}
-
 export enum State {
     LOBBY = 'LOBBY',
     QUESTION_COUNTDOWN = 'QUESTION_COUNTDOWN',
@@ -174,6 +195,12 @@ export interface Player {
     playerId: number;
     playerName: string;
     playerScore: number;
+}
+
+export interface PlayerStatus {
+    state: State,
+    numQuestions: number,
+    atQuestion: number
 }
 
 export interface Session {
