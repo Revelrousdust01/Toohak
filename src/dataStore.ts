@@ -66,11 +66,6 @@ function getData(): DataStore {
 //   return JSON.parse(data.toString());
 // }
 
-// function loadData(): DataStore {
-//   const data = fs.readFileSync('./database.json');
-//   return JSON.parse(data.toString());
-// }
-
 // // Use set(newData) to pass in the entire data object, with modifications made
 // function setData(newData: DataStore) {
 //   data = newData;
