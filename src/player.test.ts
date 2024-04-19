@@ -1,7 +1,8 @@
 import { QuestionBody } from './interfaces';
-import { 
-  v1RequestClear, v1RequestAdminAuthRegister, v1RequestAdminPlayerJoin, v1RequestAdminQuizCreate, v1RequestAdminQuizQuestionCreate, 
-  v1RequestAdminQuizSession, v1RequestAdminQuizSessionUpdate, v1RequestAdminPlayerSubmission, v1RequestAdminGuestPlayerStatus
+import {
+  v1RequestClear, v1RequestAdminAuthRegister, v1RequestAdminPlayerJoin, v1RequestAdminQuizCreate, v2RequestAdminQuizCreate, v1RequestAdminQuizQuestionCreate,
+  v2RequestAdminQuizQuestionCreate, v1RequestAdminQuizSession, v1RequestAdminQuizSessionUpdate, v1RequestAdminPlayerSubmission, v1RequestAdminGuestPlayerStatus,
+  requestSleepSync, v1RequestAdminQuizThumbnailUpdate
 } from './requests';
 import HTTPError from 'http-errors';
 beforeEach(() => {
@@ -12,7 +13,7 @@ afterAll(() => {
   v1RequestClear();
 });
 
-//adminPlayerJoin
+// adminPlayerJoin
 describe('V1 - Test adminPlayerJoin', () => {
   const playerName = 'Joe Mama';
   const firstName = 'Christian';
@@ -73,7 +74,7 @@ describe('V1 - Test adminPlayerJoin', () => {
   });
 });
 
-//adminPlayerSubmission
+// adminPlayerSubmission
 describe('V1 - Test adminPlayerSubmission', () => {
   const playerName = 'Joe Mama';
   const firstName = 'Christian';
@@ -188,7 +189,7 @@ describe('V1 - Test adminPlayerSubmission', () => {
   });
 });
 
-//adminGuestPlayerStatus
+// adminGuestPlayerStatus
 describe('V1 - Test adminGuestPlayerStatus', () => {
   const firstName = 'Samuel';
   const lastName = 'Huang';
@@ -240,8 +241,8 @@ describe('V1 - Test adminGuestPlayerStatus', () => {
     const playerId = v1RequestAdminPlayerJoin(sessionId.sessionId, playerName);
     expect(v1RequestAdminGuestPlayerStatus(playerId.playerId)).toMatchObject({
       state: 'LOBBY',
-      numQuestions: '1',
-      atQuestions: '0'
+      numQuestions: 1,
+      atQuestion: 0
     });
   });
 
@@ -255,8 +256,8 @@ describe('V1 - Test adminGuestPlayerStatus', () => {
     v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'NEXT_QUESTION');
     expect(v1RequestAdminGuestPlayerStatus(playerId.playerId)).toMatchObject({
       state: 'QUESTION_COUNTDOWN',
-      numQuestions: '1',
-      atQuestions: '1'
+      numQuestions: 1,
+      atQuestion: 1
     });
   });
 
@@ -264,7 +265,7 @@ describe('V1 - Test adminGuestPlayerStatus', () => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quizId = v2RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
     v2RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question1);
-    v2RequestAdminQuizQuestionCreate(registered.token as string, quizId,quizId as number, question2);
+    v2RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question2);
     v1RequestAdminQuizThumbnailUpdate(registered.token as string, quizId.quizId as number, 'http://google.com/some/image/path.jpg');
     const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
     const playerId = v1RequestAdminPlayerJoin(sessionId.sessionId, playerName);
@@ -274,8 +275,8 @@ describe('V1 - Test adminGuestPlayerStatus', () => {
     v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'NEXT_QUESTION');
     expect(v1RequestAdminGuestPlayerStatus(playerId.playerId)).toMatchObject({
       state: 'QUESTION_COUNTDOWN',
-      numQuestions: '2',
-      atQuestions: '2'
+      numQuestions: 2,
+      atQuestion: 2
     });
   });
 
@@ -283,7 +284,7 @@ describe('V1 - Test adminGuestPlayerStatus', () => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quizId = v2RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
     v2RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question1);
-    v2RequestAdminQuizQuestionCreate(registered.token as string, quizId,quizId as number, question2);
+    v2RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question2);
     v1RequestAdminQuizThumbnailUpdate(registered.token as string, quizId.quizId as number, 'http://google.com/some/image/path.jpg');
     const sessionId = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
     const playerId = v1RequestAdminPlayerJoin(sessionId.sessionId, playerName);
@@ -292,8 +293,8 @@ describe('V1 - Test adminGuestPlayerStatus', () => {
     v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, sessionId.sessionId, 'END');
     expect(v1RequestAdminGuestPlayerStatus(playerId.playerId)).toMatchObject({
       state: 'END',
-      numQuestions: '2',
-      atQuestions: '0'
+      numQuestions: 2,
+      atQuestion: 0
     });
   });
 
@@ -301,7 +302,7 @@ describe('V1 - Test adminGuestPlayerStatus', () => {
     { invalidPlayerId: -1 },
     { invalidPlayerId: 0 },
     { invalidPlayerId: null },
-  ]) ('Player Id does not exist', ({ invalidPlayerId }) => {
+  ])('Player Id does not exist', ({ invalidPlayerId }) => {
     const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
     const quizId = v2RequestAdminQuizCreate(registered.token as string, quizName, quizDescription);
     v2RequestAdminQuizQuestionCreate(registered.token as string, quizId.quizId as number, question1);

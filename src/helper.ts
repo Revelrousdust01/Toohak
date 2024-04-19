@@ -1,5 +1,5 @@
 import { getData } from './dataStore';
-import { type ErrorObject, type User, type Quiz, type QuestionBody, type DataStore, type Question, type Answer, State, validActionType, Action } from './interfaces';
+import { type ErrorObject, type User, type Quiz, type QuestionBody, type DataStore, type Question, type Answer, State, validActionType, Action, type Session } from './interfaces';
 import validator from 'validator';
 import httpError from 'http-errors';
 
@@ -160,7 +160,6 @@ export function setHash(password: string): string {
   * @returns { { error: } } - Returns object with error when quizid is invalid
   * @returns { } - Returns empty object if quizid is valid
 */
-
 export function validQuizId(quizid: number, user: User, data: DataStore): ErrorObject | object {
   const quizIndex = data.quizzes.findIndex(quizzes => quizzes.quizId === quizid);
   const trashedQuizIndex = data.trash.findIndex(quizzes => quizzes.quizId === quizid);
@@ -180,7 +179,6 @@ export function validQuizId(quizid: number, user: User, data: DataStore): ErrorO
   *
   * @returns { User } - Returns the user within the correct session when the token is valid
 */
-
 export function validToken(token: string, data: DataStore): User {
   const session = data.userSessions.find(session => session.sessionId === token);
   if (!session) { throw httpError(401, 'Token is empty or invalid.'); }
@@ -279,13 +277,29 @@ export function updateQuestion(question: Question, questionBody: QuestionBody, v
 }
 
 /**
+ * Player validator
+ *
+ * @param playerid - Player identification of player
+ * @param {data} DataStore
+ *
+ * @returns { { error: } } - Returns object with error when playerId is invalid
+ * @returns {Session} - Returns session of player when playerId is valid
+ */
+export function validPlayer(playerid: number, data: DataStore): Session {
+  const session = data.sessions.find(session => session.players.find(player => player.playerId === playerid));
+  if (!session) {
+    throw httpError(400, 'Player does not exist.');
+  }
+  return session;
+}
+
+/**
   * Passes the specified amount of time
   *
   * @param {number} ms - ms needed to be passed
   *
   * @returns
 */
-
 export function validAction(sessionId: number, action: string, data: DataStore): validActionType {
   const session = data.sessions.find(session => session.quizSessionId === sessionId);
   switch (session.state) {

@@ -1,7 +1,8 @@
 import { getData, setData } from './dataStore';
 import httpError from 'http-errors';
-import { State } from './interfaces';
+import { State, PlayerStatus } from './interfaces';
 import { start } from './session';
+import { validPlayer } from './helper';
 
 /**
   * Creates a new Guest Player
@@ -38,10 +39,7 @@ export function adminPlayerJoin(sessionId: number, name: string) {
 
 export function adminPlayerSubmission(playerid: number, questionposition: number, answerIds: number[]) {
   const data = getData();
-  const session = data.sessions.find(session => session.players.find(player => player.playerId === playerid));
-  if (!session) {
-    throw httpError(400, 'Player does not exist.');
-  }
+  const session = validPlayer(playerid, data);
   if (session.metadata.numQuestions < questionposition || questionposition < 1) {
     throw httpError(400, 'Question position is invalid.');
   }
@@ -76,4 +74,22 @@ export function adminPlayerSubmission(playerid: number, questionposition: number
   setData(data);
 
   return { };
+}
+
+/**
+ * Get the status of a guest player that has already joined a session
+ *
+ * @param playerid
+ *
+ * @return {PlayerStatus} - returns an object containing player status
+ */
+export function adminGuestPlayerStatus(playerid: number): PlayerStatus {
+  const data = getData();
+  const session = validPlayer(playerid, data);
+
+  return {
+    state: session.state,
+    numQuestions: session.metadata.numQuestions,
+    atQuestion: session.atQuestion
+  };
 }
