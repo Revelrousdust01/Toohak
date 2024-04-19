@@ -357,3 +357,9 @@ export const v1RequestAdminViewQuizSessions = (token: string, quizid: number) =>
     `/v1/admin/quiz/${quizid}/sessions`,
     { }, { token });
 };
+
+export const v1RequestPlayerSendMessage = (playerid: number, messageBody: string) => {
+  return requestHelper('POST',
+    `/v1/player/${playerid}/chat`,
+    { messageBody: messageBody });
+};
