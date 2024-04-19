@@ -3,7 +3,9 @@ import {
   v1RequestClear, v1RequestAdminAuthRegister, v1RequestAdminPlayerJoin,
   v1RequestAdminQuizCreate, v2RequestAdminQuizCreate, v2RequestAdminQuizQuestionCreate, v1RequestAdminQuizQuestionCreate, v1RequestAdminQuizSession,
   v1RequestAdminQuizSessionUpdate, v1RequestAdminPlayerSubmission, v1RequestAdminQuizSessionStatus, v1RequestAdminGuestPlayerStatus,
-  v1RequestAdminQuizThumbnailUpdate, requestSleepSync, v1RequestPlayerSendMessage, v1RequestPlayerSessionMessages, v1RequestAdminQuestionResult
+  v1RequestAdminQuizThumbnailUpdate, requestSleepSync, v1RequestPlayerSendMessage, v1RequestAdminQuestionResult,
+  v1RequestPlayerSessionMessages,
+  v1RequestPlayerQuestionInformation
 } from './requests';
 import HTTPError from 'http-errors';
 beforeEach(() => {
@@ -42,16 +44,16 @@ describe('V1 - Test adminPlayerJoin', () => {
 
   test('Valid inputs', () => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const quiz = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
-    v1RequestAdminQuizQuestionCreate(register.token as string, quiz.quizId as number, question);
+    const quiz = v1RequestAdminQuizCreate(register.token, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(register.token, quiz.quizId, question);
     const session = v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum);
     expect(v1RequestAdminPlayerJoin(session.sessionId, playerName)).toMatchObject({ playerId: expect.any(Number) });
   });
 
   test('Name of user entered is not unique (compared to other users who have already joined)', () => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const quiz = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
-    v1RequestAdminQuizQuestionCreate(register.token as string, quiz.quizId as number, question);
+    const quiz = v1RequestAdminQuizCreate(register.token, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(register.token, quiz.quizId, question);
     const session = v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum);
     v1RequestAdminPlayerJoin(session.sessionId, playerName);
     expect(() => v1RequestAdminPlayerJoin(session.sessionId, playerName)).toThrow(HTTPError[400]);
@@ -59,16 +61,16 @@ describe('V1 - Test adminPlayerJoin', () => {
 
   test('Session Id does not refer to a valid session', () => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const quiz = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
-    v1RequestAdminQuizQuestionCreate(register.token as string, quiz.quizId as number, question);
+    const quiz = v1RequestAdminQuizCreate(register.token, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(register.token, quiz.quizId, question);
     v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum);
     expect(() => v1RequestAdminPlayerJoin(-1, playerName)).toThrow(HTTPError[400]);
   });
 
   test('Session is not in LOBBY state', () => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const quiz = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
-    v1RequestAdminQuizQuestionCreate(register.token as string, quiz.quizId as number, question);
+    const quiz = v1RequestAdminQuizCreate(register.token, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(register.token, quiz.quizId, question);
     const session = v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum);
     v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'NEXT_QUESTION');
     expect(() => v1RequestAdminPlayerJoin(session.sessionId, playerName)).toThrow(HTTPError[400]);
@@ -134,41 +136,41 @@ describe('V1 - Test adminPlayerSubmission', () => {
 
   test('Valid inputs', () => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const quiz = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
-    v1RequestAdminQuizQuestionCreate(register.token as string, quiz.quizId as number, question);
+    const quiz = v1RequestAdminQuizCreate(register.token, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(register.token, quiz.quizId, question);
     const session = v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum);
     const player = v1RequestAdminPlayerJoin(session.sessionId, playerName);
     v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'NEXT_QUESTION');
-    v1RequestAdminQuizSessionUpdate(register.token as string, quiz.quizId as number, session.sessionId, 'SKIP_COUNTDOWN');
+    v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'SKIP_COUNTDOWN');
     expect(v1RequestAdminPlayerSubmission(player.playerId, 1, answerIds)).toMatchObject({ });
   });
 
   test('If player ID does not exist', () => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const quiz = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
-    v1RequestAdminQuizQuestionCreate(register.token as string, quiz.quizId as number, question);
+    const quiz = v1RequestAdminQuizCreate(register.token, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(register.token, quiz.quizId, question);
     const session = v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum);
     v1RequestAdminPlayerJoin(session.sessionId, playerName);
     v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'NEXT_QUESTION');
-    v1RequestAdminQuizSessionUpdate(register.token as string, quiz.quizId as number, session.sessionId, 'SKIP_COUNTDOWN');
+    v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'SKIP_COUNTDOWN');
     expect(() => v1RequestAdminPlayerSubmission(-10, 1, answerIds)).toThrow(HTTPError[400]);
   });
 
   test('If question position is not valid for the session this player is in', () => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const quiz = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
-    v1RequestAdminQuizQuestionCreate(register.token as string, quiz.quizId as number, question);
+    const quiz = v1RequestAdminQuizCreate(register.token, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(register.token, quiz.quizId, question);
     const session = v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum);
     const player = v1RequestAdminPlayerJoin(session.sessionId, playerName);
     v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'NEXT_QUESTION');
-    v1RequestAdminQuizSessionUpdate(register.token as string, quiz.quizId as number, session.sessionId, 'SKIP_COUNTDOWN');
+    v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'SKIP_COUNTDOWN');
     expect(() => v1RequestAdminPlayerSubmission(player.playerId, -10, answerIds)).toThrow(HTTPError[400]);
   });
 
   test('Session is not in QUESTION_OPEN state', () => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const quiz = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
-    v1RequestAdminQuizQuestionCreate(register.token as string, quiz.quizId as number, question);
+    const quiz = v1RequestAdminQuizCreate(register.token, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(register.token, quiz.quizId, question);
     const session = v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum);
     const player = v1RequestAdminPlayerJoin(session.sessionId, playerName);
     v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'NEXT_QUESTION');
@@ -183,40 +185,40 @@ describe('V1 - Test adminPlayerSubmission', () => {
     const session = v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum);
     const player = v1RequestAdminPlayerJoin(session.sessionId, playerName);
     v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'NEXT_QUESTION');
-    v1RequestAdminQuizSessionUpdate(register.token as string, quiz.quizId as number, session.sessionId, 'SKIP_COUNTDOWN');
+    v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'SKIP_COUNTDOWN');
     expect(() => v1RequestAdminPlayerSubmission(player.playerId, 2, answerIds)).toThrow(HTTPError[400]);
   });
 
   test('Answer IDs are not valid for this particular question', () => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const quiz = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
-    v1RequestAdminQuizQuestionCreate(register.token as string, quiz.quizId as number, question);
+    const quiz = v1RequestAdminQuizCreate(register.token, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(register.token, quiz.quizId, question);
     const session = v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum);
     const player = v1RequestAdminPlayerJoin(session.sessionId, playerName);
     v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'NEXT_QUESTION');
-    v1RequestAdminQuizSessionUpdate(register.token as string, quiz.quizId as number, session.sessionId, 'SKIP_COUNTDOWN');
+    v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'SKIP_COUNTDOWN');
     expect(() => v1RequestAdminPlayerSubmission(player.playerId, 1, [10001, 10002])).toThrow(HTTPError[400]);
   });
 
   test('There are duplicate answer IDs provided', () => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const quiz = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
-    v1RequestAdminQuizQuestionCreate(register.token as string, quiz.quizId as number, question);
+    const quiz = v1RequestAdminQuizCreate(register.token, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(register.token, quiz.quizId, question);
     const session = v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum);
     const player = v1RequestAdminPlayerJoin(session.sessionId, playerName);
     v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'NEXT_QUESTION');
-    v1RequestAdminQuizSessionUpdate(register.token as string, quiz.quizId as number, session.sessionId, 'SKIP_COUNTDOWN');
+    v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'SKIP_COUNTDOWN');
     expect(() => v1RequestAdminPlayerSubmission(player.playerId, 1, [1, 1])).toThrow(HTTPError[400]);
   });
 
   test('Less than 1 answer ID was submitted', () => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const quiz = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
-    v1RequestAdminQuizQuestionCreate(register.token as string, quiz.quizId as number, question);
+    const quiz = v1RequestAdminQuizCreate(register.token, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(register.token, quiz.quizId, question);
     const session = v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum);
     const player = v1RequestAdminPlayerJoin(session.sessionId, playerName);
     v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'NEXT_QUESTION');
-    v1RequestAdminQuizSessionUpdate(register.token as string, quiz.quizId as number, session.sessionId, 'SKIP_COUNTDOWN');
+    v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'SKIP_COUNTDOWN');
     expect(() => v1RequestAdminPlayerSubmission(player.playerId, 1, [])).toThrow(HTTPError[400]);
   });
 });
@@ -606,8 +608,8 @@ describe('V1 - Test playerSendMessage', () => {
 
   test('Valid inputs', () => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const quiz = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
-    v1RequestAdminQuizQuestionCreate(register.token as string, quiz.quizId as number, question);
+    const quiz = v1RequestAdminQuizCreate(register.token, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(register.token, quiz.quizId, question);
     const session = v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum);
     const player = v1RequestAdminPlayerJoin(session.sessionId, playerName);
     expect(v1RequestPlayerSendMessage(player.playerId, message)).toMatchObject({});
@@ -615,8 +617,8 @@ describe('V1 - Test playerSendMessage', () => {
 
   test('If player ID does not exist', () => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const quiz = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
-    v1RequestAdminQuizQuestionCreate(register.token as string, quiz.quizId as number, question);
+    const quiz = v1RequestAdminQuizCreate(register.token, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(register.token, quiz.quizId, question);
     const session = v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum);
     v1RequestAdminPlayerJoin(session.sessionId, playerName);
     expect(() => v1RequestPlayerSendMessage(-10, message)).toThrow(HTTPError[400]);
@@ -627,8 +629,8 @@ describe('V1 - Test playerSendMessage', () => {
     { invalidMessage: 'A'.repeat(101) },
   ])("Quiz name is less than 1 character or more than 100 characters: '$invalidMessage'", ({ invalidMessage }) => {
     const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
-    const quiz = v1RequestAdminQuizCreate(register.token as string, quizName, quizDescription);
-    v1RequestAdminQuizQuestionCreate(register.token as string, quiz.quizId as number, question);
+    const quiz = v1RequestAdminQuizCreate(register.token, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(register.token, quiz.quizId, question);
     const session = v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum);
     const player = v1RequestAdminPlayerJoin(session.sessionId, playerName);
     expect(() => v1RequestPlayerSendMessage(player.playerId, invalidMessage)).toThrow(HTTPError[400]);
@@ -696,5 +698,124 @@ describe('V1 - Test adminReturnSessionMessages', () => {
     v1RequestPlayerSendMessage(player.playerId, message);
     v1RequestPlayerSendMessage(player.playerId, secondMessage);
     expect(() => v1RequestPlayerSessionMessages(-20)).toThrow(HTTPError[400]);
+  });
+});
+
+describe('V1 - Test playerQuestionInformation', () => {
+  const playerName = 'Joe Mama';
+  const firstName = 'Christian';
+  const lastName = 'Politis';
+  const email = 'cpolitis@student.unsw.edu.au';
+  const password = 'a1b2c3d4e5f6';
+  const quizName = 'New Quiz';
+  const quizDescription = 'This is a new quiz';
+  const autoStartNum = 3;
+  const question: QuestionBody = {
+    question: 'Who is the Monarch of England?',
+    duration: 1,
+    points: 5,
+    answers: [
+      {
+        answer: 'Prince Charles',
+        correct: true
+      },
+      {
+        answer: 'Prince Charless',
+        correct: false
+      }
+    ],
+    thumbnailUrl: 'http://google.com/some/image/path.jpg'
+  };
+
+  test('Valid inputs', () => {
+    const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quiz = v1RequestAdminQuizCreate(register.token, quizName, quizDescription);
+    const newQuestion = v2RequestAdminQuizQuestionCreate(register.token, quiz.quizId, question);
+    const session = v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum);
+    const player = v1RequestAdminPlayerJoin(session.sessionId, playerName);
+    v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'NEXT_QUESTION');
+    v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'SKIP_COUNTDOWN');
+    expect(v1RequestPlayerQuestionInformation(player.playerId, 1)).toMatchObject(
+      {
+        questionId: newQuestion.questionId,
+        question: expect.any(String),
+        duration: expect.any(Number),
+        thumbnailUrl: expect.any(String),
+        points: expect.any(Number),
+        answers: [
+          {
+            answerId: expect.any(Number),
+            answer: expect.any(String),
+            colour: expect.any(String)
+          },
+          {
+            answerId: expect.any(Number),
+            answer: expect.any(String),
+            colour: expect.any(String)
+          }
+        ]
+      });
+  });
+
+  test('If player ID does not exist', () => {
+    const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quiz = v1RequestAdminQuizCreate(register.token, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(register.token, quiz.quizId, question);
+    const session = v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum);
+    v1RequestAdminPlayerJoin(session.sessionId, playerName);
+    v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'NEXT_QUESTION');
+    v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'SKIP_COUNTDOWN');
+    expect(() => v1RequestPlayerQuestionInformation(-10, 1)).toThrow(HTTPError[400]);
+  });
+
+  test('If question position is not valid for the session this player is in', () => {
+    const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quiz = v1RequestAdminQuizCreate(register.token, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(register.token, quiz.quizId, question);
+    const session = v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum);
+    const player = v1RequestAdminPlayerJoin(session.sessionId, playerName);
+    v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'NEXT_QUESTION');
+    v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'SKIP_COUNTDOWN');
+    expect(() => v1RequestPlayerQuestionInformation(player.playerId, -10)).toThrow(HTTPError[400]);
+  });
+
+  test('If session is not yet up to this question', () => {
+    const register = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quiz = v1RequestAdminQuizCreate(register.token, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(register.token, quiz.quizId, question);
+    const session = v1RequestAdminQuizSession(register.token, quiz.quizId, autoStartNum);
+    const player = v1RequestAdminPlayerJoin(session.sessionId, playerName);
+    v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'NEXT_QUESTION');
+    v1RequestAdminQuizSessionUpdate(register.token, quiz.quizId, session.sessionId, 'SKIP_COUNTDOWN');
+    expect(() => v1RequestPlayerQuestionInformation(player.playerId, 4)).toThrow(HTTPError[400]);
+  });
+
+  test('Session is in LOBBY state', () => {
+    const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = v2RequestAdminQuizCreate(registered.token, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(registered.token, quizId.quizId, question);
+    const session = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
+    const player = v1RequestAdminPlayerJoin(session.sessionId, playerName);
+    expect(() => v1RequestPlayerQuestionInformation(player.playerId, 1)).toThrow(HTTPError[400]);
+  });
+
+  test('Session is in END state', () => {
+    const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = v2RequestAdminQuizCreate(registered.token, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(registered.token, quizId.quizId, question);
+    const session = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
+    const player = v1RequestAdminPlayerJoin(session.sessionId, playerName);
+    v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, session.sessionId, 'END');
+    expect(() => v1RequestPlayerQuestionInformation(player.playerId, 1)).toThrow(HTTPError[400]);
+  });
+
+  test('Session is in QUESTION_COUNTDOWN state', () => {
+    const registered = v1RequestAdminAuthRegister(email, password, lastName, firstName);
+    const quizId = v2RequestAdminQuizCreate(registered.token, quizName, quizDescription);
+    v1RequestAdminQuizQuestionCreate(registered.token, quizId.quizId, question);
+    const session = v1RequestAdminQuizSession(registered.token, quizId.quizId, autoStartNum);
+    const player = v1RequestAdminPlayerJoin(session.sessionId, playerName);
+    v1RequestAdminQuizSessionUpdate(registered.token, quizId.quizId, session.sessionId, 'NEXT_QUESTION');
+    expect(() => v1RequestPlayerQuestionInformation(player.playerId, 1)).toThrow(HTTPError[400]);
   });
 });

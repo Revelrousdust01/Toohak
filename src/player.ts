@@ -210,13 +210,57 @@ export function playerSendMessage(playerid: number, messageBody: string) {
 }
 
 /**
- * Sends a chat message to all players in the session.
+ * Fetches and returns the question details for a player in a specific question position.
  *
- * @param {number} playerid - ID of the player sending the message.
+ * @param {number} playerid - The ID of the player requesting the question information.
+ * @param {number} questionposition - The position of the question within the session's list of questions.
  *
- * @returns {Message[]} - Returns an array of all the messages
+ * @returns {Question} - Details of the question at the specified position.
  *
- * @throws {HttpError} - Throws error if validation fails.
+ * @throws {HttpError} - Throws error if validation fails based on specific conditions.
+ */
+
+export function playerQuestionInformation(playerid: number, questionposition: number) {
+  const data = getData();
+  const session = data.sessions.find(session => session.players.some(player => player.playerId === playerid));
+
+  if (!session) {
+    throw httpError(400, 'Player ID does not refer to a valid player in any session.');
+  }
+  if (questionposition < 1 || questionposition > session.metadata.numQuestions) {
+    throw httpError(400, 'Question position is invalid.');
+  }
+  if (session.atQuestion !== questionposition) {
+    throw httpError(400, 'Session is not at this question yet.');
+  }
+  if ([State.LOBBY, State.QUESTION_COUNTDOWN, State.END].includes(session.state)) {
+    throw httpError(400, 'Invalid session state to fetch question.');
+  }
+
+  const question = session.metadata.questions[questionposition - 1];
+
+  return {
+    questionId: question.questionId,
+    question: question.question,
+    duration: question.duration,
+    thumbnailUrl: question.thumbnail,
+    points: question.points,
+    answers: question.answers.map(answer => ({
+      answerId: answer.answerId,
+      answer: answer.answer,
+      colour: answer.colour,
+    }))
+  };
+}
+
+/**
+ * Gets Messages of a player asssosciated to the session
+ *
+ * @param {number} playerid - The ID of the player requesting the message information.
+ *
+ * @returns {Message} - Details of the player session messages.
+ *
+ * @throws {HttpError} - Throws error if validation fails based on specific conditions.
  */
 
 export function playerSessionMessages(playerid: number) {

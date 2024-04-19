@@ -376,6 +376,12 @@ export const v1RequestPlayerSendMessage = (playerid: number, messageBody: string
     { messageBody: messageBody });
 };
 
+export const v1RequestPlayerQuestionInformation = (playerid: number, questionposition: number) => {
+  return requestHelper('GET',
+    `/v1/player/${playerid}/question/${questionposition}`,
+    { });
+};
+
 export const v1RequestPlayerSessionMessages = (playerid: number) => {
   return requestHelper('GET',
     `/v1/player/${playerid}/chat`,
